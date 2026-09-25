@@ -214,6 +214,34 @@ body:not(.dashboardDocument) .cardOverlayButton-br .cardOverlayButton {
     display: none;
 }
 
+/* Episode thumbs (Continue Watching, Next Up) often have the show logo in the art:
+   put their text under the image instead of over it. */
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):is([data-type="Episode"], .section1 *) .cardBox > .cardScalable::after {
+    display: none;
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):is([data-type="Episode"], .section1 *) .cardBox > .cardText {
+    position: static;
+    padding: .45em .1em 0;
+    text-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):is([data-type="Episode"], .section1 *) .cardBox > .cardText + .cardText {
+    padding-top: 0;
+    color: var(--nfx-text-2);
+}
+
+/* default text on cards with no image (studios, genres): never huge */
+body:not(.dashboardDocument) :is(.cardImageContainer .cardText, .cardDefaultText) {
+    font-size: clamp(.9rem, 4vw, 1.2rem) !important;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 /* keep the progress bar above the title shade */
 :is(.homeSectionsContainer, .nfx-row) .innerCardFooter {
     z-index: 3;

@@ -1,5 +1,12 @@
 /* ---- 60 detail page ---- */
 /* Full-bleed backdrop with the logo, meta and buttons laid over its lower left. */
+/* Own stacking context. In 12 a legacy detail page stays in the DOM (not .hide) under the
+   React home page after Back. Without this its z-indexed logo and wrapper paint and catch
+   clicks above the home page (the hero Play button stopped working). */
+#itemDetailPage {
+    isolation: isolate;
+}
+
 #itemDetailPage:not(.hide) {
     --nfx-detail-h: min(56.25vw, 82vh);
     --nfx-detail-pull: 13vw;

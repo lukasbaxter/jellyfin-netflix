@@ -111,13 +111,28 @@ async function shot(page, vpName, name, opts = {}) {
     console.log(`  ${vpName}/${name}.png`);
 }
 
-async function scrollTo(page, y) {
-    await page.evaluate((yy) => {
+// Scroll the page the way a user would: the window first, then document.scrollingElement.
+// If the page could not move at all (and should have), record it as a failure: that is the
+// "body became the scroller" bug from review 1.
+async function scrollTo(page, y, vpName = '', name = '') {
+    const r = await page.evaluate((yy) => {
+        const before = window.scrollY;
         window.scrollTo(0, yy);
-        const s = document.querySelector('.page:not(.hide) .scrollY, .mainAnimatedPage:not(.hide)');
-        if (s && s.scrollHeight > s.clientHeight) s.scrollTop = yy;
+        if (window.scrollY === before && yy !== before) {
+            const se = document.scrollingElement || document.documentElement;
+            se.scrollTop = yy;
+        }
+        const max = (document.scrollingElement || document.documentElement).scrollHeight - window.innerHeight;
+        return { y: window.scrollY, max, bodyTop: document.body.scrollTop };
     }, y);
     await page.waitForTimeout(900);
+    if (y > 0 && r.max > 40 && r.y === 0) {
+        const line = `SCROLL ${vpName}/${name}: window did not scroll (scrollY 0, body.scrollTop ${r.bodyTop}, max ${r.max})`;
+        consoleLines.push(line);
+        nfxErrors.push(line);
+        console.log(line);
+    }
+    return r;
 }
 
 async function run(vpName, items, pages) {
@@ -149,8 +164,11 @@ async function run(vpName, items, pages) {
 
 async function runPages(page, vp, vpName, items, pages) {
     page.on('console', (m) => {
-        if (m.type() !== 'error') return;
-        const t = `[${vpName}] ${m.text()}`;
+        const type = m.type();
+        const text = m.text();
+        // netflix.js reports its own failures with console.warn('[nfx] ...')
+        if (type !== 'error' && !(type === 'warning' && /\[nfx\]/.test(text))) return;
+        const t = `[${vpName}] ${type} ${text}`;
         consoleLines.push(t);
         if (/nfx|netflix/i.test(t)) nfxErrors.push(t);
     });
@@ -177,15 +195,30 @@ async function runPages(page, vp, vpName, items, pages) {
     if (want('home')) {
         await settle(page, 2500);
         await shot(page, vpName, 'home');
-        await scrollTo(page, 1200);
+        await scrollTo(page, 1200, vpName, 'home-scrolled');
         await shot(page, vpName, 'home-scrolled');
         await scrollTo(page, 0);
         if (vpName === 'desktop' || vpName === 'legacy') {
-            const card = page.locator('.homeSectionsContainer .card').nth(2);
+            // a real hover on a content card (not a My Media tile), with mouse movement
+            const card = page.locator('.homeSectionsContainer .verticalSection:not(.section0) .card[data-id]').nth(2);
             if (await card.count()) {
-                await card.hover();
-                await page.waitForTimeout(1200);
-                await shot(page, vpName, 'home-hover');
+                try {
+                    await page.evaluate(() => document.querySelectorAll('.nfx-preview.is-open').forEach((p) => p.classList.remove('is-open')));
+                    await card.scrollIntoViewIfNeeded();
+                    const b = await card.boundingBox();
+                    if (b) {
+                        await page.mouse.move(b.x + 5, b.y + 5);
+                        await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 5 });
+                    } else {
+                        await card.hover({ force: true });
+                    }
+                    await page.waitForTimeout(1300);
+                    await shot(page, vpName, 'home-hover');
+                    await page.mouse.move(2, 2);
+                    await page.waitForTimeout(400);
+                } catch (e) {
+                    consoleLines.push(`[${vpName}] home-hover: ${e.message}`);
+                }
             }
         }
         if (vpName === 'tv') {
@@ -203,7 +236,7 @@ async function runPages(page, vp, vpName, items, pages) {
     if (want('movie') && items.movie) {
         await go(`#/details?id=${items.movie.Id}&serverId=${serverId}`);
         await shot(page, vpName, 'movie-detail');
-        await scrollTo(page, 900);
+        await scrollTo(page, 900, vpName, 'movie-detail-scrolled');
         await shot(page, vpName, 'movie-detail-scrolled');
         await scrollTo(page, 0);
     }

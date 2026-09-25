@@ -140,6 +140,6 @@ body:not(.dashboardDocument) .emby-scroller[data-scroll-mode-x="custom"] {
     overflow-y: visible;
 }
 
-html:has(body:not(.dashboardDocument)) {
-    overflow-x: clip;
-}
+/* Do NOT set overflow on <html> here. Anything but visible stops body's overflow-x:hidden
+   from passing to the viewport, body becomes the scroller and window.scrollY stays 0
+   (header never goes solid, scroll restore breaks). Stock body{overflow-x:hidden} is enough. */

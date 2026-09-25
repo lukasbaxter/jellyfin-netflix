@@ -73,7 +73,7 @@ body:has(.backdropContainer .backdropImage) #loginPage {
 
 #loginPage .emby-input:focus {
     background: #454545 !important;
-    border-bottom-color: #e87c03 !important;
+    border-bottom-color: #fff !important;
 }
 
 #loginPage .manualLoginForm .button-submit {
@@ -202,15 +202,19 @@ body:has(.backdropContainer .backdropImage) #loginPage {
     }
 
     #loginPage .manualLoginForm {
-        background: transparent;
-        padding: 24px 0 8px;
+        background: rgba(0, 0, 0, .82);
+        padding: 28px 20px 8px;
         margin-top: 2vh;
     }
 
-    #loginPage .readOnlyContent,
-    #loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent {
+    #loginPage .readOnlyContent {
         padding: 0;
         background: transparent;
+    }
+
+    #loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent {
+        padding: 0 20px 20px;
+        background: rgba(0, 0, 0, .82);
     }
 
     #loginPage #divUsers .card {

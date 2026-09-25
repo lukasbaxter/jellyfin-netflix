@@ -30,8 +30,8 @@
     inset: 0;
     pointer-events: none;
     background:
-        linear-gradient(77deg, rgba(0, 0, 0, .6), transparent 85%),
-        linear-gradient(180deg, transparent 55%, rgba(20, 20, 20, .6) 78%, var(--nfx-bg) 100%);
+        linear-gradient(180deg, transparent 60%, rgba(20, 20, 20, .6) 80%, var(--nfx-bg) 100%),
+        linear-gradient(77deg, rgba(0, 0, 0, .6), transparent 85%);
 }
 
 .nfx-hero__content {
@@ -86,6 +86,13 @@
     padding: 0 .4em;
     font-size: .85em;
     line-height: 1.5;
+}
+
+/* the rating is already on the right-side badge (desktop and TV) */
+@media (min-width: 601px) {
+    .nfx-hero:has(.nfx-hero__badge:not(:empty)) .nfx-hero__meta .nfx-rating {
+        display: none;
+    }
 }
 
 .nfx-rating:empty,
@@ -329,14 +336,34 @@ html.layout-tv .nfx-btn:focus {
         font-size: 1rem;
     }
 
+    /* Netflix mobile: "My List" is an icon over a small label, left of Play */
     .nfx-hero__actions .nfx-btn--icon.nfx-btn--list {
-        flex: 1 1 0;
-        width: auto;
+        order: -1;
+        flex: 0 0 auto;
+        flex-direction: column;
+        gap: 2px;
+        width: 64px;
         height: auto;
         min-height: 44px;
-        border-radius: var(--nfx-radius);
+        padding: 0;
         border: 0;
-        background: rgba(109, 109, 110, .7) !important;
+        border-radius: 0;
+        background: transparent !important;
+        font-size: .75rem;
+        font-weight: 400;
+    }
+
+    .nfx-hero__actions .nfx-btn--list .material-icons {
+        font-size: 1.9rem;
+    }
+
+    .nfx-hero__actions .nfx-btn--list .nfx-btn__label {
+        display: block;
+        color: #e5e5e5;
+    }
+
+    .nfx-hero__actions .nfx-btn--play {
+        flex: 0 1 160px;
     }
 }
 

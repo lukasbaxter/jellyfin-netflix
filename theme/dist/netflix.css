@@ -52,7 +52,6 @@ body:not(.dashboardDocument) .toast{background:#fff;color:#000;border-radius:var
 body:not(.dashboardDocument) .sectionTitle{color:#e5e5e5;font-weight:700}
 body:not(.dashboardDocument) .hide{display:none !important}
 body:not(.dashboardDocument) .emby-scroller[data-scroll-mode-x="custom"]{overflow-x:clip;overflow-y:visible}
-html:has(body:not(.dashboardDocument)){overflow-x:clip}
 body:not(.dashboardDocument) .MuiAppBar-root,
 body:not(.dashboardDocument) .skinHeader{background-color:transparent;background-image:linear-gradient(180deg,rgba(0,0,0,.7) 10%,transparent) !important;box-shadow:none !important;border-bottom:0 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;transition:background-color .4s var(--nfx-ease)}
 html.nfx-scrolled body:not(.dashboardDocument) .MuiAppBar-root,
@@ -199,6 +198,10 @@ body:not(.dashboardDocument) .cardOverlayButton-br .cardOverlayButton{color:#fff
 :is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardFooter{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:1.6em .7em .5em;margin:0;pointer-events:none;text-align:left}
 :is(.homeSectionsContainer,.nfx-row) .cardText a{pointer-events:none}
 :is(.homeSectionsContainer,.nfx-row) .btnCardOptions{display:none}
+:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):is([data-type="Episode"],.section1 *) .cardBox>.cardScalable::after{display:none}
+:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):is([data-type="Episode"],.section1 *) .cardBox>.cardText{position:static;padding:.45em .1em 0;text-shadow:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):is([data-type="Episode"],.section1 *) .cardBox>.cardText + .cardText{padding-top:0;color:var(--nfx-text-2)}
+body:not(.dashboardDocument) :is(.cardImageContainer .cardText,.cardDefaultText){font-size:clamp(.9rem,4vw,1.2rem) !important;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
 :is(.homeSectionsContainer,.nfx-row) .innerCardFooter{z-index:3}
 @media (hover:none){:is(.homeSectionsContainer,.nfx-row) .cardOverlayContainer{display:none !important}
 }
@@ -228,14 +231,16 @@ body:not(.dashboardDocument) .card:focus>.cardBox{transform:none !important;tran
 .nfx-hero__backdrop{position:absolute;inset:0}
 .nfx-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 20%;display:block;animation:nfx-fade .8s var(--nfx-ease) both}
 .nfx-hero__shade{position:absolute;inset:0;pointer-events:none;background:
-linear-gradient(77deg,rgba(0,0,0,.6),transparent 85%),
-linear-gradient(180deg,transparent 55%,rgba(20,20,20,.6) 78%,var(--nfx-bg) 100%)}
+linear-gradient(180deg,transparent 60%,rgba(20,20,20,.6) 80%,var(--nfx-bg) 100%),
+linear-gradient(77deg,rgba(0,0,0,.6),transparent 85%)}
 .nfx-hero__content{position:absolute;left:var(--nfx-gutter);bottom:calc(clamp(40px,7vw,140px) + 6vw);width:36%;min-width:320px;z-index:2;animation:nfx-rise .8s var(--nfx-ease) both}
 .nfx-hero__logo{display:block;max-width:100%;width:auto;max-height:14vw;margin:0 0 1.2vw 0;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 2px 8px rgba(0,0,0,.45))}
 .nfx-hero__title{font-size:clamp(2rem,3.5vw,4.5rem);font-weight:800;line-height:1.05;margin:0 0 1vw 0;text-shadow:2px 2px 4px rgba(0,0,0,.45);letter-spacing:-.01em}
 .nfx-hero__meta{display:flex;flex-wrap:wrap;align-items:center;gap:.6em;font-size:clamp(.85rem,1vw,1.15rem);font-weight:500;color:#fff;margin:0 0 .8vw 0;text-shadow:1px 1px 3px rgba(0,0,0,.6)}
 .nfx-match{color:var(--nfx-match);font-weight:700}
 .nfx-rating{border:1px solid rgba(255,255,255,.4);padding:0 .4em;font-size:.85em;line-height:1.5}
+@media (min-width:601px){.nfx-hero:has(.nfx-hero__badge:not(:empty)) .nfx-hero__meta .nfx-rating{display:none}
+}
 .nfx-rating:empty,
 .nfx-year:empty,
 .nfx-runtime:empty,
@@ -287,11 +292,15 @@ linear-gradient(180deg,rgba(0,0,0,.55) 0%,transparent 25%,transparent 45%,rgba(2
 .nfx-hero__genres{display:block;margin:0 0 14px 0}
 .nfx-hero__actions{justify-content:center;gap:10px}
 .nfx-hero__actions .nfx-btn{flex:1 1 0;max-width:160px;font-size:1rem}
-.nfx-hero__actions .nfx-btn--icon.nfx-btn--list{flex:1 1 0;width:auto;height:auto;min-height:44px;border-radius:var(--nfx-radius);border:0;background:rgba(109,109,110,.7) !important}
+.nfx-hero__actions .nfx-btn--icon.nfx-btn--list{order:-1;flex:0 0 auto;flex-direction:column;gap:2px;width:64px;height:auto;min-height:44px;padding:0;border:0;border-radius:0;background:transparent !important;font-size:.75rem;font-weight:400}
+.nfx-hero__actions .nfx-btn--list .material-icons{font-size:1.9rem}
+.nfx-hero__actions .nfx-btn--list .nfx-btn__label{display:block;color:#e5e5e5}
+.nfx-hero__actions .nfx-btn--play{flex:0 1 160px}
 }
 @media (prefers-reduced-motion:reduce){.nfx-hero__img,
 .nfx-hero__content{animation:none}
 }
+#itemDetailPage{isolation:isolate}
 #itemDetailPage:not(.hide){--nfx-detail-h:min(56.25vw,82vh);--nfx-detail-pull:13vw;display:grid;grid-template-columns:minmax(0,1fr);background:transparent}
 body:has(#itemDetailPage:not(.hide)) .backgroundContainer.withBackdrop{background-color:transparent !important;opacity:1}
 #itemDetailPage .itemBackdrop{grid-area:1 / 1;display:block !important;height:var(--nfx-detail-h) !important;margin-top:calc(-1 * var(--nfx-header-h)) !important;background-attachment:scroll !important;background-position:center 20% !important;position:relative}
@@ -497,7 +506,7 @@ body:has(.backdropContainer .backdropImage) #loginPage{background:none}
 #loginPage .inputContainer{margin-bottom:16px}
 #loginPage .inputLabel{color:#8c8c8c;font-size:.9rem}
 #loginPage .emby-input{background:#333 !important;border:0 !important;border-bottom:2px solid transparent !important;border-radius:var(--nfx-radius);height:50px;padding:0 20px;font-size:1rem;color:#fff;box-sizing:border-box}
-#loginPage .emby-input:focus{background:#454545 !important;border-bottom-color:#e87c03 !important}
+#loginPage .emby-input:focus{background:#454545 !important;border-bottom-color:#fff !important}
 #loginPage .manualLoginForm .button-submit{width:100%;height:48px;margin:24px 0 12px;font-size:1rem;font-weight:700;border-radius:var(--nfx-radius);background:var(--nfx-red)}
 #loginPage .manualLoginForm .button-submit:hover,
 #loginPage .manualLoginForm .button-submit:focus{background:var(--nfx-red-hover)}
@@ -530,9 +539,9 @@ body:has(.backdropContainer .backdropImage) #loginPage{background:none}
 #loginPage #divUsers .visualCardBox .cardFooter{background:none}
 #loginPage .loginDisclaimer{color:#737373;font-size:.85rem}
 @media (max-width:600px){body:has(#loginPage:not(.hide)) .backgroundContainer.withBackdrop{background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,rgba(0,0,0,.7) 100%) !important}
-#loginPage .manualLoginForm{background:transparent;padding:24px 0 8px;margin-top:2vh}
-#loginPage .readOnlyContent,
-#loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent{padding:0;background:transparent}
+#loginPage .manualLoginForm{background:rgba(0,0,0,.82);padding:28px 20px 8px;margin-top:2vh}
+#loginPage .readOnlyContent{padding:0;background:transparent}
+#loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent{padding:0 20px 20px;background:rgba(0,0,0,.82)}
 #loginPage #divUsers .card{width:30vw}
 }
 #selectServerPage .card .cardScalable{border-radius:var(--nfx-radius)}
@@ -575,6 +584,9 @@ html.layout-tv .emby-button:focus,
 html.layout-tv .detailButton:focus,
 html.layout-tv .raised:focus,
 html.layout-tv .emby-tab-button:focus{outline:3px solid #fff;outline-offset:2px;transform:scale(1.1);transition:transform .15s var(--nfx-ease)}
+html.layout-tv .nfx-hero .nfx-btn,
+html.layout-tv .nfx-hero .nfx-btn--icon{background:rgba(109,109,110,.7) !important;color:#fff !important;border-color:transparent}
+html.layout-tv .nfx-hero .nfx-btn:focus{background:#fff !important;color:#000 !important;outline:none;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
 html.layout-tv .nfx-hero{min-height:60vh;--nfx-hero-h:60vh;margin-top:0;margin-bottom:0}
 html.layout-tv .nfx-hero__content{bottom:7vh;width:40%}
 html.layout-tv .nfx-hero__logo{max-height:9vw;max-width:80%}
@@ -590,10 +602,10 @@ html.layout-tv #itemDetailPage .detailPageSecondaryContainer{padding-left:5vw !i
 html.layout-tv .skinHeader{padding-left:5vw;padding-right:5vw}
 html.layout-tv .padded-bottom-page{padding-bottom:5vh}
 html.layout-tv :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:hover>.cardBox{box-shadow:none}
-.nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 8vw) / 5.2);display:block;position:relative;text-decoration:none;color:#fff}
+.nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 8vw) / 6.3);display:block;position:relative;text-decoration:none;color:#fff}
 .nfx-card--top10 .nfx-card__img,
-.nfx-card--top10>.cardBox{width:52%;margin-left:48%}
-.nfx-card--top10 .nfx-rank{position:absolute;left:0;bottom:-.08em;width:60%;z-index:0;font-size:calc((100vw - 8vw) / 5.2 * .75);line-height:.82;font-weight:800;letter-spacing:-.08em;text-align:right;color:#141414;-webkit-text-stroke:max(2px,.25vw) #595959;paint-order:stroke fill;user-select:none;pointer-events:none}
+.nfx-card--top10>.cardBox{width:62%;margin-left:38%}
+.nfx-card--top10 .nfx-rank{position:absolute;left:0;bottom:-.08em;width:55%;z-index:0;font-size:calc((100vw - 8vw) / 6.3 * .9);line-height:.82;font-weight:800;letter-spacing:-.08em;text-align:right;color:#141414;-webkit-text-stroke:max(2px,.25vw) #595959;paint-order:stroke fill;user-select:none;pointer-events:none}
 .nfx-card--top10 .nfx-card__img,
 .nfx-card--top10 .cardBox{position:relative;z-index:1}
 .nfx-card{display:block;flex-shrink:0;text-decoration:none;color:#fff;outline:none}
@@ -612,12 +624,14 @@ html.layout-tv :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:hover>.c
 .nfx-card:focus-visible .nfx-card__img,
 html.layout-tv .nfx-card:focus .nfx-card__img{outline:3px solid #fff;outline-offset:0}
 html.layout-tv .nfx-row .scrollSlider>.nfx-card:focus{transform:scale(1.1);z-index:5;transition:transform .15s var(--nfx-ease)}
-@media (max-width:600px){.nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 16px) / 2.4)}
-.nfx-card--top10 .nfx-rank{font-size:calc((100vw - 16px) / 2.4 * .75)}
+@media (max-width:600px){.nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 16px) / 2.9)}
+.nfx-card--top10 .nfx-rank{font-size:calc((100vw - 16px) / 2.9 * .9)}
 .nfx-row .scrollSlider>.nfx-card:not(.nfx-card--top10){margin-right:8px}
 }
-html.layout-tv .nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 10vw) / 5)}
-html.layout-tv .nfx-card--top10 .nfx-rank{font-size:calc((100vw - 10vw) / 5 * .75)}
+html.layout-tv .nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 10vw) / 6)}
+html.layout-tv .nfx-card--top10 .nfx-rank{font-size:calc((100vw - 10vw) / 6 * .9)}
+#itemDetailPage .itemBackdrop.nfx-detail-backdrop{background-size:cover !important;background-repeat:no-repeat !important;animation:nfx-fade .6s var(--nfx-ease) both}
+.nfx-btn__label{display:none}
 .nfx-preview{position:absolute;z-index:1000;background:var(--nfx-bg-elev);border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.75);overflow:hidden;color:#fff;opacity:0;transform:scale(.66);transform-origin:center center;pointer-events:none;transition:opacity .2s var(--nfx-ease),transform .25s var(--nfx-ease)}
 .nfx-preview.is-open{opacity:1;transform:none;pointer-events:auto}
 .nfx-preview__media{position:relative;aspect-ratio:16 / 9;background:#000}

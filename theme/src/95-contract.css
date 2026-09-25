@@ -4,7 +4,7 @@
 
 /* ---- Top 10: big outlined numeral left of the poster ---- */
 .nfx-row .scrollSlider > .nfx-card--top10 {
-    width: calc((100vw - 8vw) / 5.2);
+    width: calc((100vw - 8vw) / 6.3);
     display: block;
     position: relative;
     text-decoration: none;
@@ -13,17 +13,17 @@
 
 .nfx-card--top10 .nfx-card__img,
 .nfx-card--top10 > .cardBox {
-    width: 52%;
-    margin-left: 48%;
+    width: 62%;
+    margin-left: 38%;
 }
 
 .nfx-card--top10 .nfx-rank {
     position: absolute;
     left: 0;
     bottom: -.08em;
-    width: 60%;
+    width: 55%;
     z-index: 0;
-    font-size: calc((100vw - 8vw) / 5.2 * .75);
+    font-size: calc((100vw - 8vw) / 6.3 * .9);
     line-height: .82;
     font-weight: 800;
     letter-spacing: -.08em;
@@ -125,11 +125,11 @@ html.layout-tv .nfx-row .scrollSlider > .nfx-card:focus {
 
 @media (max-width: 600px) {
     .nfx-row .scrollSlider > .nfx-card--top10 {
-        width: calc((100vw - 16px) / 2.4);
+        width: calc((100vw - 16px) / 2.9);
     }
 
     .nfx-card--top10 .nfx-rank {
-        font-size: calc((100vw - 16px) / 2.4 * .75);
+        font-size: calc((100vw - 16px) / 2.9 * .9);
     }
 
     .nfx-row .scrollSlider > .nfx-card:not(.nfx-card--top10) {
@@ -138,11 +138,23 @@ html.layout-tv .nfx-row .scrollSlider > .nfx-card:focus {
 }
 
 html.layout-tv .nfx-row .scrollSlider > .nfx-card--top10 {
-    width: calc((100vw - 10vw) / 5);
+    width: calc((100vw - 10vw) / 6);
 }
 
 html.layout-tv .nfx-card--top10 .nfx-rank {
-    font-size: calc((100vw - 10vw) / 5 * .75);
+    font-size: calc((100vw - 10vw) / 6 * .9);
+}
+
+/* ---- detail backdrop the plugin paints where stock leaves #itemBackdrop empty (TV, < 1000px) ---- */
+#itemDetailPage .itemBackdrop.nfx-detail-backdrop {
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    animation: nfx-fade .6s var(--nfx-ease) both;
+}
+
+/* ---- hero "My List" label: only shown on phones (icon over a small label) ---- */
+.nfx-btn__label {
+    display: none;
 }
 
 /* ---- hover preview card ---- */

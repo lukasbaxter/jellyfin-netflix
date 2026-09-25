@@ -67,6 +67,21 @@ html.layout-tv .emby-tab-button:focus {
     transition: transform .15s var(--nfx-ease);
 }
 
+/* hero buttons on TV: unfocused are grey, the focused one turns white (Netflix TV) */
+html.layout-tv .nfx-hero .nfx-btn,
+html.layout-tv .nfx-hero .nfx-btn--icon {
+    background: rgba(109, 109, 110, .7) !important;
+    color: #fff !important;
+    border-color: transparent;
+}
+
+html.layout-tv .nfx-hero .nfx-btn:focus {
+    background: #fff !important;
+    color: #000 !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .35);
+}
+
 /* hero shorter on TV */
 html.layout-tv .nfx-hero {
     min-height: 60vh;
