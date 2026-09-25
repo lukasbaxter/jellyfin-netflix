@@ -30,20 +30,22 @@ jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b6
 ## Things staging found that the notes do not mention
 
 1. **encoding.xml gets wiped.** Prod has `<EncoderPreset xsi:nil="true" />`. 12.1 cannot parse that, logs `Error loading configuration file: /config/config/encoding.xml`, and rewrites the file with defaults. That silently turns off NVENC, tonemapping, HEVC/AV1 encoding and the hw decode codec list. Fix it before first start (step 6). With the fix, staging kept `nvenc` and all 8 decode codecs.
-2. **The migration deletes items whose files are missing.** `MigrateLinkedChildren` checks every item path (182k items). On staging it removed 1685 stale items (files really gone, for example The Wire S04). If `/mnt/unas` or `/mnt/wd_nvme1/music` is unmounted or wedged at that moment, it would treat the whole library as missing and wipe watch history. The UNAS pre-check below is not optional.
-3. **Playlists and counts drop until the scan runs.** Right after the migration staging showed 180 playlists (prod 196). The missing ones were music playlists made from `.m3u` files in album folders. The full scan brought them back (196). Movies / Series / Episodes drop for good: 1516 to 1260, 284 to 195, 13436 to 12628. That is exactly the number of prod items whose file still exists on disk (checked one by one), so nothing real is lost. Expect the same on prod.
-4. Streaming Collections 1.0.1.0 targets 10.11. It has to be rebuilt for net10/12 (release step 1 in the plan) before it can go back on.
+2. **The migration deletes items whose files are missing.** `MigrateLinkedChildren` checks every item path (182k items). On staging the log has 1817 "Removing item" lines. Most files were really gone (for example The Wire S04), but not all: 127 of the removed paths still exist on disk. 126 are MusicArtist folders that the scan re-created as new items, and 1 is `Battlestar Galactica Miniseries - Part 2.mkv`, dropped as an "orphaned alternate version". Watch history for removed items is kept on a placeholder, but it is detached from the new item (detached UserData rows went from 1707 to 1841). So after the scan, check the watch state of re-added items (step 13). If `/mnt/unas` or `/mnt/wd_nvme1/music` is unmounted or wedged at that moment, it would treat the whole library as missing and wipe watch history. The UNAS guard in step 7 is not optional.
+3. **Playlists and counts drop until the scan runs.** Right after the migration staging showed 180 playlists (prod 196). The missing ones were music playlists made from `.m3u` files in album folders. The full scan brought them back (196). Movies / Series / Episodes drop for good: 1516 to 1260, 284 to 195, 13436 to 12628. That is exactly the number of prod items whose file still exists on disk (checked one by one), so no real movie or episode is lost. Expect the same on prod.
+4. **The stock 12.1 web client needs legacy auth for its websocket.** jellyfin-web 12.1 ships jellyfin-apiclient 1.11.0, which opens `/socket?api_key=<token>`. With legacy auth off that returns 403 (`/socket?ApiKey=` gives 101). Browsers, the iPhone app and Jellyfin Media Player then lose remote control, live updates, SyncPlay and "now playing". Our plugin is not involved. Keep legacy auth ON until a jellyfin-web release fixes this (step 14).
+5. Streaming Collections 1.0.1.0 targets 10.11. It has to be rebuilt for net10/12 (release step 1 in the plan) before it can go back on.
 
 ## Measured on staging
 
 - `MigrateSystem`: **195 s** (about 3.5 min). Log: `staging/migrate-20260925.log`.
 - Full library scan: **75 min** (08:27 to 09:42 UTC). Movies and shows were done in about 5 min. The rest was the music library, held up by MusicBrainz rate limits on album lookups. Post-scan tasks took 2.5 min.
-- Plan a **45 minute downtime window** (stop, backup of about 42 GB, migrate, start, plugins). The scan then runs with the server already up, so plan about 90 more minutes of "music may look odd". Do not restart during the scan: every restart aborts it, and staging lost 5 scan runs that way.
+- Plan a **45 minute downtime window** (stop, local backup of about 42 GB, migrate, start, plugins). The UNAS copy of the backup happens after the scan, not in the window. The scan then runs with the server already up, so plan about 90 more minutes of "music may look odd". Do not restart during the scan: every restart aborts it, and staging lost 5 scan runs that way.
 
 ## Who breaks when legacy auth is off
 
 | Caller | What it sends | Fix |
 |---|---|---|
+| **Stock web client websocket** (browsers, iPhone app, Jellyfin Media Player) | `/socket?api_key=` (jellyfin-apiclient 1.11.0 inside jellyfin-web 12.1) | nothing we can fix. Wait for a jellyfin-web release that sends `ApiKey`, then re-run the curl test in step 14 |
 | Jellyseerr 2.7.3 (`services-jellyseerr-1`) | `X-Emby-Authorization` | move to Seerr (`ghcr.io/seerr-team/seerr`) or a build that sends `Authorization: MediaBrowser`, then re-test |
 | `music-requests/spotify_to_jellyfin.py:28` | `q["api_key"]` | `q["ApiKey"]` |
 | `music-requests/spotify_to_jellyfin.py:45` | `?api_key=` | `?ApiKey=` |
@@ -71,7 +73,9 @@ sudo sqlite3 -readonly /home/admin/services/jellyfin/config/data/jellyfin.db \
 dmesg -T | grep "cifs: VFS" | tail -5          # should be empty or old
 time ls /mnt/unas > /dev/null                   # must be instant
 time smbclient -L //192.168.1.100 -A /root/.smbcredentials-jellyfin > /dev/null
-mountpoint /mnt/unas && mountpoint /mnt/cloud
+# /mnt/unas is a systemd automount, so `mountpoint` says yes even when the share is NOT mounted.
+# Touch it first (that triggers the mount), then ask for the real cifs mount.
+timeout 5 ls /mnt/unas/movies | head -1 && findmnt -t cifs /mnt/unas && findmnt -t cifs /mnt/cloud
 ls /mnt/unas | wc -l ; ls /mnt/wd_nvme1/music | wc -l   # both non-zero
 # who is watching
 curl -s -H 'Authorization: MediaBrowser Token="<prod key>"' http://127.0.0.1:2101/Sessions | python3 -c 'import json,sys;print([s["UserName"] for s in json.load(sys.stdin) if s.get("NowPlayingItem")])'
@@ -87,7 +91,7 @@ docker compose stop
 docker inspect -f '{{.State.Status}}' jellyfin-jellyfin-1   # exited
 ```
 
-## 2. Backup (local + UNAS) and verify
+## 2. Backup (local only inside the window) and verify
 
 ```bash
 D=$(date +%Y%m%d-%H%M)
@@ -99,10 +103,11 @@ sudo zstd -t "$B"
 mkdir -p /tmp/jfchk && sudo tar -I zstd -xf "$B" -C /tmp/jfchk config/data/jellyfin.db
 sudo sqlite3 /tmp/jfchk/config/data/jellyfin.db "PRAGMA integrity_check;"   # ok
 sudo rm -rf /tmp/jfchk
-sudo mkdir -p /mnt/cloud/jellyfin-backups
-sudo cp "$B" /mnt/cloud/jellyfin-backups/ && sudo zstd -t /mnt/cloud/jellyfin-backups/$(basename "$B")
-ls -lh "$B" /mnt/cloud/jellyfin-backups/
+ls -lh "$B"
+echo "$B"    # write this path down, step 9b and rollback need it
 ```
+
+Do NOT copy the backup to the UNAS here. `/mnt/cloud` is the same UNAS over CIFS, and a 42 GB write right before the migration is exactly the load that triggers the SMB wedge (memory `unas_smb_wedge_failure.md`). A wedged UNAS during step 7 means the migration sees every file as missing. The UNAS copy is step 9b, after the scan.
 
 Note: the backup includes `jellyfin.db-wal`. That is fine because Jellyfin is stopped and the WAL is replayed on open.
 
@@ -154,9 +159,20 @@ docker compose pull
 
 ```bash
 cd /home/admin/services/jellyfin
-time docker compose run --rm jellyfin --mode MigrateSystem 2>&1 | tee migrate-12.1-$D.log
+# Hard guard in the SAME command: both media mounts must answer right now, or nothing runs.
+# ls first (it triggers the automount), then check it really is cifs.
+timeout 5 ls /mnt/unas/movies | head -1 | grep -q . \
+  && findmnt -t cifs /mnt/unas >/dev/null \
+  && timeout 5 ls /mnt/wd_nvme1/music | head -1 | grep -q . \
+  && { time docker compose run --rm jellyfin --mode MigrateSystem 2>&1 | tee migrate-12.1-$D.log; } \
+  || echo "GUARD FAILED or migration failed: do NOT continue, read the output above"
 # expect about 4 min. Do not interrupt. If it passes 2 h, stop and report (jellyfin#17840).
 tail -3 migrate-12.1-$D.log      # "jellyfin.db optimized successfully!"
+
+# Legacy auth ON before the first start. The migration writes it as false, and with it off
+# the web client websocket, Jellyseerr and the music scripts all fail (see "Who breaks").
+sudo sed -i 's#<EnableLegacyAuthorization>false</EnableLegacyAuthorization>#<EnableLegacyAuthorization>true</EnableLegacyAuthorization>#' config/config/system.xml
+grep -n EnableLegacyAuthorization config/config/system.xml    # must say true
 docker compose up -d
 until curl -sf http://127.0.0.1:2101/System/Info/Public; do sleep 3; done   # "Version":"12.1.0"
 docker logs jellyfin-jellyfin-1 2>&1 | grep -E 'ERR|FTL' | head     # must NOT show encoding.xml
@@ -188,7 +204,9 @@ Install from the catalog (versions staging used):
 | Intro Skipper | 12.0.4.0 |
 | Netflix UI | 1.0.0.0 |
 
-Then `docker compose restart` and check Dashboard > Plugins: all Active.
+Then `docker compose restart` and check Dashboard > Plugins: all Active. This is the last restart. Everything after this runs with the server up.
+
+Theme: Netflix UI injects its CSS and JS into `index.html` through File Transformation. Leave Dashboard > General > Branding > Custom CSS **empty**. Only if the log says `File Transformation plugin not found` set Custom CSS to `@import url("/NetflixUi/netflix.css?v=1.0.0.0");` as the fallback. Setting both loads the theme twice.
 
 Intro Skipper: staging turned off `AutoDetectIntros` so it would not hammer the UNAS. On prod decide on purpose. Turning it on means one long analysis pass over every episode over CIFS. Run it at night and watch `/var/log/unas-stall.log`.
 
@@ -196,14 +214,27 @@ Intro Skipper: staging turned off `AutoDetectIntros` so it would not hammer the 
 
 Dashboard > Scheduled Tasks > Scan Media Library > Run. About 75 min on staging. Do not restart the server while it runs (a restart aborts it, and 12 also starts a scan on boot that a restart cancels). Watch the UNAS the whole time (`tail -f /var/log/unas-stall.log`). Expected log noise: `Read-only file system ... album.nfo` from the Music library, since `/music` is mounted `:ro`.
 
-## 10. Auth: day one
+## 9b. Copy the backup to the UNAS (after the scan)
+
+Only once the scan is done and `/var/log/unas-stall.log` is quiet. Rate limited so the UNAS stays healthy.
 
 ```bash
-sudo sed -i 's#<EnableLegacyAuthorization>false</EnableLegacyAuthorization>#<EnableLegacyAuthorization>true</EnableLegacyAuthorization>#' config/config/system.xml
-docker compose restart
+B=/home/admin/services/.backups/jellyfin-10.11.5-<D>.tar.zst     # from step 2
+sudo mkdir -p /mnt/cloud/jellyfin-backups
+sudo rsync --bwlimit=50M --progress "$B" /mnt/cloud/jellyfin-backups/
+sudo zstd -t /mnt/cloud/jellyfin-backups/$(basename "$B")
 ```
 
-Or Dashboard > Networking / General (API: POST `/System/Configuration` with `EnableLegacyAuthorization: true`, no restart needed, staging proved the toggle is live).
+## 10. Auth: day one
+
+Already done in step 7 (legacy auth ON before the first start). Just confirm, no restart:
+
+```bash
+curl -s -H 'Authorization: MediaBrowser Token="<key>"' http://127.0.0.1:2101/System/Configuration \
+  | python3 -c 'import json,sys;print(json.load(sys.stdin)["EnableLegacyAuthorization"])'    # True
+```
+
+If it ever needs flipping, use the API (POST `/System/Configuration`). The toggle is live, staging proved it, so there is no restart that could cancel the scan.
 
 ## 11. Connection checks
 
@@ -233,19 +264,35 @@ Then play a 4K HDR file in a browser with a forced low bitrate and check the Das
 - [ ] Collections 242, playlists about 196 after the scan
 - [ ] a movie and an episode play, one direct and one transcoded on NVENC
 - [ ] resume points and watched state look right for a couple of users
+- [ ] after the scan, watched state of re-added items is right (finding 2): a few music artists and `Battlestar Galactica Miniseries - Part 2`
+- [ ] once logged in, the web client has no `WebSocket ... /socket failed: 403` in the browser console (legacy auth must be on). A few 403s on the login page itself are normal: the client tries the socket before it has a token
+- [ ] theme loads once: `curl -s http://127.0.0.1:2101/web/ | grep -c NetflixUi/netflix.js` prints 1 and branding Custom CSS is empty
 - [ ] all plugins Active
 - [ ] subtitle settings present in each library's options (global page is gone)
 - [ ] Jellyseerr sync works
 - [ ] iPhone app, Google TV Streamer, XGIMI all connect
+- [ ] backup copied to the UNAS (step 9b)
 - [ ] no `encoding.xml` error in the log
 
 `staging/verify.sh` covers most of this for staging. Point it at prod only for read checks.
 
 ## 14. Auth follow-up (later, not in the window)
 
-1. Fix every row in the "Who breaks" table.
+0. **Do NOT set `EnableLegacyAuthorization=false` until jellyfin-web ships an apiclient that sends `ApiKey` on the socket.** Check with this test against a staging copy with legacy auth off. It must print 101 for `api_key` too, or better, the web client bundle must no longer contain `?api_key=`:
+   ```bash
+   K=<key>; U=http://127.0.0.1:2199
+   for q in api_key ApiKey; do curl -s -o /dev/null -m 3 -w "$q %{http_code}\n" "$U/socket?$q=$K&deviceId=v" \
+     -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ=='; done
+   docker exec jellyfin-jellyfin-1 sh -c 'grep -l "?api_key=" /jellyfin/jellyfin-web/*.js' # empty = fixed
+   ```
+   `staging/verify.sh` runs the same check and prints a NOTE line.
+1. Fix every other row in the "Who breaks" table.
 2. Set `EnableLegacyAuthorization` back to false.
-3. Re-run Jellyseerr sync and one music-requests job.
+3. Re-run Jellyseerr sync and one music-requests job, and check a browser console for socket errors.
+
+## 15. Home screen tidy up (per user)
+
+The Demos library (Dolby test clips) shows as a row of black tiles under "Recently Added in Demos". Each user: Profile > Home > under "Latest media" untick **Demos**. Or hide Demos from home for everyone by removing it from each user's library access if nobody needs it. Netflix UI already skips items with no TMDb/IMDb/TVDb id in its own rows, and its settings page can exclude whole libraries.
 
 ## Rollback
 
@@ -268,4 +315,6 @@ docker compose up -d
 - Location: `/home/admin/services/jellyfin-staging` (compose copy in `staging/docker-compose.yml`). Media mounted `:ro`, no GPU, own server id, name `baxtergroup-staging`, never auto-restarts.
 - Refresh from prod: `staging/sync-config.sh` (stop staging first), then `staging/migrate.sh`, then fix encoding.xml, then up.
 - The plugin folders removed from the staging copy are in `/home/admin/services/jellyfin-staging/plugins-10.11-removed`.
-- Stop it when done: `cd /home/admin/services/jellyfin-staging && sudo docker compose stop`.
+- It holds a copy of prod users, password hashes and prod API keys. It is LAN only and has `restart: "no"`, but nothing stops it for you. **Stop it when done:** `cd /home/admin/services/jellyfin-staging && sudo docker compose stop`.
+- Optional, to make the copy harmless: revoke the copied keys (stop staging first, then `sudo sqlite3 config/data/jellyfin.db "DELETE FROM ApiKeys WHERE Name != 'netflix-agents';"`).
+- Staging runs with `EnableLegacyAuthorization=true`, the same as prod day one.

@@ -74,7 +74,10 @@ for t in Movie Episode; do
   [ "$h" = 200 ] && ok "hls transcode playlist $t ($h)" || bad "hls playlist $t ($h)"
 done
 
-# 5. auth forms (12 default: legacy off)
+# 5. auth forms. Staging runs with legacy auth ON (the prod day-one state, see UPGRADE.md 7).
+# The test checks both states and puts back whatever was set before.
+# The websocket check matters most: jellyfin-web 12.1 (apiclient 1.11.0) opens /socket?api_key=,
+# which only works while legacy auth is on.
 authtest() {
   a=$(code -H "X-Emby-Authorization: MediaBrowser Client=\"v\", Device=\"v\", DeviceId=\"v\", Version=\"1\", Token=\"$K\"" "$U/System/Info")
   b=$(code -H "$AUTH" "$U/System/Info")
@@ -82,17 +85,32 @@ authtest() {
   d=$(code "$U/System/Info?ApiKey=$K")
   echo "$a $b $c $d"
 }
-r=$(authtest)
-[ "$r" = "401 200 401 200" ] && ok "auth legacy-off: X-Emby 401, MediaBrowser 200, api_key 401, ApiKey 200" || bad "auth legacy-off got '$r' (want 401 200 401 200)"
-if [ "${1:-}" != "--no-legacy-flip" ]; then
-  setlegacy() {
-    curl -s -H "$AUTH" "$U/System/Configuration" | python3 -c "import json,sys;d=json.load(sys.stdin);d['EnableLegacyAuthorization']=$1;print(json.dumps(d))" > /tmp/nfx-sys.json
-    code -H "$AUTH" -H 'Content-Type: application/json' -X POST --data @/tmp/nfx-sys.json "$U/System/Configuration" >/dev/null
-  }
-  setlegacy True; r=$(authtest)
-  [ "$r" = "200 200 200 200" ] && ok "auth legacy-on: all four forms 200" || bad "auth legacy-on got '$r' (want 200 200 200 200)"
-  setlegacy False; r=$(authtest)
-  [ "$r" = "401 200 401 200" ] && ok "auth back to legacy-off" || bad "auth after flip back got '$r'"
+sock() {  # prints the HTTP status of a websocket upgrade using ?$1=<key>
+  curl -s -o /dev/null -m 3 -w '%{http_code}' "$U/socket?$1=$K&deviceId=verify" \
+    -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ=='
+}
+setlegacy() {
+  curl -s -H "$AUTH" "$U/System/Configuration" | python3 -c "import json,sys;d=json.load(sys.stdin);d['EnableLegacyAuthorization']=$1;print(json.dumps(d))" > /tmp/nfx-sys.json
+  code -H "$AUTH" -H 'Content-Type: application/json' -X POST --data @/tmp/nfx-sys.json "$U/System/Configuration" >/dev/null
+}
+legacy0=$(curl -s -H "$AUTH" "$U/System/Configuration" | j "d['EnableLegacyAuthorization']")
+echo "INFO  EnableLegacyAuthorization is $legacy0 on staging"
+if [ "$legacy0" = True ]; then
+  r=$(authtest); [ "$r" = "200 200 200 200" ] && ok "auth legacy-on: all four forms 200" || bad "auth legacy-on got '$r' (want 200 200 200 200)"
+  s1=$(sock api_key); s2=$(sock ApiKey)
+  [ "$s1 $s2" = "101 101" ] && ok "websocket legacy-on: api_key 101, ApiKey 101 (web client socket works)" || bad "websocket legacy-on got api_key=$s1 ApiKey=$s2 (want 101 101)"
+fi
+if [ "${1:-}" != "--no-legacy-flip" ] || [ "$legacy0" != True ]; then
+  [ "$legacy0" = True ] && setlegacy False
+  r=$(authtest); [ "$r" = "401 200 401 200" ] && ok "auth legacy-off: X-Emby 401, MediaBrowser 200, api_key 401, ApiKey 200" || bad "auth legacy-off got '$r' (want 401 200 401 200)"
+  s1=$(sock api_key); s2=$(sock ApiKey)
+  # expected today: api_key 403 = the stock web client socket is broken with legacy off
+  [ "$s2" = 101 ] && ok "websocket legacy-off: ApiKey 101" || bad "websocket legacy-off ApiKey=$s2 (want 101)"
+  [ "$s1" = 101 ] && echo "NOTE  websocket legacy-off: api_key 101, the web client socket now works with legacy off" \
+                  || echo "NOTE  websocket legacy-off: api_key $s1, web client socket BREAKS with legacy off (keep it on)"
+  [ "$legacy0" = True ] && setlegacy True
+  [ "$(curl -s -H "$AUTH" "$U/System/Configuration" | j "d['EnableLegacyAuthorization']")" = "$legacy0" ] \
+    && ok "EnableLegacyAuthorization restored to $legacy0" || bad "EnableLegacyAuthorization not restored"
 fi
 
 # 6. plugins all Active
