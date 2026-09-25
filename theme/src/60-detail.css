@@ -93,13 +93,16 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
 }
 
 /* quieter extras */
-#itemDetailPage .itemExternalLinks,
-#itemDetailPage .itemTags {
+#itemDetailPage .itemExternalLinks {
     color: var(--nfx-text-3);
 }
 
-#itemDetailPage .itemExternalLinks a,
-#itemDetailPage .itemTags a {
+/* tags here are mostly internal (streaming:... from Streaming Collections) */
+#itemDetailPage .itemTags {
+    display: none !important;
+}
+
+#itemDetailPage .itemExternalLinks a {
     color: var(--nfx-text-2) !important;
     font-weight: 400;
 }
@@ -276,11 +279,19 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
     font-weight: 700;
 }
 
-#itemDetailPage .mainDetailButtons .btnPlay:hover,
-#itemDetailPage .mainDetailButtons .btnPlay:focus,
-#itemDetailPage .mainDetailButtons .btnReplay:hover,
-#itemDetailPage .mainDetailButtons .btnReplay:focus {
-    background: rgba(255, 255, 255, .75);
+@media (hover: hover) {
+    #itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay):hover {
+        background: rgba(255, 255, 255, .75);
+    }
+}
+
+#itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay):focus {
+    background: #fff;
+}
+
+#itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay):focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
 }
 
 #itemDetailPage .mainDetailButtons .btnPlay .detailButton-icon,
@@ -288,20 +299,17 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
     font-size: 1.9em;
 }
 
-#itemDetailPage .mainDetailButtons .btnPlay .detailButton-content::after {
-    content: "Play";
-    font-size: 1.1em;
-    margin-left: .3em;
+/* label = the button's own translated title (Resume / Play), so it follows the UI language */
+#itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay) {
+    flex-direction: row;
+    align-items: center;
 }
 
-#itemDetailPage .mainDetailButtons .btnPlay[data-action="resume"] .detailButton-content::after {
-    content: "Resume";
-}
-
-#itemDetailPage .mainDetailButtons .btnReplay .detailButton-content::after {
-    content: "Start over";
+#itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay)::after {
+    content: attr(title);
     font-size: 1.1em;
     margin-left: .3em;
+    white-space: nowrap;
 }
 
 /* when Resume is showing, Replay becomes a round icon */
@@ -314,7 +322,7 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
     color: #fff;
 }
 
-#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay .detailButton-content::after {
+#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay::after {
     content: none;
 }
 
@@ -693,7 +701,6 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
         display: block;
     }
 
-    #itemDetailPage .itemTags,
     #itemDetailPage .itemExternalLinks {
         display: none !important;
     }

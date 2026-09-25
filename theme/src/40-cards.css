@@ -148,62 +148,30 @@ body:not(.dashboardDocument) .cardOverlayButton-br .cardOverlayButton {
     margin-bottom: 0 !important;
 }
 
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox {
-    position: relative;
-}
-
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):not([data-type="CollectionFolder"], [data-type="UserView"]) .cardBox:has(> .cardText) > .cardScalable::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 60%;
-    z-index: 1;
-    pointer-events: none;
-    border-radius: 0 0 var(--nfx-radius) var(--nfx-radius);
-    background: linear-gradient(0deg, rgba(0, 0, 0, .85), rgba(0, 0, 0, 0));
-}
-
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: .55em;
-    z-index: 2;
+/* Backdrop cards: title (and the episode / year line) under the image, the same for every
+   card in every row, so card heights never differ inside a row. */
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > :is(.cardText, .cardFooter) {
+    position: static;
     margin: 0;
-    padding: 0 .7em;
-    pointer-events: none;
+    padding: .45em .1em 0;
     text-align: left !important;
     font-size: .82em;
     line-height: 1.3;
-    color: #d2d2d2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
-}
-
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText-first {
-    font-weight: 700;
     color: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText-first:has(+ .cardText) {
-    bottom: calc(.55em + 1.3em);
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText + .cardText {
+    padding-top: 0;
+    color: var(--nfx-text-2);
+    font-weight: 400;
 }
 
 :is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText + .cardText + .cardText {
     display: none;
-}
-
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardFooter {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    padding: 1.6em .7em .5em;
-    margin: 0;
-    pointer-events: none;
-    text-align: left;
 }
 
 :is(.homeSectionsContainer, .nfx-row) .cardText a {
@@ -214,24 +182,20 @@ body:not(.dashboardDocument) .cardOverlayButton-br .cardOverlayButton {
     display: none;
 }
 
-/* Episode thumbs (Continue Watching, Next Up) often have the show logo in the art:
-   put their text under the image instead of over it. */
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):is([data-type="Episode"], .section1 *) .cardBox > .cardScalable::after {
-    display: none;
+/* posters turned 16:9 by the plugin (no landscape art): crop the poster to fill */
+.card.nfx-crop .cardImageContainer {
+    background-size: cover !important;
+    background-position: center 20% !important;
 }
 
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):is([data-type="Episode"], .section1 *) .cardBox > .cardText {
-    position: static;
-    padding: .45em .1em 0;
-    text-shadow: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* no art at all: a quiet 16:9 box, the title is under it like every other card */
+.card.nfx-noart .cardImageContainer {
+    background: var(--nfx-bg-elev2) !important;
 }
 
-:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):is([data-type="Episode"], .section1 *) .cardBox > .cardText + .cardText {
-    padding-top: 0;
-    color: var(--nfx-text-2);
+.card.nfx-noart .cardImageIcon {
+    font-size: 2.4em !important;
+    color: var(--nfx-text-3);
 }
 
 /* default text on cards with no image (studios, genres): never huge */

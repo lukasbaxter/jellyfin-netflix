@@ -189,18 +189,14 @@ body:not(.dashboardDocument) .cardOverlayButton-br .cardOverlayButton{color:#fff
 :is(.homeSectionsContainer,.nfx-row) .card[data-type="CollectionFolder"] .cardBox>:is(.cardText,.cardFooter),
 :is(.homeSectionsContainer,.nfx-row) .card[data-type="UserView"] .cardBox>:is(.cardText,.cardFooter){display:none}
 :is(.homeSectionsContainer,.nfx-row) .cardBox-bottompadded{margin-bottom:0 !important}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox{position:relative}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):not([data-type="CollectionFolder"],[data-type="UserView"]) .cardBox:has(>.cardText)>.cardScalable::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;z-index:1;pointer-events:none;border-radius:0 0 var(--nfx-radius) var(--nfx-radius);background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,0))}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardText{position:absolute;left:0;right:0;bottom:.55em;z-index:2;margin:0;padding:0 .7em;pointer-events:none;text-align:left !important;font-size:.82em;line-height:1.3;color:#d2d2d2;text-shadow:0 1px 2px rgba(0,0,0,.8)}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardText-first{font-weight:700;color:#fff}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardText-first:has(+ .cardText){bottom:calc(.55em + 1.3em)}
+:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>:is(.cardText,.cardFooter){position:static;margin:0;padding:.45em .1em 0;text-align:left !important;font-size:.82em;line-height:1.3;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardText + .cardText{padding-top:0;color:var(--nfx-text-2);font-weight:400}
 :is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardText + .cardText + .cardText{display:none}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard) .cardBox>.cardFooter{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:1.6em .7em .5em;margin:0;pointer-events:none;text-align:left}
 :is(.homeSectionsContainer,.nfx-row) .cardText a{pointer-events:none}
 :is(.homeSectionsContainer,.nfx-row) .btnCardOptions{display:none}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):is([data-type="Episode"],.section1 *) .cardBox>.cardScalable::after{display:none}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):is([data-type="Episode"],.section1 *) .cardBox>.cardText{position:static;padding:.45em .1em 0;text-shadow:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-:is(.homeSectionsContainer,.nfx-row) :is(.overflowBackdropCard,.overflowSmallBackdropCard,.backdropCard):is([data-type="Episode"],.section1 *) .cardBox>.cardText + .cardText{padding-top:0;color:var(--nfx-text-2)}
+.card.nfx-crop .cardImageContainer{background-size:cover !important;background-position:center 20% !important}
+.card.nfx-noart .cardImageContainer{background:var(--nfx-bg-elev2) !important}
+.card.nfx-noart .cardImageIcon{font-size:2.4em !important;color:var(--nfx-text-3)}
 body:not(.dashboardDocument) :is(.cardImageContainer .cardText,.cardDefaultText){font-size:clamp(.9rem,4vw,1.2rem) !important;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
 :is(.homeSectionsContainer,.nfx-row) .innerCardFooter{z-index:3}
 @media (hover:none){:is(.homeSectionsContainer,.nfx-row) .cardOverlayContainer{display:none !important}
@@ -313,10 +309,9 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
 #itemDetailPage .detailPageWrapperContainer{grid-area:2 / 1;position:relative;z-index:2;margin-top:calc(-1 * var(--nfx-detail-pull)) !important;background:linear-gradient(180deg,transparent 0,var(--nfx-bg) var(--nfx-detail-pull));display:block;height:auto !important;min-height:40vh}
 #itemDetailPage:not(.hide){grid-template-rows:auto auto;align-content:start;contain:style}
 #itemDetailPage .detailPageSecondaryContainer{background:var(--nfx-bg)}
-#itemDetailPage .itemExternalLinks,
-#itemDetailPage .itemTags{color:var(--nfx-text-3)}
-#itemDetailPage .itemExternalLinks a,
-#itemDetailPage .itemTags a{color:var(--nfx-text-2) !important;font-weight:400}
+#itemDetailPage .itemExternalLinks{color:var(--nfx-text-3)}
+#itemDetailPage .itemTags{display:none !important}
+#itemDetailPage .itemExternalLinks a{color:var(--nfx-text-2) !important;font-weight:400}
 #itemDetailPage .trackSelections .selectLabel,
 #itemDetailPage .trackSelections label{color:var(--nfx-text-3)}
 #itemDetailPage .detailImageContainer{display:none !important}
@@ -350,17 +345,16 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
 #itemDetailPage .mainDetailButtons .detailButton-text{display:none}
 #itemDetailPage .mainDetailButtons .btnPlay,
 #itemDetailPage .mainDetailButtons .btnReplay{width:auto;border-radius:var(--nfx-radius);border:0;background:#fff;color:#000;padding:0 1.6em 0 1.2em !important;font-weight:700}
-#itemDetailPage .mainDetailButtons .btnPlay:hover,
-#itemDetailPage .mainDetailButtons .btnPlay:focus,
-#itemDetailPage .mainDetailButtons .btnReplay:hover,
-#itemDetailPage .mainDetailButtons .btnReplay:focus{background:rgba(255,255,255,.75)}
+@media (hover:hover){#itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay):hover{background:rgba(255,255,255,.75)}
+}
+#itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay):focus{background:#fff}
+#itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay):focus-visible{outline:2px solid #fff;outline-offset:2px}
 #itemDetailPage .mainDetailButtons .btnPlay .detailButton-icon,
 #itemDetailPage .mainDetailButtons .btnReplay .detailButton-icon{font-size:1.9em}
-#itemDetailPage .mainDetailButtons .btnPlay .detailButton-content::after{content:"Play";font-size:1.1em;margin-left:.3em}
-#itemDetailPage .mainDetailButtons .btnPlay[data-action="resume"] .detailButton-content::after{content:"Resume"}
-#itemDetailPage .mainDetailButtons .btnReplay .detailButton-content::after{content:"Start over";font-size:1.1em;margin-left:.3em}
+#itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay){flex-direction:row;align-items:center}
+#itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay)::after{content:attr(title);font-size:1.1em;margin-left:.3em;white-space:nowrap}
 #itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay{width:2.6em;padding:0 !important;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(42,42,42,.6);color:#fff}
-#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay .detailButton-content::after{content:none}
+#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay::after{content:none}
 #itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay .detailButton-icon{font-size:1.4em}
 #itemDetailPage .btnUserRating .detailButton-icon.ratingbutton-icon-withrating,
 #itemDetailPage .btnUserRating[data-isfavorite="true"] .detailButton-icon{color:var(--nfx-red)}
@@ -434,7 +428,6 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
 #itemDetailPage .mainDetailButtons .btnPlay.hide + .btnReplay:not(.hide){flex:1 1 100%;width:100%;height:44px;justify-content:center}
 #itemDetailPage .detailPagePrimaryContent{padding:0 16px !important}
 #itemDetailPage .detailSection{display:block}
-#itemDetailPage .itemTags,
 #itemDetailPage .itemExternalLinks{display:none !important}
 #itemDetailPage .detailPageSecondaryContainer{padding-left:16px !important}
 #itemDetailPage #childrenContent .listItem{padding:1em 0}
@@ -469,14 +462,13 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
 #videoOsdPage .videoOsdBottom .buttons button:focus{transform:scale(1.2)}
 #videoOsdPage .osdHeader,
 .skinHeader-withBackground.osdHeader{background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,0) 100%) !important}
-@media (hover:none) and (pointer:coarse){#videoOsdPage .videoOsdBottom .btnPause,
-#videoOsdPage .videoOsdBottom .btnRewind,
-#videoOsdPage .videoOsdBottom .btnFastForward{position:fixed;top:50%;left:50%;margin:0;transform:translate(-50%,-50%);font-size:1.9em;pointer-events:auto}
-#videoOsdPage .videoOsdBottom .btnRewind{left:calc(50% - 30vw);font-size:1.4em}
-#videoOsdPage .videoOsdBottom .btnFastForward{left:calc(50% + 30vw);font-size:1.4em}
-}
-@media (hover:none) and (pointer:coarse) and (orientation:landscape){#videoOsdPage .videoOsdBottom .btnRewind{left:calc(50% - 18vw)}
-#videoOsdPage .videoOsdBottom .btnFastForward{left:calc(50% + 18vw)}
+html.layout-mobile #videoOsdPage .videoOsdBottom :is(.btnPause,.btnRewind,.btnFastForward){display:inline-flex !important;align-items:center;justify-content:center;position:fixed;top:50%;left:50%;width:64px;height:64px;margin:0;transform:translate(-50%,-50%);pointer-events:auto}
+html.layout-mobile #videoOsdPage .videoOsdBottom :is(.btnPause,.btnRewind,.btnFastForward) .material-icons{font-size:56px}
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnPause .material-icons{font-size:64px}
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnRewind{left:calc(50% - 30vw)}
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnFastForward{left:calc(50% + 30vw)}
+@media (orientation:landscape){html.layout-mobile #videoOsdPage .videoOsdBottom .btnRewind{left:calc(50% - 18vw)}
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnFastForward{left:calc(50% + 18vw)}
 }
 .upNextContainer{background:rgba(20,20,20,.92);border-radius:var(--nfx-radius);box-shadow:0 10px 30px rgba(0,0,0,.7);width:min(30em,calc(100vw - 2em));padding:1.2em}
 .upNextContainer .upNextDialog-nextVideoText{font-size:1em;color:var(--nfx-text-2);font-weight:400}
@@ -564,6 +556,12 @@ body:not(.dashboardDocument) .MuiBottomNavigation-root,
 body:not(.dashboardDocument) .nowPlayingBar{background:#121212 !important;border-top:1px solid #262626}
 body:not(.dashboardDocument) .nowPlayingBar .nowPlayingBarPositionSlider .mdl-slider-background-lower{background-color:var(--nfx-red) !important}
 body:not(.dashboardDocument) .MuiBottomNavigationAction-root.Mui-selected{color:#fff}
+html.layout-mobile :is(.homeSectionsContainer,.nfx-row) .cardOverlayButton,
+html.layout-mobile :is(.homeSectionsContainer,.nfx-row) .cardOverlayContainer{display:none !important}
+@media (hover:none){:is(.homeSectionsContainer,.nfx-row) :is(.cardOverlayButton,.cardOverlayContainer){display:none !important}
+}
+@media (max-width:600px){#itemDetailPage #childrenContent .listItemMediaInfo{display:flex !important;flex-wrap:wrap;gap:.2em .6em;font-size:.85em}
+}
 html.layout-tv{font-size:125%}
 html.layout-tv body:not(.dashboardDocument) *{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
 html.layout-tv .homeSectionsContainer .sectionTitleContainer,
@@ -602,6 +600,9 @@ html.layout-tv #itemDetailPage .detailPageSecondaryContainer{padding-left:5vw !i
 html.layout-tv .skinHeader{padding-left:5vw;padding-right:5vw}
 html.layout-tv .padded-bottom-page{padding-bottom:5vh}
 html.layout-tv :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:hover>.cardBox{box-shadow:none}
+html.layout-tv :is(.homeSectionsContainer,.nfx-row) .emby-scroller{margin-top:0 !important}
+html.layout-tv #itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay):not(:focus){background:rgba(109,109,110,.7);color:#fff}
+html.layout-tv #itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay):focus{background:#fff;color:#000;transform:scale(1.08)}
 .nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 8vw) / 6.3);display:block;position:relative;text-decoration:none;color:#fff}
 .nfx-card--top10 .nfx-card__img,
 .nfx-card--top10>.cardBox{width:62%;margin-left:38%}

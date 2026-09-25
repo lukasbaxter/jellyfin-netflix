@@ -97,37 +97,44 @@
     background: linear-gradient(180deg, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, 0) 100%) !important;
 }
 
-/* touch: big centred rewind / pause / forward, like the Netflix app */
-@media (hover: none) and (pointer: coarse) {
-    #videoOsdPage .videoOsdBottom .btnPause,
-    #videoOsdPage .videoOsdBottom .btnRewind,
-    #videoOsdPage .videoOsdBottom .btnFastForward {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        margin: 0;
-        transform: translate(-50%, -50%);
-        font-size: 1.9em;
-        pointer-events: auto;
-    }
-
-    #videoOsdPage .videoOsdBottom .btnRewind {
-        left: calc(50% - 30vw);
-        font-size: 1.4em;
-    }
-
-    #videoOsdPage .videoOsdBottom .btnFastForward {
-        left: calc(50% + 30vw);
-        font-size: 1.4em;
-    }
+/* touch: big centred rewind / pause / forward, like the Netflix app.
+   Stock hides rewind and forward under 50em, so they are brought back here. */
+html.layout-mobile #videoOsdPage .videoOsdBottom :is(.btnPause, .btnRewind, .btnFastForward) {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 64px;
+    height: 64px;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
 }
 
-@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
-    #videoOsdPage .videoOsdBottom .btnRewind {
+html.layout-mobile #videoOsdPage .videoOsdBottom :is(.btnPause, .btnRewind, .btnFastForward) .material-icons {
+    font-size: 56px;
+}
+
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnPause .material-icons {
+    font-size: 64px;
+}
+
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnRewind {
+    left: calc(50% - 30vw);
+}
+
+html.layout-mobile #videoOsdPage .videoOsdBottom .btnFastForward {
+    left: calc(50% + 30vw);
+}
+
+@media (orientation: landscape) {
+    html.layout-mobile #videoOsdPage .videoOsdBottom .btnRewind {
         left: calc(50% - 18vw);
     }
 
-    #videoOsdPage .videoOsdBottom .btnFastForward {
+    html.layout-mobile #videoOsdPage .videoOsdBottom .btnFastForward {
         left: calc(50% + 18vw);
     }
 }

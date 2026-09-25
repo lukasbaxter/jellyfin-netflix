@@ -149,3 +149,20 @@ html.layout-tv .padded-bottom-page {
 html.layout-tv :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card:hover > .cardBox {
     box-shadow: none;
 }
+
+/* room above every row so a focused (scaled) card never covers the row title */
+html.layout-tv :is(.homeSectionsContainer, .nfx-row) .emby-scroller {
+    margin-top: 0 !important;
+}
+
+/* detail Play / Resume: grey until focused, then white and bigger (same as the hero) */
+html.layout-tv #itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay):not(:focus) {
+    background: rgba(109, 109, 110, .7);
+    color: #fff;
+}
+
+html.layout-tv #itemDetailPage .mainDetailButtons :is(.btnPlay, .btnReplay):focus {
+    background: #fff;
+    color: #000;
+    transform: scale(1.08);
+}

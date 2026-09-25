@@ -61,3 +61,25 @@ body:not(.dashboardDocument) .nowPlayingBar .nowPlayingBarPositionSlider .mdl-sl
 body:not(.dashboardDocument) .MuiBottomNavigationAction-root.Mui-selected {
     color: #fff;
 }
+
+/* touch: no round play button on every home card (Netflix opens the title on tap) */
+html.layout-mobile :is(.homeSectionsContainer, .nfx-row) .cardOverlayButton,
+html.layout-mobile :is(.homeSectionsContainer, .nfx-row) .cardOverlayContainer {
+    display: none !important;
+}
+
+@media (hover: none) {
+    :is(.homeSectionsContainer, .nfx-row) :is(.cardOverlayButton, .cardOverlayContainer) {
+        display: none !important;
+    }
+}
+
+/* phone episode list: keep runtime and rating under the title */
+@media (max-width: 600px) {
+    #itemDetailPage #childrenContent .listItemMediaInfo {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: .2em .6em;
+        font-size: .85em;
+    }
+}
