@@ -197,6 +197,10 @@ body:has(.backdropContainer .backdropImage) #loginPage {
 }
 
 @media (max-width: 600px) {
+    body:has(#loginPage:not(.hide)) .backgroundContainer.withBackdrop {
+        background: linear-gradient(180deg, rgba(0, 0, 0, .75) 0%, rgba(0, 0, 0, .7) 100%) !important;
+    }
+
     #loginPage .manualLoginForm {
         background: transparent;
         padding: 24px 0 8px;

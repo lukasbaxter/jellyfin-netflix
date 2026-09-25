@@ -74,9 +74,11 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
     min-height: 40vh;
 }
 
+/* stock pages use contain:size, which would squash the grid rows; drop only the size part */
 #itemDetailPage:not(.hide) {
     grid-template-rows: auto auto;
     align-content: start;
+    contain: style;
 }
 
 #itemDetailPage .detailPageSecondaryContainer {

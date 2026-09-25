@@ -302,7 +302,7 @@ body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not
 #itemDetailPage .detailLogo{grid-area:1 / 1;align-self:end;justify-self:start;display:block;position:relative;inset:auto;width:min(34vw,560px);height:min(12vw,22vh);margin:0 0 calc(var(--nfx-detail-pull) + 1.2vw) var(--nfx-gutter);background-position:left bottom;z-index:3;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
 #itemDetailPage .detailLogo.hide{display:none}
 #itemDetailPage .detailPageWrapperContainer{grid-area:2 / 1;position:relative;z-index:2;margin-top:calc(-1 * var(--nfx-detail-pull)) !important;background:linear-gradient(180deg,transparent 0,var(--nfx-bg) var(--nfx-detail-pull));display:block;height:auto !important;min-height:40vh}
-#itemDetailPage:not(.hide){grid-template-rows:auto auto;align-content:start}
+#itemDetailPage:not(.hide){grid-template-rows:auto auto;align-content:start;contain:style}
 #itemDetailPage .detailPageSecondaryContainer{background:var(--nfx-bg)}
 #itemDetailPage .itemExternalLinks,
 #itemDetailPage .itemTags{color:var(--nfx-text-3)}
@@ -529,7 +529,8 @@ body:has(.backdropContainer .backdropImage) #loginPage{background:none}
 #loginPage #divUsers .cardFooter,
 #loginPage #divUsers .visualCardBox .cardFooter{background:none}
 #loginPage .loginDisclaimer{color:#737373;font-size:.85rem}
-@media (max-width:600px){#loginPage .manualLoginForm{background:transparent;padding:24px 0 8px;margin-top:2vh}
+@media (max-width:600px){body:has(#loginPage:not(.hide)) .backgroundContainer.withBackdrop{background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,rgba(0,0,0,.7) 100%) !important}
+#loginPage .manualLoginForm{background:transparent;padding:24px 0 8px;margin-top:2vh}
 #loginPage .readOnlyContent,
 #loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent{padding:0;background:transparent}
 #loginPage #divUsers .card{width:30vw}

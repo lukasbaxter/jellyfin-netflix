@@ -1,6 +1,9 @@
 // Screenshot harness for the jellyfin-netflix theme.
 // Usage: node test/shoot.mjs [--only=phone|desktop|tv|legacy|webkit] [--pages=home,detail] [--out=dir]
 // Reads ../.staging.env for STAGING_URL and the viewer login.
+// macOS blocks Playwright's WebKit from LAN addresses (Local Network privacy). For --only=webkit
+// open a tunnel first and override the URL:
+//   ssh -fNL 2199:localhost:2199 server && STAGING_URL=http://localhost:2199 node test/shoot.mjs --only=webkit
 import { chromium, webkit } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -137,6 +140,14 @@ async function run(vpName, items, pages) {
         await ctx.addInitScript((l) => { try { localStorage.setItem('layout', l); } catch { /* ignore */ } }, vp.layout);
     }
     const page = await ctx.newPage();
+    try {
+        await runPages(page, vp, vpName, items, pages);
+    } finally {
+        await browser.close();
+    }
+}
+
+async function runPages(page, vp, vpName, items, pages) {
     page.on('console', (m) => {
         if (m.type() !== 'error') return;
         const t = `[${vpName}] ${m.text()}`;
@@ -231,7 +242,6 @@ async function run(vpName, items, pages) {
             try { await page.keyboard.press('Escape'); } catch { /* ignore */ }
         }
     }
-    await browser.close();
 }
 
 const all = ['phone', 'desktop', 'tv'];
