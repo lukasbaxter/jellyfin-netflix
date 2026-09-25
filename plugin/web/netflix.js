@@ -329,7 +329,9 @@
 
     function scheduleRotate(hero) {
         clearInterval(state.hero.timer);
-        if (isMobile() || isTv() || reducedMotion() || state.hero.list.length < 2) return;
+        // Netflix 2022 keeps one billboard per visit. Rotating meant a full-screen image
+        // decode + GPU upload every 9 s, a visible hitch on retina screens.
+        return;
         state.hero.timer = setInterval(safe('rotate', function () {
             if (!hero.isConnected) { clearInterval(state.hero.timer); return; }
             if (state.hero.paused || !heroActive(hero) || doc.getElementById('nfx-modal') || doc.getElementById('nfx-gate')) return;
@@ -1544,9 +1546,9 @@
         var logoImg = p.querySelector('.nfx-preview__logo');
         var titleEl = p.querySelector('.nfx-preview__title');
         var logo = it ? logoUrl(it) : '';
-        var src = '';
-        if (it) src = it.ImageTags ? dtoLandscape(it, !!logo) : cardImage(it, !!logo);
-        if (!src) src = ownCardImage(card);
+        // the card's own image is already downloaded and decoded: reuse it so the preview is instant
+        var src = ownCardImage(card);
+        if (!src && it) src = it.ImageTags ? dtoLandscape(it, !!logo) : cardImage(it, !!logo);
         if (mediaImg.getAttribute('src') !== src) mediaImg.src = src;
         var name = it ? (it.SeriesName && it.Type === 'Episode' ? it.SeriesName : it.Name) : (card.getAttribute('aria-label') || '');
         mediaImg.alt = name || '';
@@ -1585,9 +1587,9 @@
     }
 
     function logoUrl(it) {
-        if (it.LogoTag) return img(it.Id, 'Logo', it.LogoTag, 500);
-        if (it.ImageTags && it.ImageTags.Logo) return img(it.Id, 'Logo', it.ImageTags.Logo, 500);
-        if (it.ParentLogoItemId && it.ParentLogoImageTag) return img(it.ParentLogoItemId, 'Logo', it.ParentLogoImageTag, 500);
+        if (it.LogoTag) return img(it.Id, 'Logo', it.LogoTag, 400);
+        if (it.ImageTags && it.ImageTags.Logo) return img(it.Id, 'Logo', it.ImageTags.Logo, 400);
+        if (it.ParentLogoItemId && it.ParentLogoImageTag) return img(it.ParentLogoItemId, 'Logo', it.ParentLogoImageTag, 400);
         return '';
     }
 
@@ -1831,6 +1833,7 @@
 
     function init() {
         root.classList.add('nfx');
+        if (/^#\/(home)?(\?|$)/.test(location.hash || '#/home') && !/tab=1/.test(location.hash)) root.classList.add('nfx-own-home');
         // hide the app until the profile gate decides, so home never flashes first
         if (!ssGet(GATE_KEY) && !/#\/login/.test(location.hash)) {
             root.classList.add('nfx-gate-pending');
