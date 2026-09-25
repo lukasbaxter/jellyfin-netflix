@@ -793,7 +793,7 @@ html:has(#itemDetailPage:not(.hide)) body{background:#141414}
 #searchPage .verticalSection[data-nfx-kind="title"]{order:-1}
 #searchPage .verticalSection[data-nfx-kind="noise"]{display:none !important}
 #searchPage .searchFields input,#searchPage input[type="search"],#searchPage .searchfields-txtSearch{background:#000 !important; border:1px solid rgba(255,255,255,.7) !important; border-radius:2px;color:#fff; font-size:16px; padding:.5em .8em}
-#loginPage::before{content:"BAXTERFLIX"; position:absolute; z-index:5; top:22px; left:4%;font-family:"NfxBrand","Bebas Neue",Impact,sans-serif; font-size:48px; line-height:1;color:var(--nfx-red); letter-spacing:.02em}
+#loginPage::before{content:"JELLYFLIX"; position:fixed; z-index:5; top:22px; left:4%;font-family:"NfxBrand","Bebas Neue",Impact,sans-serif; font-size:48px; line-height:1;color:var(--nfx-red); letter-spacing:.02em}
 #loginPage .manualLoginForm h1,#loginPage .visualLoginForm h1{font-size:0 !important}
 #loginPage .manualLoginForm h1::after{content:"Sign In"; font-size:32px; font-weight:700}
 #loginPage .visualLoginForm h1::after{content:"Who's watching?"; font-size:32px; font-weight:500}
@@ -827,6 +827,10 @@ html.nfx-mode-list #nfx-hero{display:none !important}
 html.nfx-own-home #indexPage{padding-top:0 !important}
 html.nfx-own-home #nfx-hero:not(.nfx-hero--card){margin-top:0 !important}
 html.layout-tv.nfx-has-hero #nfx-home{margin-top:-2vw}
+body:has(#loginPage:not(.hide)) :is(.MuiAppBar-root,.skinHeader){display:none !important}
+#loginPage:not(.hide){padding-top:0 !important; justify-content:safe center}
+#loginPage .manualLoginForm{margin-top:0 !important}
+#loginPage>.padded-left{padding-top:90px; padding-bottom:90px !important}
 html.nfx-gate-pending body>*:not(#nfx-gate){visibility:hidden !important}
 html.nfx-gate-pending body{background:#141414 !important}
 html.nfx-gate-open{overflow:hidden}

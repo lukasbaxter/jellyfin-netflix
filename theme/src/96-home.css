@@ -269,7 +269,7 @@ html:has(#itemDetailPage:not(.hide)) body { background: #141414; }
 
 /* ---------------- login ---------------- */
 #loginPage::before {
-    content: "BAXTERFLIX"; position: absolute; z-index: 5; top: 22px; left: 4%;
+    content: "JELLYFLIX"; position: fixed; z-index: 5; top: 22px; left: 4%;
     font-family: "NfxBrand", "Bebas Neue", Impact, sans-serif; font-size: 48px; line-height: 1;
     color: var(--nfx-red); letter-spacing: .02em;
 }
@@ -321,3 +321,9 @@ html.nfx-mode-list #nfx-hero { display: none !important; }
 html.nfx-own-home #indexPage { padding-top: 0 !important; }
 html.nfx-own-home #nfx-hero:not(.nfx-hero--card) { margin-top: 0 !important; }
 html.layout-tv.nfx-has-hero #nfx-home { margin-top: -2vw; }
+
+/* login: no stock header (it showed the server name and pushed everything down); card centred */
+body:has(#loginPage:not(.hide)) :is(.MuiAppBar-root, .skinHeader) { display: none !important; }
+#loginPage:not(.hide) { padding-top: 0 !important; justify-content: safe center; }
+#loginPage .manualLoginForm { margin-top: 0 !important; }
+#loginPage > .padded-left { padding-top: 90px; padding-bottom: 90px !important; }

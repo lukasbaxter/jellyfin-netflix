@@ -624,7 +624,7 @@
     // ------------------------------------------------------------------ own header
     // Stock header is hidden (CSS, html.nfx-own-chrome). Ours links to the stock routes.
 
-    var BRAND = 'BAXTERFLIX';
+    var BRAND = 'JELLYFLIX';
     var views = { list: null, promise: null };
 
     function loadViews() {
