@@ -91,4 +91,7 @@ public class NfxPublicConfig
     public bool EnableHeroTrailer { get; set; }
 
     public string HomeCardShape { get; set; } = "backdrop";
+
+    /// <summary>Gets or sets libraries the home rows leave out (e.g. Demos).</summary>
+    public Guid[] ExcludedLibraryIds { get; set; } = Array.Empty<Guid>();
 }

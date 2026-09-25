@@ -52,6 +52,7 @@ public class NetflixUiController : ControllerBase
             EnableHoverPreview = c.EnableHoverPreview,
             EnableHeroTrailer = c.EnableHeroTrailer,
             HomeCardShape = string.IsNullOrEmpty(c.HomeCardShape) ? "backdrop" : c.HomeCardShape,
+            ExcludedLibraryIds = c.ExcludedLibraryIds ?? Array.Empty<Guid>(),
         };
     }
 

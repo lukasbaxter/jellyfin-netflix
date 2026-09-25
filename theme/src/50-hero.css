@@ -272,100 +272,69 @@ html.layout-tv .nfx-btn:focus {
     to { opacity: 1; transform: none; }
 }
 
-/* phone hero: poster-like, centred */
-@media (max-width: 600px) {
-    .nfx-hero {
-        min-height: 70vh;
-        margin-bottom: 0;
-    }
-
-    .nfx-hero__img {
-        object-position: center top;
-    }
-
-    .nfx-hero__shade {
-        background:
-            linear-gradient(180deg, rgba(0, 0, 0, .55) 0%, transparent 25%, transparent 45%, rgba(20, 20, 20, .85) 80%, var(--nfx-bg) 100%);
-    }
-
-    .nfx-hero__content {
-        left: 16px;
-        right: 16px;
-        bottom: 24px;
-        width: auto;
-        min-width: 0;
-        text-align: center;
-    }
-
-    .nfx-hero__logo {
-        max-width: 70%;
-        max-height: 26vw;
-        margin: 0 auto 12px;
-        object-position: center bottom;
-    }
-
-    .nfx-hero__title {
-        font-size: 2rem;
-    }
-
-    .nfx-hero__meta {
-        justify-content: center;
-        font-size: .85rem;
-    }
-
-    .nfx-hero__overview,
-    .nfx-hero__badge,
-    .nfx-hero__dots,
-    .nfx-hero__actions .nfx-btn--info {
-        display: none;
-    }
-
-    .nfx-hero__genres {
-        display: block;
-        margin: 0 0 14px 0;
-    }
-
-    .nfx-hero__actions {
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .nfx-hero__actions .nfx-btn {
-        flex: 1 1 0;
-        max-width: 160px;
-        font-size: 1rem;
-    }
-
-    /* Netflix mobile: "My List" is an icon over a small label, left of Play */
-    .nfx-hero__actions .nfx-btn--icon.nfx-btn--list {
-        order: -1;
-        flex: 0 0 auto;
-        flex-direction: column;
-        gap: 2px;
-        width: 64px;
-        height: auto;
-        min-height: 44px;
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent !important;
-        font-size: .75rem;
-        font-weight: 400;
-    }
-
-    .nfx-hero__actions .nfx-btn--list .material-icons {
-        font-size: 1.9rem;
-    }
-
-    .nfx-hero__actions .nfx-btn--list .nfx-btn__label {
-        display: block;
-        color: #e5e5e5;
-    }
-
-    .nfx-hero__actions .nfx-btn--play {
-        flex: 0 1 160px;
-    }
+/* phone hero: the Netflix app's rounded poster card over a colour glow */
+.nfx-hero.nfx-hero--card {
+    box-sizing: border-box;
+    min-height: 0;
+    margin: 0;
+    padding: calc(var(--nfx-mobile-head, 104px) + 4px) 14px 0;
+    overflow: visible;
+    overflow-x: clip;
+    background: transparent;
+    isolation: isolate;
 }
+.nfx-hero--card::before {
+    content: ""; position: absolute; z-index: -1;
+    left: -40px; right: -40px; top: 0; height: 125%;
+    background: var(--nfx-glow, none) center 30% / cover no-repeat;
+    filter: blur(50px) saturate(1.3) brightness(.75);
+    transform: scale(1.3);
+    -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 45%, transparent 100%);
+    opacity: .9;
+}
+.nfx-hero--card .nfx-hero__backdrop {
+    position: relative; inset: auto;
+    aspect-ratio: 2 / 2.75;
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .12);
+}
+.nfx-hero--card .nfx-hero__img { object-position: center top; }
+.nfx-hero--card .nfx-hero__shade {
+    top: calc(var(--nfx-mobile-head, 104px) + 4px); left: 14px; right: 14px; bottom: auto;
+    aspect-ratio: 2 / 2.75; border-radius: 10px;
+    background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, .75) 88%);
+}
+.nfx-hero--card .nfx-hero__content {
+    left: 30px; right: 30px; bottom: 18px; width: auto; min-width: 0; text-align: center;
+}
+.nfx-hero--card .nfx-hero__logo { max-width: 68%; max-height: 22vw; margin: 0 auto 10px; object-position: center bottom; }
+.nfx-hero--card .nfx-hero__title { font-size: 2rem; margin-bottom: 8px; }
+.nfx-hero--card .nfx-hero__meta,
+.nfx-hero--card .nfx-hero__overview,
+.nfx-hero--card ~ .nfx-hero__badge,
+.nfx-hero--card .nfx-hero__badge,
+.nfx-hero--card .nfx-hero__dots,
+.nfx-hero--card .nfx-hero__actions .nfx-btn--info { display: none !important; }
+.nfx-hero--card .nfx-hero__genres {
+    display: flex !important; justify-content: center; flex-wrap: wrap;
+    font-size: 13px; color: #fff; margin: 0 0 14px; text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
+}
+.nfx-hero--card .nfx-hero__genres span + span::before { content: "\2022"; margin: 0 7px; color: #bbb; }
+.nfx-hero--card .nfx-hero__actions { display: flex; gap: 10px; justify-content: center; }
+.nfx-hero--card .nfx-hero__logo,
+.nfx-hero--card .nfx-hero__title { display: none !important; } /* posters carry the title art */
+.nfx-hero--card .nfx-hero__actions .nfx-btn:not(.nfx-btn--info) {
+    flex: 1 1 0; max-width: none; height: 40px; min-height: 0; padding: 0 10px;
+    font-size: 16px; font-weight: 600; border-radius: 4px; border: 0;
+    display: inline-flex !important; flex-direction: row; align-items: center; justify-content: center; gap: 6px;
+}
+.nfx-hero--card .nfx-hero__actions .nfx-btn--play { background: #fff; color: #000; }
+.nfx-hero--card .nfx-hero__actions .nfx-btn--icon.nfx-btn--list {
+    width: auto; background: rgba(109, 109, 110, .8) !important; color: #fff; order: 0;
+}
+.nfx-hero--card .nfx-hero__actions .nfx-btn--list .nfx-btn__label { display: inline; color: #fff; }
+.nfx-hero--card .nfx-hero__actions .material-icons { font-size: 26px; }
 
 @media (prefers-reduced-motion: reduce) {
     .nfx-hero__img,

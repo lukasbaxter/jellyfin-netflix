@@ -1,0 +1,289 @@
+/* ---- 96 own home (#nfx-home) + own header (#nfx-header), Netflix layout ---- */
+
+/* stock chrome off while the plugin draws its own */
+/* modern (12) layout: the app bar's first toolbar is the nav we replace; the rest (library
+   title, sort/filter, tabs) stays, docked under our header */
+html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .MuiAppBar-root {
+    top: var(--nfx-header-h) !important;
+    background: #141414 !important; box-shadow: none !important;
+}
+html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .MuiAppBar-root > .MuiToolbar-root:first-child { display: none !important; }
+html.nfx-own-chrome.nfx-at-home body:not(.dashboardDocument) .MuiAppBar-root,
+html.nfx-own-chrome body:not(.dashboardDocument):has(#itemDetailPage:not(.hide)) .MuiAppBar-root,
+html.nfx-own-chrome body:not(.dashboardDocument):has(#searchPage:not(.hide)) .MuiAppBar-root { display: none !important; }
+/* legacy/TV layout: .skinHeader holds the nav and the page tabs; hide only its top bar */
+html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .skinHeader { top: var(--nfx-header-h) !important; background: #141414 !important; }
+html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .skinHeader .headerTop { display: none !important; }
+html.nfx-own-chrome body:not(.dashboardDocument) .skinHeader .headerTabs {
+    position: static !important; margin: 0 !important; transform: none !important; top: auto !important;
+    padding: 0 var(--nfx-gutter-px);
+}
+html.nfx-own-chrome body:not(.dashboardDocument) .skinHeader .emby-tab-button { padding: .9em 1.1em !important; font-size: 15px; }
+html.nfx-own-chrome body:not(.dashboardDocument) .skinHeader .emby-tab-button-active { color: #fff !important; font-weight: 700; }
+html.nfx-own-chrome:not(.nfx-modern) body:not(.dashboardDocument) .page.libraryPage.pageWithAbsoluteTabs:not(.itemDetailPage):not(.homePage) {
+    margin-top: 0; padding-top: calc(var(--nfx-header-h) + 58px) !important;
+}
+html.nfx-own-chrome.nfx-at-home body:not(.dashboardDocument) .skinHeader,
+html.nfx-own-chrome body:not(.dashboardDocument):has(#itemDetailPage:not(.hide)) .skinHeader { display: none !important; }
+html.nfx-own-chrome body:not(.dashboardDocument) .page:is(.libraryPage, #searchPage, .type-interior):not(.itemDetailPage):not(.homePage) { margin-top: var(--nfx-header-h); }
+/* detail: backdrop runs under a transparent header, like the Netflix title page */
+html.nfx-own-chrome:has(#itemDetailPage:not(.hide)):not(.nfx-scrolled) #nfx-header { background-color: transparent; }
+html.nfx-own-home #homeTab .homeSectionsContainer { display: none !important; }
+body.dashboardDocument #nfx-header, html:not(.nfx-own-chrome) #nfx-header { display: none; }
+html:has(#videoOsdPage:not(.hide)) #nfx-header { display: none; }
+
+/* ---------------- header ---------------- */
+#nfx-header {
+    --h: var(--nfx-header-h);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--h);
+    display: flex; align-items: center;
+    padding: 0 var(--nfx-gutter);
+    background: linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent);
+    transition: background-color .4s;
+    font-family: var(--nfx-font);
+}
+html.nfx-scrolled #nfx-header, html:not(.nfx-at-home) #nfx-header { background-color: #141414; }
+.nfx-logo {
+    font-family: "NfxBrand", "Bebas Neue", Impact, sans-serif;
+    color: var(--nfx-red) !important; text-decoration: none;
+    font-size: 36px; line-height: 1; letter-spacing: .02em;
+    margin-right: 42px; padding-top: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+    transform: scaleY(1.05);
+}
+.nfx-nav { display: flex; gap: 20px; flex: 1; min-width: 0; }
+.nfx-nav__link {
+    color: #e5e5e5 !important; text-decoration: none; font-size: 14px; font-weight: 400;
+    white-space: nowrap; transition: color .4s;
+}
+.nfx-nav__link:hover { color: #b3b3b3 !important; }
+.nfx-nav__link.is-active { color: #fff !important; font-weight: 700; cursor: default; }
+.nfx-header__right { display: flex; align-items: center; gap: 22px; margin-left: auto; }
+.nfx-hbtn, .nfx-hbtn:hover, .nfx-avatar { text-decoration: none !important; }
+.nfx-hbtn { color: #fff !important; background: none; border: 0; padding: 0; cursor: pointer; display: flex; }
+.nfx-hbtn .material-icons { font-size: 26px; }
+.nfx-hbtn--cast { display: none; }
+.nfx-avatar { display: flex; align-items: center; color: #fff !important; text-decoration: none; }
+.nfx-avatar__img {
+    width: 32px; height: 32px; border-radius: 4px; background: #0071eb center / cover no-repeat;
+}
+.nfx-avatar__img.is-default {
+    background-image: linear-gradient(135deg, #2e9cf5, #0a4fb5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font: 700 15px/1 var(--nfx-font);
+}
+.nfx-avatar .material-icons { font-size: 24px; transition: transform .3s; }
+.nfx-avatar:hover .material-icons { transform: rotate(180deg); }
+.nfx-header__back { display: none; }
+.nfx-chips { display: none; }
+
+/* ---------------- hero tweaks ---------------- */
+html.nfx-own-home .nfx-hero__dots { display: none !important; }
+html.nfx-own-home .nfx-hero .nfx-match,
+html.nfx-own-home .nfx-hero .nfx-hero__genres { display: none; }
+html.nfx-own-home:not(.layout-mobile) .nfx-hero .nfx-btn--list { display: none; }
+
+/* ---------------- rows ---------------- */
+#nfx-home {
+    --per: 6;
+    --gap: .4vw;
+    --tile: calc((100vw - 2 * var(--nfx-gutter-px) - (var(--per) - 1) * var(--gap)) / var(--per));
+    position: relative; z-index: 2;
+    padding-bottom: 6vw;
+    font-family: var(--nfx-font);
+}
+html.nfx-has-hero #nfx-home { margin-top: calc(-1 * max(90px, 9vw)); }
+@media (max-width: 1399px) { #nfx-home { --per: 5; } }
+@media (max-width: 1099px) { #nfx-home { --per: 4; } }
+@media (max-width: 799px) { #nfx-home { --per: 3; } }
+
+#nfx-home .nfx-row { margin: 0 0 3vw; position: relative; }
+#nfx-home .nfx-row__title {
+    margin: 0 var(--nfx-gutter-px) .5em;
+    font-size: clamp(14px, 1.4vw, 26px); font-weight: 500; color: #e5e5e5; line-height: 1.25;
+}
+#nfx-home .nfx-row__wrap { position: relative; }
+#nfx-home .nfx-row__items {
+    display: flex; gap: var(--gap);
+    overflow-x: auto; overflow-y: hidden;
+    padding: 0 var(--nfx-gutter-px);
+    scroll-padding: 0 var(--nfx-gutter-px);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+#nfx-home .nfx-row__items::-webkit-scrollbar { display: none; }
+#nfx-home .nfx-card { flex: 0 0 var(--tile); width: var(--tile); scroll-snap-align: start; position: relative; margin: 0 !important; }
+#nfx-home .nfx-card__img { border-radius: 4px; background: #232323; overflow: hidden; aspect-ratio: 16 / 9; }
+#nfx-home .nfx-card__img > img:first-child { width: 100%; height: 100%; object-fit: cover; display: block; }
+#nfx-home .nfx-card__img.is-poster > img:first-child { object-position: center 20%; }
+#nfx-home .nfx-card__logo {
+    position: absolute; left: 8%; bottom: 10%; max-width: 55%; max-height: 38%;
+    object-fit: contain; object-position: left bottom;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .8));
+}
+#nfx-home .nfx-card__img:has(.nfx-card__logo)::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(20deg, rgba(0, 0, 0, .55), transparent 55%);
+}
+#nfx-home .nfx-card__logo { z-index: 1; }
+#nfx-home .nfx-card__name {
+    position: absolute; inset: auto 8% 10% 8%;
+    color: #fff; font-weight: 700; font-size: clamp(12px, 1.1vw, 20px); line-height: 1.15;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, .9);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* continue watching: thin grey track + red fill under the art */
+#nfx-home .nfx-card--resume .nfx-card__progress {
+    position: static; height: 2px; margin: 6px 8% 0; background: #5a5a5a; border-radius: 0;
+}
+#nfx-home .nfx-card--resume .nfx-card__progress > i { display: block; height: 100%; background: var(--nfx-red); }
+
+/* Top 10: numeral fills the left half of the tile, poster the right half */
+#nfx-home .nfx-row--top10 .nfx-card--top10 {
+    display: flex; align-items: flex-end;
+    flex-basis: var(--tile); width: var(--tile);
+    aspect-ratio: 16 / 11.2; overflow: visible;
+}
+#nfx-home .nfx-card--top10 .nfx-rank {
+    position: static; flex: 0 0 50%; width: 50%;
+    height: 100%;
+    display: flex; align-items: flex-end; justify-content: flex-end;
+    font-family: var(--nfx-font); font-weight: 800;
+    font-size: calc(var(--tile) * 1.02); line-height: .74; letter-spacing: -.09em;
+    color: #141414;
+    -webkit-text-stroke: max(2px, .16vw) #595959;
+    paint-order: stroke fill;
+    margin-right: -7%;
+    user-select: none; pointer-events: none;
+}
+#nfx-home .nfx-card--top10 .nfx-card__img {
+    flex: 0 0 50%; width: 50%; margin: 0; aspect-ratio: 2 / 3; height: auto;
+    position: relative; z-index: 1;
+}
+
+/* arrows: only on a mouse, only while hovering the row */
+#nfx-home .nfx-row__arrow {
+    position: absolute; top: 0; bottom: 0; z-index: 4;
+    width: calc(var(--nfx-gutter-px) - 2px); min-width: 28px;
+    border: 0; padding: 0; color: #fff; cursor: pointer;
+    background: rgba(20, 20, 20, .5);
+    opacity: 0; transition: opacity .2s, background .2s;
+    display: flex; align-items: center; justify-content: center;
+}
+#nfx-home .nfx-row__arrow .material-icons { font-size: 2.6vw; transition: transform .2s; }
+#nfx-home .nfx-row__arrow:hover { background: rgba(20, 20, 20, .7); }
+#nfx-home .nfx-row__arrow:hover .material-icons { transform: scale(1.25); }
+#nfx-home .nfx-row__arrow--prev { left: 0; border-radius: 0 4px 4px 0; }
+#nfx-home .nfx-row__arrow--next { right: 0; border-radius: 4px 0 0 4px; }
+@media (hover: hover) and (pointer: fine) {
+    #nfx-home .nfx-row:hover .nfx-row__arrow { opacity: 1; }
+    #nfx-home .nfx-row.at-start .nfx-row__arrow--prev,
+    #nfx-home .nfx-row.at-end .nfx-row__arrow--next { opacity: 0 !important; pointer-events: none; }
+}
+@media (hover: none) { #nfx-home .nfx-row__arrow { display: none; } }
+
+/* mouse: gentle lift while the preview arms */
+@media (hover: hover) and (pointer: fine) {
+    #nfx-home .nfx-card { transition: transform .25s var(--nfx-ease); }
+}
+
+/* TV focus */
+html.layout-tv #nfx-home { --gap: .6vw; --per: 5; }
+html.layout-tv #nfx-home .nfx-row__items { padding-top: 1.4vw; padding-bottom: 1.4vw; margin: -1.4vw 0; scroll-snap-type: none; }
+html.layout-tv #nfx-home .nfx-card:focus { transform: scale(1.08); z-index: 3; outline: none; }
+html.layout-tv #nfx-home .nfx-card:focus .nfx-card__img { box-shadow: 0 0 0 3px #fff; }
+html.layout-tv #nfx-home .nfx-card--top10:focus .nfx-card__img { box-shadow: 0 0 0 3px #fff; }
+html.layout-tv #nfx-home .nfx-card--top10:focus { transform: none; }
+html.layout-tv #nfx-home .nfx-card--top10:focus .nfx-card__img { transform: scale(1.08); transition: transform .15s; }
+.nfx-card:focus-visible { outline: none; }
+#nfx-home .nfx-card:focus-visible .nfx-card__img { box-shadow: 0 0 0 3px #fff; }
+
+/* ---------------- phone: the Netflix app ---------------- */
+html.layout-mobile #nfx-home, #nfx-home[data-mode^="p"] {
+    --gap: 8px;
+    --tile: calc((100vw - 12px) / 3.25);
+}
+#nfx-home[data-mode^="p"] .nfx-row { margin-bottom: 22px; }
+#nfx-home[data-mode^="p"] .nfx-row__title { font-size: 18px; font-weight: 700; color: #fff; margin: 0 12px 8px; }
+#nfx-home[data-mode^="p"] .nfx-row__items { padding: 0 12px; scroll-padding: 0 12px; scroll-snap-type: x proximity; }
+#nfx-home[data-mode^="p"] .nfx-card--poster .nfx-card__img { aspect-ratio: 2 / 3; }
+#nfx-home[data-mode^="p"] .nfx-card--resume .nfx-card__img { border-radius: 4px 4px 0 0; }
+#nfx-home[data-mode^="p"] .nfx-card--resume .nfx-card__progress { margin: 0; height: 3px; }
+#nfx-home[data-mode^="p"] .nfx-card--top10 { aspect-ratio: auto; flex-basis: calc(var(--tile) * 1.3); width: calc(var(--tile) * 1.3); }
+#nfx-home[data-mode^="p"] .nfx-card--top10 .nfx-rank { font-size: calc(var(--tile) * .82); flex-basis: 30%; width: 30%; height: auto; -webkit-text-stroke-width: 2px; margin-right: -3%; }
+#nfx-home[data-mode^="p"] .nfx-card--top10 .nfx-card__img { flex-basis: 70%; width: 70%; }
+html.nfx-has-hero #nfx-home[data-mode^="p"] { margin-top: 22px; }
+#nfx-home[data-mode^="p"] { --nfx-mobile-head: 100px; }
+html { --nfx-mobile-head: 100px; }
+
+@media (max-width: 800px) {
+    #nfx-header { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 56px; align-content: flex-start; }
+    .nfx-nav { display: none; }
+    .nfx-logo { font-size: 32px; margin-right: auto; height: 56px; display: flex; align-items: center; }
+    .nfx-hbtn--cast { display: flex; }
+    .nfx-header__right { gap: 20px; height: 56px; }
+    .nfx-avatar .material-icons { display: none; }
+    .nfx-avatar__img { width: 26px; height: 26px; }
+    html.nfx-at-home .nfx-chips {
+        display: flex; gap: 8px; width: 100%; padding: 2px 0 12px;
+    }
+    .nfx-chip {
+        color: #fff !important; text-decoration: none; font-size: 13px; font-weight: 500;
+        padding: 5px 12px; border: 1px solid rgba(255, 255, 255, .55); border-radius: 18px; white-space: nowrap;
+        background: rgba(0, 0, 0, .15);
+    }
+    .nfx-chip.is-active { background: #fff; color: #000 !important; }
+    html:not(.nfx-at-home) .nfx-header__back { display: flex; background: none; border: 0; color: #fff; padding: 0 12px 0 0; height: 56px; align-items: center; }
+    html:not(.nfx-at-home) .nfx-logo { display: none; }
+    html:not(.nfx-at-home) .nfx-header__right { margin-left: auto; }
+}
+
+/* ---------------- detail page ---------------- */
+#itemDetailPage .trackSelections,
+#itemDetailPage form.trackSelections,
+#itemDetailPage .itemExternalLinks,
+#itemDetailPage .itemMiscInfo .endsAt { display: none !important; }
+/* episode rows: Netflix shows no per-row action icons */
+#itemDetailPage .listItem .listViewUserDataButtons,
+#itemDetailPage .listItem .listItemButton:not(.itemAction[data-action="play"]) { display: none !important; }
+
+/* ---------------- library grids: posters only ---------------- */
+.libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .card:is(.portraitCard, .backdropCard) :is(.cardFooter, .cardBox > .cardText) { display: none !important; }
+.libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .card:is(.portraitCard, .backdropCard) .cardOverlayContainer { display: none !important; }
+.libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .cardBox-bottompadded { margin-bottom: .4vw !important; }
+.libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .cardBox { margin: .2vw !important; }
+.libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .cardScalable { border-radius: 4px; overflow: hidden; }
+html:has(#itemDetailPage:not(.hide)) .backdropContainer { display: none !important; }
+html:has(#itemDetailPage:not(.hide)) body { background: #141414; }
+
+/* ---------------- search ---------------- */
+#searchPage .searchResults, #searchPage .searchResults > div { display: flex; flex-direction: column; }
+#searchPage .verticalSection[data-nfx-kind="title"] { order: -1; }
+#searchPage .verticalSection[data-nfx-kind="noise"] { display: none !important; }
+#searchPage .searchFields input, #searchPage input[type="search"], #searchPage .searchfields-txtSearch {
+    background: #000 !important; border: 1px solid rgba(255, 255, 255, .7) !important; border-radius: 2px;
+    color: #fff; font-size: 16px; padding: .5em .8em;
+}
+
+/* ---------------- login ---------------- */
+#loginPage::before {
+    content: "BAXTERFLIX"; position: absolute; z-index: 5; top: 22px; left: 4%;
+    font-family: "NfxBrand", "Bebas Neue", Impact, sans-serif; font-size: 48px; line-height: 1;
+    color: var(--nfx-red); letter-spacing: .02em;
+}
+#loginPage .manualLoginForm h1, #loginPage .visualLoginForm h1 { font-size: 0 !important; }
+#loginPage .manualLoginForm h1::after { content: "Sign In"; font-size: 32px; font-weight: 700; }
+#loginPage .visualLoginForm h1::after { content: "Who's watching?"; font-size: 32px; font-weight: 500; }
+@media (max-width: 600px) { #loginPage::before { font-size: 34px; top: 14px; left: 16px; } }
+
+/* ---------------- My List ---------------- */
+html.nfx-mode-list #nfx-hero { display: none !important; }
+#nfx-home.nfx-list { margin-top: 0 !important; padding: calc(var(--nfx-header-h) + 2vw) var(--nfx-gutter-px) 6vw; }
+.nfx-list__title { font-size: clamp(22px, 2.4vw, 40px); font-weight: 500; color: #fff; margin: 0 0 1.4vw; }
+.nfx-list__grid { display: grid; grid-template-columns: repeat(var(--per), 1fr); gap: 4vw var(--gap); }
+.nfx-list__grid .nfx-card { width: auto !important; flex: none !important; }
+.nfx-list__empty { color: #808080; font-size: 18px; }
+#nfx-home[data-mode^="p"].nfx-list { padding: calc(var(--nfx-mobile-head, 100px) + 8px) 12px 40px; }
+#nfx-home[data-mode^="p"] .nfx-list__grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }

@@ -5,7 +5,7 @@
     'use strict';
 
     if (window.__NFX_VERSION__) return;
-    var VERSION = '1.0.0';
+    var VERSION = '2.0.0';
     window.__NFX_VERSION__ = VERSION;
 
     var doc = document;
@@ -119,7 +119,8 @@
                         GenreRowCount: typeof c.GenreRowCount === 'number' ? c.GenreRowCount : 4,
                         EnableHoverPreview: c.EnableHoverPreview !== false,
                         EnableHeroTrailer: c.EnableHeroTrailer === true,
-                        HomeCardShape: c.HomeCardShape || 'backdrop'
+                        HomeCardShape: c.HomeCardShape || 'backdrop',
+                        ExcludedLibraryIds: c.ExcludedLibraryIds || []
                     };
                     return state.cfg;
                 });
@@ -259,7 +260,11 @@
         newImg.className = 'nfx-hero__img';
         newImg.alt = '';
         newImg.decoding = 'async';
-        newImg.src = img(it.Id, 'Backdrop', it.BackdropTag, isMobile() ? 1000 : 1920);
+        var cardMode = isMobile() && !isTv();
+        hero.classList.toggle('nfx-hero--card', cardMode);
+        newImg.src = cardMode && it.PrimaryTag ? img(it.Id, 'Primary', it.PrimaryTag, 800)
+            : img(it.Id, 'Backdrop', it.BackdropTag, isMobile() ? 1000 : 1920);
+        hero.style.setProperty('--nfx-glow', cardMode ? 'url("' + newImg.src + '")' : 'none');
         if (imgEl) imgEl.replaceWith(newImg); else backdropHost.appendChild(newImg);
 
         var content = hero.querySelector('.nfx-hero__content');
@@ -616,6 +621,385 @@
 
     // ------------------------------------------------------------------ hover preview
 
+    // ------------------------------------------------------------------ own header
+    // Stock header is hidden (CSS, html.nfx-own-chrome). Ours links to the stock routes.
+
+    var BRAND = 'BAXTERFLIX';
+    var views = { list: null, promise: null };
+
+    function loadViews() {
+        if (views.list) return Promise.resolve(views.list);
+        if (!views.promise) {
+            views.promise = getJSON('UserViews', { userId: userId() }).then(function (r) {
+                views.list = (r && r.Items) || [];
+                return views.list;
+            }, function (e) { views.promise = null; throw e; });
+        }
+        return views.promise;
+    }
+
+    function excludedView(v) {
+        var ex = (state.cfg && state.cfg.ExcludedLibraryIds) || [];
+        var id = String(v.Id).replace(/-/g, '').toLowerCase();
+        if (ex.some(function (x) { return String(x).replace(/-/g, '').toLowerCase() === id; })) return true;
+        return !ex.length && /^demos?$/i.test(v.Name || '');
+    }
+
+    function mainView(type) {
+        var vs = (views.list || []).filter(function (v) { return v.CollectionType === type && !excludedView(v); });
+        return vs[0] || null;
+    }
+
+    function viewHash(v) {
+        if (!v) return '#/home';
+        var route = v.CollectionType === 'tvshows' ? 'tv' : v.CollectionType;
+        return '#/' + route + '?topParentId=' + v.Id + '&collectionType=' + v.CollectionType;
+    }
+
+    function navLinks() {
+        return [
+            ['home', 'Home', '#/home'],
+            ['shows', 'Shows', viewHash(mainView('tvshows'))],
+            ['movies', 'Movies', viewHash(mainView('movies'))],
+            ['new', 'New & Popular', '#/home?nfx=new'],
+            ['list', 'My List', '#/home?nfx=list']
+        ];
+    }
+
+    function activeNav() {
+        var h = location.hash || '';
+        if (/nfx=new/.test(h)) return 'new';
+        if (/nfx=list/.test(h)) return 'list';
+        var tv = mainView('tvshows'), mv = mainView('movies');
+        if (tv && h.indexOf(tv.Id) > -1) return 'shows';
+        if (mv && h.indexOf(mv.Id) > -1) return 'movies';
+        if (/^#\/(home)?(\?|$)/.test(h) || h === '' || h === '#/') return 'home';
+        return '';
+    }
+
+    function avatarUrl() {
+        var c = api();
+        var u = state.user;
+        if (u && u.PrimaryImageTag) return url('Users/' + u.Id + '/Images/Primary', { tag: u.PrimaryImageTag, maxWidth: 96 });
+        return '';
+    }
+
+    function ensureHeader() {
+        var h = doc.getElementById('nfx-header');
+        if (!h) {
+            h = doc.createElement('header');
+            h.id = 'nfx-header';
+            h.className = 'nfx-header';
+            h.innerHTML =
+                '<button type="button" class="nfx-header__back" aria-label="Back">' + icon('arrow_back') + '</button>' +
+                '<a class="nfx-logo" href="#/home" aria-label="Home">' + BRAND + '</a>' +
+                '<nav class="nfx-nav" aria-label="Browse"></nav>' +
+                '<div class="nfx-header__right">' +
+                '<a class="nfx-hbtn nfx-hbtn--search" href="#/search" aria-label="Search">' + icon('search') + '</a>' +
+                '<button type="button" class="nfx-hbtn nfx-hbtn--cast" aria-label="Cast">' + icon('cast') + '</button>' +
+                '<a class="nfx-avatar" href="#/mypreferencesmenu" aria-label="Profile"><span class="nfx-avatar__img"></span>' + icon('arrow_drop_down') + '</a>' +
+                '</div>' +
+                '<nav class="nfx-chips" aria-label="Categories"></nav>';
+            h.querySelector('.nfx-header__back').addEventListener('click', function () { history.back(); });
+            h.querySelector('.nfx-hbtn--cast').addEventListener('click', function () {
+                var b = doc.querySelector('.headerCastButton, button[aria-label="Cast to Device"]');
+                if (b) b.click();
+            });
+            doc.body.appendChild(h);
+        }
+        var links = navLinks();
+        var active = activeNav();
+        var nav = h.querySelector('.nfx-nav');
+        var navHtml = links.map(function (l) {
+            return '<a href="' + esc(l[2]) + '" class="nfx-nav__link' + (l[0] === active ? ' is-active' : '') + '">' + esc(l[1]) + '</a>';
+        }).join('');
+        if (nav.getAttribute('data-html') !== navHtml) { nav.innerHTML = navHtml; nav.setAttribute('data-html', navHtml); }
+        var chips = h.querySelector('.nfx-chips');
+        var chipHtml = links.slice(1, 4).map(function (l) {
+            return '<a href="' + esc(l[2]) + '" class="nfx-chip' + (l[0] === active ? ' is-active' : '') + '">' + esc(l[1]) + '</a>';
+        }).join('');
+        if (chips.getAttribute('data-html') !== chipHtml) { chips.innerHTML = chipHtml; chips.setAttribute('data-html', chipHtml); }
+        var av = h.querySelector('.nfx-avatar__img');
+        var src = avatarUrl();
+        av.style.backgroundImage = src ? 'url("' + src + '")' : '';
+        av.classList.toggle('is-default', !src);
+        av.textContent = src ? '' : ((state.user && state.user.Name) || '').charAt(0).toUpperCase();
+        root.classList.toggle('nfx-at-home', active === 'home' || active === 'new');
+        root.classList.toggle('nfx-mode-list', active === 'list');
+        return h;
+    }
+
+    function loadUser() {
+        var c = api();
+        if (state.user || state.userLoading || !c || !c.getCurrentUser) return;
+        state.userLoading = true;
+        c.getCurrentUser().then(function (u) { state.user = u; state.userLoading = false; ensureHeader(); },
+            function () { state.userLoading = false; });
+    }
+
+    // search: titles first, people after, music/studios hidden (Netflix only shows titles)
+    var SEARCH_KIND = { movies: 'title', shows: 'title', series: 'title', episodes: 'title', collections: 'title', 'live tv': 'title', programs: 'title',
+        people: 'people', studios: 'noise', artists: 'noise', albums: 'noise', songs: 'noise', 'music videos': 'noise', playlists: 'noise', books: 'noise', photos: 'noise', 'photo albums': 'noise', videos: 'noise' };
+    function tagSearch() {
+        var pg = doc.querySelector('#searchPage:not(.hide)');
+        if (!pg) return;
+        Array.prototype.forEach.call(pg.querySelectorAll('.verticalSection'), function (sec) {
+            var h = sec.querySelector('h2, .sectionTitle');
+            var k = SEARCH_KIND[((h && h.textContent) || '').trim().toLowerCase()] || 'title';
+            if (sec.getAttribute('data-nfx-kind') !== k) sec.setAttribute('data-nfx-kind', k);
+        });
+    }
+
+    // ------------------------------------------------------------------ own home
+    // The stock home sections are hidden (html.nfx-own-home) and replaced by #nfx-home.
+
+    var DTO_FIELDS = 'Overview,Genres,PrimaryImageAspectRatio,ProductionYear,OfficialRating,CommunityRating,RunTimeTicks';
+    var DTO_IMG = { EnableImageTypes: 'Primary,Backdrop,Thumb,Logo', ImageTypeLimit: 1 };
+
+    function withImg(p) { return Object.assign({ Fields: DTO_FIELDS, userId: userId() }, DTO_IMG, p); }
+
+    // one card model for both plugin feed items (NfxItem) and stock BaseItemDto
+    function card(it) {
+        var dto = !!it.ImageTags || !!it.BackdropImageTags;
+        var ep = it.Type === 'Episode';
+        var m = { id: it.Id, type: it.Type, name: ep && it.SeriesName ? it.SeriesName : it.Name, raw: it };
+        m.linkId = ep && it.SeriesId ? it.SeriesId : it.Id;
+        if (dto) {
+            var t = it.ImageTags || {};
+            m.thumb = t.Thumb ? img(it.Id, 'Thumb', t.Thumb, 640)
+                : (it.ParentThumbItemId && it.ParentThumbImageTag ? img(it.ParentThumbItemId, 'Thumb', it.ParentThumbImageTag, 640) : '');
+            m.backdrop = it.BackdropImageTags && it.BackdropImageTags.length ? img(it.Id, 'Backdrop', it.BackdropImageTags[0], 640)
+                : (it.ParentBackdropItemId && it.ParentBackdropImageTags && it.ParentBackdropImageTags.length ? img(it.ParentBackdropItemId, 'Backdrop', it.ParentBackdropImageTags[0], 640) : '');
+            m.logo = t.Logo ? img(it.Id, 'Logo', t.Logo, 400)
+                : (it.ParentLogoItemId && it.ParentLogoImageTag ? img(it.ParentLogoItemId, 'Logo', it.ParentLogoImageTag, 400) : '');
+            m.poster = ep ? (it.SeriesId && it.SeriesPrimaryImageTag ? img(it.SeriesId, 'Primary', it.SeriesPrimaryImageTag, 360) : '')
+                : (t.Primary ? img(it.Id, 'Primary', t.Primary, 360) : '');
+            m.still = ep && t.Primary ? img(it.Id, 'Primary', t.Primary, 640) : '';
+        } else {
+            m.thumb = it.ThumbTag ? img(it.Id, 'Thumb', it.ThumbTag, 640) : '';
+            m.backdrop = it.BackdropTag ? img(it.Id, 'Backdrop', it.BackdropTag, 640) : '';
+            m.logo = it.LogoTag ? img(it.Id, 'Logo', it.LogoTag, 400) : '';
+            m.poster = it.PrimaryTag ? img(it.Id, 'Primary', it.PrimaryTag, 360) : '';
+        }
+        var ud = it.UserData || {};
+        var pos = ud.PlaybackPositionTicks || it.PlayPositionTicks || 0;
+        m.pos = pos;
+        m.pct = pos && it.RunTimeTicks ? Math.max(3, Math.min(100, Math.round(pos / it.RunTimeTicks * 100))) : 0;
+        m.sub = ep ? 'S' + (it.ParentIndexNumber || 0) + ':E' + (it.IndexNumber || 0) : '';
+        state.items[it.Id] = it;
+        return m;
+    }
+
+    function landHtml(m) {
+        // Thumb art normally has the title baked in; a backdrop gets the logo on top, like Netflix
+        var src = m.thumb || m.backdrop || m.still || m.poster;
+        var overlay = !m.thumb && m.backdrop && m.logo ? '<img class="nfx-card__logo" alt="" loading="lazy" src="' + esc(m.logo) + '">' : '';
+        var name = (!m.thumb && !(m.backdrop && m.logo)) ? '<span class="nfx-card__name">' + esc(m.name) + '</span>' : '';
+        return '<div class="nfx-card__img' + (!m.thumb && !m.backdrop && m.poster ? ' is-poster' : '') + '">' +
+            (src ? '<img loading="lazy" decoding="async" alt="" src="' + esc(src) + '">' : '') + overlay + name + '</div>';
+    }
+
+    function posterHtml(m) {
+        var src = m.poster || m.thumb || m.backdrop;
+        return '<div class="nfx-card__img">' + (src ? '<img loading="lazy" decoding="async" alt="" src="' + esc(src) + '">' : '') +
+            (m.poster ? '' : '<span class="nfx-card__name">' + esc(m.name) + '</span>') + '</div>';
+    }
+
+    function tiles(list, opts) {
+        var ms = list.map(card);
+        if (!opts.poster && !opts.resume) {
+            var art = ms.filter(function (m) { return m.thumb || m.backdrop; });
+            if (art.length >= 6) ms = art;
+        }
+        return ms.map(function (m) { return tileHtml(m, opts); }).join('');
+    }
+
+    function tileHtml(m, opts) {
+        var poster = opts.poster;
+        var cls = 'card nfx-card ' + (poster ? 'nfx-card--poster' : 'nfx-card--land') + (opts.resume ? ' nfx-card--resume' : '');
+        return '<a class="' + cls + '" href="' + esc(detailsHash(m.linkId)) + '" data-id="' + esc(m.id) + '" data-type="' + esc(m.type) + '"' +
+            (opts.resume ? ' data-nfx-action="play" data-pos="' + m.pos + '"' : '') +
+            ' aria-label="' + esc(m.name + (m.sub ? ' ' + m.sub : '')) + '">' +
+            (poster ? posterHtml(m) : landHtml(m)) +
+            (opts.resume ? '<div class="nfx-card__progress"><i style="width:' + m.pct + '%"></i></div>' : '') +
+            '</a>';
+    }
+
+    function top10Html(m, rank) {
+        return '<a class="card nfx-card nfx-card--top10" href="' + esc(detailsHash(m.linkId)) + '" data-id="' + esc(m.id) + '" data-type="' + esc(m.type) + '"' +
+            ' aria-label="' + esc('#' + rank + ' ' + m.name) + '">' +
+            '<span class="nfx-rank" aria-hidden="true">' + rank + '</span>' +
+            '<div class="nfx-card__img"><img loading="lazy" decoding="async" alt="" src="' + esc(m.poster || m.thumb || m.backdrop) + '"></div></a>';
+    }
+
+    function ownRowHtml(key, title, inner) {
+        return '<section class="nfx-row" data-nfx-row="' + esc(key) + '">' +
+            '<h2 class="nfx-row__title">' + esc(title) + '</h2>' +
+            '<div class="nfx-row__wrap">' +
+            '<button type="button" class="nfx-row__arrow nfx-row__arrow--prev" tabindex="-1" aria-label="Previous">' + icon('chevron_left') + '</button>' +
+            '<div class="nfx-row__items itemsContainer focuscontainer-x">' + inner + '</div>' +
+            '<button type="button" class="nfx-row__arrow nfx-row__arrow--next" tabindex="-1" aria-label="Next">' + icon('chevron_right') + '</button>' +
+            '</div></section>';
+    }
+
+    function dedupe(list, key) {
+        var seen = {};
+        return list.filter(function (x) { var k = key(x); if (seen[k]) return false; seen[k] = true; return true; });
+    }
+
+    // Row specs, in Netflix order. Each returns a promise of { title, html } or null.
+    function homeRows() {
+        var cfg = state.cfg;
+        var poster = isMobile() && !isTv();
+        var name = (state.user && state.user.Name) || '';
+        var lib = function (type) { var v = mainView(type); return v ? v.Id : undefined; };
+        var rows = [];
+
+        rows.push(['continue', function () {
+            return Promise.all([
+                getJSON('UserItems/Resume', withImg({ Limit: 20, MediaTypes: 'Video' })).catch(function () { return { Items: [] }; }),
+                getJSON('Shows/NextUp', withImg({ Limit: 20, EnableResumable: false, EnableRewatching: false, DisableFirstEpisode: true })).catch(function () { return { Items: [] }; })
+            ]).then(function (r) {
+                var items = dedupe((r[0].Items || []).concat(r[1].Items || []), function (i) { return i.SeriesId || i.Id; })
+                    .filter(function (i) { return i.Type === 'Movie' || i.Type === 'Episode'; });
+                if (!items.length) return null;
+                return { title: 'Continue Watching' + (name ? ' for ' + name : ''), html: items.map(function (i) { return tileHtml(card(i), { poster: poster, resume: true }); }).join('') };
+            });
+        }]);
+
+        var top10 = function (type, title) {
+            return function () {
+                if (!cfg.EnableTop10) return Promise.resolve(null);
+                return feed('top10-' + type, 'NetflixUi/Top10', { type: type }).then(function (list) {
+                    if (!list || list.length < 3) return null;
+                    return { title: title, cls: 'nfx-row--top10', html: list.map(function (it, i) { return top10Html(card(it), it.Rank || i + 1); }).join('') };
+                });
+            };
+        };
+        rows.push(['top10-series', top10('Series', 'Top 10 Shows Today')]);
+
+        rows.push(['mylist', function () {
+            return getJSON('Items', withImg({ Recursive: true, Filters: 'IsFavorite', IncludeItemTypes: 'Movie,Series', SortBy: 'DateLastContentAdded,DateCreated', SortOrder: 'Descending', Limit: 30 }))
+                .then(function (r) {
+                    var items = (r.Items || []);
+                    if (!items.length) return null;
+                    return { title: 'My List', html: tiles(items, { poster: poster }) };
+                });
+        }]);
+
+        rows.push(['new', function () {
+            var q = function (type, parent) {
+                if (!parent) return Promise.resolve({ Items: [] });
+                return getJSON('Items', withImg({ Recursive: true, ParentId: parent, IncludeItemTypes: type, SortBy: type === 'Series' ? 'DateLastContentAdded' : 'DateCreated', SortOrder: 'Descending', Limit: 15, HasPrimaryImage: true }))
+                    .catch(function () { return { Items: [] }; });
+            };
+            return Promise.all([q('Movie', lib('movies')), q('Series', lib('tvshows'))]).then(function (r) {
+                var a = r[0].Items || [], b = r[1].Items || [], out = [];
+                for (var i = 0; i < Math.max(a.length, b.length); i++) { if (a[i]) out.push(a[i]); if (b[i]) out.push(b[i]); }
+                if (!out.length) return null;
+                return { title: 'New on ' + BRAND.charAt(0) + BRAND.slice(1).toLowerCase(), html: tiles(out, { poster: poster }) };
+            });
+        }]);
+
+        rows.push(['top10-movie', top10('Movie', 'Top 10 Movies Today')]);
+
+        rows.push(['genres', function () {
+            if (!(cfg.GenreRowCount > 0)) return Promise.resolve(null);
+            return feed('genres', 'NetflixUi/GenreRows', { count: cfg.GenreRowCount }).then(function (list) {
+                if (!Array.isArray(list) || !list.length) return null;
+                return {
+                    multi: list.map(function (r) {
+                        return { key: 'genre-' + r.Slug, title: r.Genre, html: tiles(r.Items, { poster: poster }) };
+                    })
+                };
+            });
+        }]);
+        return rows;
+    }
+
+    function wireRow(sec) {
+        var items = sec.querySelector('.nfx-row__items');
+        var step = function (dir) {
+            items.scrollBy({ left: dir * (items.clientWidth - 40), behavior: reducedMotion() ? 'auto' : 'smooth' });
+        };
+        sec.querySelector('.nfx-row__arrow--prev').addEventListener('click', function () { step(-1); });
+        sec.querySelector('.nfx-row__arrow--next').addEventListener('click', function () { step(1); });
+        var edges = function () {
+            sec.classList.toggle('at-start', items.scrollLeft < 8);
+            sec.classList.toggle('at-end', items.scrollLeft + items.clientWidth > items.scrollWidth - 8);
+        };
+        items.addEventListener('scroll', edges, { passive: true });
+        if (items.pause === undefined) { items.pause = function () { }; items.resume = function () { return Promise.resolve(); }; }
+        setTimeout(edges, 0);
+    }
+
+    function renderMyList(home) {
+        home.classList.add('nfx-list');
+        home.innerHTML = '<h1 class="nfx-list__title">My List</h1><div class="nfx-list__grid"></div>';
+        getJSON('Items', withImg({ Recursive: true, Filters: 'IsFavorite', IncludeItemTypes: 'Movie,Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 200 }))
+            .then(safe('mylist', function (r) {
+                var items = (r && r.Items) || [];
+                var grid = home.querySelector('.nfx-list__grid');
+                if (!items.length) {
+                    grid.outerHTML = '<p class="nfx-list__empty">You haven\'t added any titles to your list yet.</p>';
+                    return;
+                }
+                grid.innerHTML = items.map(function (i) { return tileHtml(card(i), { poster: isMobile() && !isTv() }); }).join('');
+            }), function (e) { warn('mylist', e); });
+    }
+
+    function ensureHome(tab) {
+        var home = tab.querySelector('#nfx-home');
+        var listMode = /nfx=list/.test(location.hash);
+        var mode = (isMobile() && !isTv() ? 'p' : 'l') + (/nfx=new/.test(location.hash) ? 'n' : '') + (listMode ? 'm' : '');
+        if (home && home.getAttribute('data-mode') === mode && home.getAttribute('data-user') === userId()) return;
+        if (home) home.remove();
+        home = doc.createElement('div');
+        home.id = 'nfx-home';
+        home.setAttribute('data-mode', mode);
+        home.setAttribute('data-user', userId());
+        // after the (hidden) stock sections: the hero is inserted before those, so it stays on top
+        var stock = tab.querySelector('.homeSectionsContainer');
+        tab.insertBefore(home, stock ? stock.nextSibling : null);
+        root.classList.add('nfx-own-home');
+
+        if (listMode) { renderMyList(home); return; }
+        var specs = homeRows();
+        if (/nfx=new/.test(location.hash)) {
+            // New & Popular: new first, then the Top 10s
+            var order = ['new', 'top10-series', 'top10-movie'];
+            specs = order.map(function (k) { return specs.filter(function (s) { return s[0] === k; })[0]; }).filter(Boolean);
+        }
+        // placeholders keep the order stable while feeds resolve at different speeds
+        specs.forEach(function (s) {
+            var slot = doc.createElement('div');
+            slot.className = 'nfx-slot';
+            slot.setAttribute('data-slot', s[0]);
+            home.appendChild(slot);
+            Promise.resolve().then(s[1]).then(safe('row ' + s[0], function (r) {
+                if (!r || !slot.isConnected) { slot.remove(); return; }
+                var list = r.multi || [{ key: s[0], title: r.title, html: r.html, cls: r.cls }];
+                var w = doc.createElement('div');
+                w.innerHTML = list.map(function (x) { return ownRowHtml(x.key, x.title, x.html); }).join('');
+                var secs = Array.prototype.slice.call(w.children);
+                secs.forEach(function (sec, i) {
+                    if (list[i].cls) sec.classList.add(list[i].cls);
+                    wireRow(sec);
+                });
+                secs.forEach(function (sec) { slot.parentNode.insertBefore(sec, slot); });
+                slot.remove();
+            }), function (e) { slot.remove(); warn('row ' + s[0], e); });
+        });
+
+        home.addEventListener('click', safe('homeClick', function (e) {
+            var a = e.target.closest && e.target.closest('a.nfx-card[data-nfx-action="play"]');
+            if (!a) return;
+            e.preventDefault();
+            var it = state.items[a.getAttribute('data-id')] || {};
+            play(it.Id, it.Type, parseInt(a.getAttribute('data-pos'), 10) || 0, a.getAttribute('data-id'));
+        }));
+    }
+
     function previewEl() {
         var p = state.preview.el;
         if (p && p.isConnected) return p;
@@ -780,7 +1164,7 @@
         if (!target || !target.closest) return null;
         var card = target.closest('.card[data-id]');
         if (!card) return null;
-        if (!card.closest('.homeSectionsContainer, #homeTab')) return null;
+        if (!card.closest('.homeSectionsContainer, #homeTab, #nfx-home')) return null;
         // library tiles (My Media) and folders: Play would queue a whole library
         if (/^(CollectionFolder|UserView|Folder|Channel|Playlist)$/.test(card.getAttribute('data-type') || '')) return null;
         if (card.closest('.section0')) return null;
@@ -903,19 +1287,23 @@
         state.scanQueued = false;
         root.classList.toggle('nfx-modern', !!doc.querySelector('.MuiAppBar-root'));
         root.classList.toggle('nfx-legacy', !doc.querySelector('.MuiAppBar-root'));
-        if (onDashboard()) { closePreview(); return; }
+        if (onDashboard()) { closePreview(); root.classList.remove('nfx-own-chrome', 'nfx-own-home'); return; }
         if (!api() || !userId()) return;
+        root.classList.add('nfx-own-chrome');
+        loadUser();
+        loadConfig().then(function () { return loadViews().catch(function () { return []; }); }).then(safe('header', ensureHeader));
         ensureDetailBackdrop();
+        tagSearch();
         var tab = activeHomeTab();
-        if (!tab) { root.classList.remove('nfx-on-home'); return; }
+        if (!tab) { root.classList.remove('nfx-on-home', 'nfx-own-home'); return; }
         var container = tab.querySelector('.homeSectionsContainer');
         if (!container) return;
         root.classList.add('nfx-on-home');
         bridge();
-        loadConfig().then(safe('home', function () {
+        loadConfig().then(function () { return loadViews().catch(function () { return []; }); }).then(safe('home', function () {
+            ensureHeader();
             ensureHero(tab, container);
-            ensureRows(container);
-            backdropify(container);
+            ensureHome(tab);
         }));
     }
 

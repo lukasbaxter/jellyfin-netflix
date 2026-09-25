@@ -154,6 +154,12 @@ async function run(vpName, items, pages) {
     if (vp.layout) {
         await ctx.addInitScript((l) => { try { localStorage.setItem('layout', l); } catch { /* ignore */ } }, vp.layout);
     }
+    // NFX_LOCAL=1: serve the theme css + plugin js from this checkout instead of the installed
+    // plugin, so a design pass needs no plugin rebuild.
+    if (process.env.NFX_LOCAL) {
+        await ctx.route(/\/NetflixUi\/netflix\.css/, r => r.fulfill({ contentType: 'text/css', body: fs.readFileSync(path.join(root, 'theme/dist/netflix.css')) }));
+        await ctx.route(/\/NetflixUi\/netflix\.js/, r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(path.join(root, 'plugin/web/netflix.js')) }));
+    }
     const page = await ctx.newPage();
     try {
         await runPages(page, vp, vpName, items, pages);
@@ -200,7 +206,7 @@ async function runPages(page, vp, vpName, items, pages) {
         await scrollTo(page, 0);
         if (vpName === 'desktop' || vpName === 'legacy') {
             // a real hover on a content card (not a My Media tile), with mouse movement
-            const card = page.locator('.homeSectionsContainer .verticalSection:not(.section0) .card[data-id]').nth(2);
+            const card = page.locator('#nfx-home .nfx-row[data-nfx-row^="genre-"] .nfx-card').nth(2);
             if (await card.count()) {
                 try {
                     await page.evaluate(() => document.querySelectorAll('.nfx-preview.is-open').forEach((p) => p.classList.remove('is-open')));
