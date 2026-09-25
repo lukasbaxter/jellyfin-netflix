@@ -170,7 +170,8 @@ html.layout-tv .nfx-card--top10 .nfx-rank {
     transform: scale(.66);
     transform-origin: center center;
     pointer-events: none;
-    transition: opacity .2s var(--nfx-ease), transform .25s var(--nfx-ease);
+    will-change: transform, opacity;
+    transition: opacity .15s var(--nfx-ease), transform .2s var(--nfx-ease);
 }
 
 .nfx-preview.is-open {

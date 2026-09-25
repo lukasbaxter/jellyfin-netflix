@@ -12,7 +12,7 @@
     var root = doc.documentElement;
     var CACHE_MS = 5 * 60 * 1000;
     var HERO_ROTATE_MS = 9000;
-    var PREVIEW_DELAY_MS = 600;
+    var PREVIEW_DELAY_MS = 380;
 
     var state = {
         cfg: null,
@@ -793,11 +793,13 @@
         if (chips.getAttribute('data-html') !== chipHtml) { chips.innerHTML = chipHtml; chips.setAttribute('data-html', chipHtml); }
         var av = h.querySelector('.nfx-avatar__img');
         var src = avatarUrl();
-        av.style.backgroundImage = src ? 'url("' + src + '")' : '';
-        av.classList.toggle('is-default', !src);
-        av.textContent = src ? '' : ((state.user && state.user.Name) || '').charAt(0).toUpperCase();
-        root.classList.toggle('nfx-at-home', active === 'home' || active === 'new');
-        root.classList.toggle('nfx-mode-list', active === 'list');
+        var bg = src ? 'url("' + src + '")' : '';
+        var letter = src ? '' : ((state.user && state.user.Name) || '').charAt(0).toUpperCase();
+        if (av.style.backgroundImage !== bg) av.style.backgroundImage = bg;
+        if (av.classList.contains('is-default') !== !src) av.classList.toggle('is-default', !src);
+        if (av.textContent !== letter) av.textContent = letter;
+        setRootClass('nfx-at-home', active === 'home' || active === 'new');
+        setRootClass('nfx-mode-list', active === 'list');
         return h;
     }
 
@@ -1267,7 +1269,7 @@
         var src = m.thumb || m.backdrop || m.still || m.poster;
         var overlay = !m.thumb && m.backdrop && m.logo ? '<img class="nfx-card__logo" alt="" loading="lazy" src="' + esc(m.logo) + '">' : '';
         var name = (!m.thumb && !(m.backdrop && m.logo)) ? '<span class="nfx-card__name">' + esc(m.name) + '</span>' : '';
-        return '<div class="nfx-card__img' + (!m.thumb && !m.backdrop && m.poster ? ' is-poster' : '') + '">' +
+        return '<div class="nfx-card__img' + (!m.thumb && !m.backdrop && m.poster ? ' is-poster' : '') + (overlay ? ' has-logo' : '') + '">' +
             (src ? '<img loading="lazy" decoding="async" alt="" src="' + esc(src) + '">' : '') + overlay + name + '</div>';
     }
 
@@ -1772,14 +1774,32 @@
         return tab;
     }
 
+    function setRootClass(c, on) {
+        if (root.classList.contains(c) !== !!on) root.classList.toggle(c, !!on);
+    }
+
+    // Page-state flags on <html>. The CSS keys off these instead of html:has(#page:not(.hide)),
+    // which Chrome re-evaluates on every DOM change anywhere in the document.
+    function pageFlags() {
+        var on = function (sel) { return !!doc.querySelector(sel); };
+        setRootClass('nfx-pg-osd', on('#videoOsdPage:not(.hide)'));
+        setRootClass('nfx-pg-detail', on('#itemDetailPage:not(.hide)'));
+        setRootClass('nfx-pg-search', on('#searchPage:not(.hide)'));
+        setRootClass('nfx-pg-login', on('#loginPage:not(.hide)'));
+        setRootClass('nfx-pg-solid', on('.page:not(.hide):is(#searchPage, .type-interior, #myPreferencesMenuPage, #displayPreferencesPage, .libraryPage:not(.homePage):not(.itemDetailPage))'));
+        setRootClass('nfx-dash', !!(doc.body && doc.body.classList.contains('dashboardDocument')));
+        setRootClass('nfx-stock-backdrop', on('.backdropContainer .backdropImage'));
+    }
+
     function scan() {
         state.scanQueued = false;
-        root.classList.toggle('nfx-modern', !!doc.querySelector('.MuiAppBar-root'));
-        root.classList.toggle('nfx-legacy', !doc.querySelector('.MuiAppBar-root'));
+        pageFlags();
+        setRootClass('nfx-modern', !!doc.querySelector('.MuiAppBar-root'));
+        setRootClass('nfx-legacy', !doc.querySelector('.MuiAppBar-root'));
         if (onDashboard()) { closePreview(); root.classList.remove('nfx-own-chrome', 'nfx-own-home'); return; }
         if (/#\/login/.test(location.hash)) { ssSet(GATE_KEY, '1'); root.classList.remove('nfx-gate-pending'); }
         if (!api() || !userId()) return;
-        root.classList.add('nfx-own-chrome');
+        setRootClass('nfx-own-chrome', true);
         loadUser();
         loadConfig().then(function () { return loadViews().catch(function () { return []; }); }).then(safe('header', ensureHeader));
         ensureDetailBackdrop();
@@ -1816,10 +1836,18 @@
             root.classList.add('nfx-gate-pending');
             setTimeout(function () { root.classList.remove('nfx-gate-pending'); }, 4000); // never strand a black screen
         }
+        var OWN = '#nfx-header, #nfx-home, #nfx-hero, .nfx-preview, #nfx-modal, #nfx-gate, #nfx-bridge';
         new MutationObserver(function (muts) {
             if (state.scanQueued || osdOpen()) return; // the OSD clock mutates constantly
             for (var i = 0; i < muts.length; i++) {
-                if (muts[i].addedNodes.length) { queueScan(); return; }
+                var t = muts[i].target;
+                if (!muts[i].addedNodes.length) continue;
+                // our own rendering must never trigger a rescan (that was a 16/s idle loop)
+                if (t.nodeType === 1 && t.closest && t.closest(OWN)) continue;
+                var a = muts[i].addedNodes[0];
+                if (a && a.nodeType === 1 && a.matches && a.matches(OWN)) continue;
+                queueScan();
+                return;
             }
         }).observe(doc.body, { childList: true, subtree: true });
         doc.addEventListener('viewshow', safe('viewshow', onNavigate), true);

@@ -34,7 +34,7 @@ html.nfx-scrolled body:not(.dashboardDocument) .skinHeader {
 }
 
 /* Pages that are not home/detail have content right under the bar, keep those solid */
-body:not(.dashboardDocument):has(.page:not(.hide):is(#searchPage, .type-interior, #myPreferencesMenuPage, #displayPreferencesPage, .libraryPage:not(.homePage, .itemDetailPage))) .MuiAppBar-root {
+html.nfx-pg-solid:not(.nfx-dash) .MuiAppBar-root {
     background-color: var(--nfx-bg) !important;
     animation: none;
 }

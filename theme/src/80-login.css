@@ -8,14 +8,14 @@
 }
 
 /* when the splash screen collage is on, let it show through a vignette */
-body:has(#loginPage:not(.hide)) .backdropContainer ~ .backgroundContainer.withBackdrop,
-body:has(#loginPage:not(.hide)) .backgroundContainer.withBackdrop {
+html.nfx-pg-login body .backdropContainer ~ .backgroundContainer.withBackdrop,
+html.nfx-pg-login body .backgroundContainer.withBackdrop {
     background: linear-gradient(180deg, rgba(0, 0, 0, .8) 0%, rgba(0, 0, 0, .35) 40%, rgba(0, 0, 0, .8) 100%) !important;
     opacity: 1;
 }
 
-body:has(#loginPage:not(.hide)) .backdropContainer:not(:empty) ~ * #loginPage,
-body:has(.backdropContainer .backdropImage) #loginPage {
+html.nfx-pg-login body .backdropContainer:not(:empty) ~ * #loginPage,
+html.nfx-stock-backdrop #loginPage {
     background: none;
 }
 
@@ -197,7 +197,7 @@ body:has(.backdropContainer .backdropImage) #loginPage {
 }
 
 @media (max-width: 600px) {
-    body:has(#loginPage:not(.hide)) .backgroundContainer.withBackdrop {
+    html.nfx-pg-login body .backgroundContainer.withBackdrop {
         background: linear-gradient(180deg, rgba(0, 0, 0, .75) 0%, rgba(0, 0, 0, .7) 100%) !important;
     }
 

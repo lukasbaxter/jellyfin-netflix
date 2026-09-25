@@ -17,7 +17,7 @@
 
 /* With backdrops on, the art is the fixed full-screen .backdropContainer and #itemBackdrop
    stays empty. Either way #itemBackdrop is the frame and carries the gradients. */
-body:has(#itemDetailPage:not(.hide)) .backgroundContainer.withBackdrop {
+html.nfx-pg-detail body .backgroundContainer.withBackdrop {
     background-color: transparent !important;
     opacity: 1;
 }
@@ -45,7 +45,7 @@ body:has(#itemDetailPage:not(.hide)) .backgroundContainer.withBackdrop {
 }
 
 /* No art at all (narrow desktop window, backdrops off): shrink the frame to fit the logo */
-body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not(:has(.itemBackdrop[style*="background-image"])) {
+html:not(.nfx-stock-backdrop) #itemDetailPage:not(.hide):not(:has(.itemBackdrop[style*="background-image"])) {
     --nfx-detail-h: calc(var(--nfx-header-h) + 30vw);
 }
 

@@ -3,17 +3,17 @@
 /* stock chrome off while the plugin draws its own */
 /* modern (12) layout: the app bar's first toolbar is the nav we replace; the rest (library
    title, sort/filter, tabs) stays, docked under our header */
-html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .MuiAppBar-root {
+html.nfx-own-chrome:not(.nfx-pg-osd) body:not(.dashboardDocument) .MuiAppBar-root {
     top: var(--nfx-header-h) !important;
     background: #141414 !important; box-shadow: none !important;
 }
-html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .MuiAppBar-root > .MuiToolbar-root:first-child { display: none !important; }
+html.nfx-own-chrome:not(.nfx-pg-osd) body:not(.dashboardDocument) .MuiAppBar-root > .MuiToolbar-root:first-child { display: none !important; }
 html.nfx-own-chrome.nfx-at-home body:not(.dashboardDocument) .MuiAppBar-root,
-html.nfx-own-chrome body:not(.dashboardDocument):has(#itemDetailPage:not(.hide)) .MuiAppBar-root,
-html.nfx-own-chrome body:not(.dashboardDocument):has(#searchPage:not(.hide)) .MuiAppBar-root { display: none !important; }
+html.nfx-own-chrome.nfx-pg-detail body:not(.dashboardDocument) .MuiAppBar-root,
+html.nfx-own-chrome.nfx-pg-search body:not(.dashboardDocument) .MuiAppBar-root { display: none !important; }
 /* legacy/TV layout: .skinHeader holds the nav and the page tabs; hide only its top bar */
-html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .skinHeader { top: var(--nfx-header-h) !important; background: #141414 !important; }
-html.nfx-own-chrome:not(:has(#videoOsdPage:not(.hide))) body:not(.dashboardDocument) .skinHeader .headerTop { display: none !important; }
+html.nfx-own-chrome:not(.nfx-pg-osd) body:not(.dashboardDocument) .skinHeader { top: var(--nfx-header-h) !important; background: #141414 !important; }
+html.nfx-own-chrome:not(.nfx-pg-osd) body:not(.dashboardDocument) .skinHeader .headerTop { display: none !important; }
 html.nfx-own-chrome body:not(.dashboardDocument) .skinHeader .headerTabs {
     position: static !important; margin: 0 !important; transform: none !important; top: auto !important;
     padding: 0 var(--nfx-gutter-px);
@@ -24,13 +24,13 @@ html.nfx-own-chrome:not(.nfx-modern) body:not(.dashboardDocument) .page.libraryP
     margin-top: 0; padding-top: calc(var(--nfx-header-h) + 58px) !important;
 }
 html.nfx-own-chrome.nfx-at-home body:not(.dashboardDocument) .skinHeader,
-html.nfx-own-chrome body:not(.dashboardDocument):has(#itemDetailPage:not(.hide)) .skinHeader { display: none !important; }
+html.nfx-own-chrome.nfx-pg-detail body:not(.dashboardDocument) .skinHeader { display: none !important; }
 html.nfx-own-chrome body:not(.dashboardDocument) .page:is(.libraryPage, #searchPage, .type-interior):not(.itemDetailPage):not(.homePage) { margin-top: var(--nfx-header-h); }
 /* detail: backdrop runs under a transparent header, like the Netflix title page */
-html.nfx-own-chrome:has(#itemDetailPage:not(.hide)):not(.nfx-scrolled) #nfx-header { background-color: transparent; }
+html.nfx-own-chrome.nfx-pg-detail:not(.nfx-scrolled) #nfx-header { background-color: transparent; }
 html.nfx-own-home #homeTab .homeSectionsContainer { display: none !important; }
 body.dashboardDocument #nfx-header, html:not(.nfx-own-chrome) #nfx-header { display: none; }
-html:has(#videoOsdPage:not(.hide)) #nfx-header { display: none; }
+html.nfx-pg-osd #nfx-header { display: none; }
 
 /* ---------------- header ---------------- */
 #nfx-header {
@@ -120,9 +120,8 @@ html.nfx-has-hero #nfx-home { margin-top: calc(-1 * max(90px, 9vw)); }
 #nfx-home .nfx-card__logo {
     position: absolute; left: 8%; bottom: 10%; max-width: 55%; max-height: 38%;
     object-fit: contain; object-position: left bottom;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .8));
 }
-#nfx-home .nfx-card__img:has(.nfx-card__logo)::after {
+#nfx-home .nfx-card__img.has-logo::after {
     content: ""; position: absolute; inset: 0;
     background: linear-gradient(20deg, rgba(0, 0, 0, .55), transparent 55%);
 }
@@ -255,8 +254,8 @@ html { --nfx-mobile-head: 100px; }
 .libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .cardBox-bottompadded { margin-bottom: .4vw !important; }
 .libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .cardBox { margin: .2vw !important; }
 .libraryPage:not(.itemDetailPage) .itemsContainer.vertical-wrap .cardScalable { border-radius: 4px; overflow: hidden; }
-html:has(#itemDetailPage:not(.hide)) .backdropContainer { display: none !important; }
-html:has(#itemDetailPage:not(.hide)) body { background: #141414; }
+html.nfx-pg-detail .backdropContainer { display: none !important; }
+html.nfx-pg-detail body { background: #141414; }
 
 /* ---------------- search ---------------- */
 #searchPage .searchResults, #searchPage .searchResults > div { display: flex; flex-direction: column; }
@@ -323,7 +322,7 @@ html.nfx-own-home #nfx-hero:not(.nfx-hero--card) { margin-top: 0 !important; }
 html.layout-tv.nfx-has-hero #nfx-home { margin-top: -2vw; }
 
 /* login: no stock header (it showed the server name and pushed everything down); card centred */
-body:has(#loginPage:not(.hide)) :is(.MuiAppBar-root, .skinHeader) { display: none !important; }
+html.nfx-pg-login body :is(.MuiAppBar-root, .skinHeader) { display: none !important; }
 #loginPage:not(.hide) { padding-top: 0 !important; justify-content: safe center; }
 #loginPage .manualLoginForm { margin-top: 0 !important; }
 #loginPage > .padded-left { padding-top: 90px; padding-bottom: 90px !important; }

@@ -22,7 +22,7 @@
 }
 
 /* jellyfin 12 theme variables. Not applied on the dashboard (the plugin <link> loads there too). */
-:root:not(:has(body.dashboardDocument)) {
+:root:not(.nfx-dash) {
     --jf-palette-background-default: var(--nfx-bg);
     --jf-palette-background-paper: #181818;
     --jf-palette-background-defaultImage: none;
