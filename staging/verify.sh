@@ -16,6 +16,9 @@ bad()  { echo "FAIL  $*"; fails=$((fails+1)); }
 code() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
 j()    { python3 -c "import json,sys;d=json.load(sys.stdin);print($1)"; }
 
+# 0. wait until the server answers authenticated calls (it may be mid-restart)
+for i in $(seq 1 60); do [ "$(code -H "$AUTH" "$U/System/Info")" = 200 ] && break; sleep 5; done
+
 # 1. version
 v=$(curl -s "$U/System/Info/Public" | j "d['Version']")
 [ "$v" = "${JF_VERSION:-12.1.0}" ] && ok "version $v" || bad "version is '$v'"
@@ -35,13 +38,26 @@ ATOK=$(login "$STAGING_ADMIN_USER" "$STAGING_ADMIN_PASS" | j "d['AccessToken']" 
 VAUTH="Authorization: MediaBrowser Token=\"$VTOK\""
 
 # 3. counts vs prod (within 1%)
-cnt() { curl -s -H "Authorization: MediaBrowser Token=\"$2\"" "$1/Items?IncludeItemTypes=$3&Recursive=true&Limit=0" | j "d['TotalRecordCount']"; }
+# The 12.x migration deletes items whose files are gone (prod still lists them), so for
+# Movie/Series/Episode the baseline is "prod items whose file still exists" (checked read-only over ssh).
+# Staging counts use the admin user's view (a bare API key without userId collapses box sets).
+AUID=$(curl -s -H "$AUTH" "$U/Users" | python3 -c "import json,sys;print([u['Id'] for u in json.load(sys.stdin) if u['Name']=='$STAGING_ADMIN_USER'][0])")
+cnt() { curl -s -H "Authorization: MediaBrowser Token=\"$2\"" "$1/Items?IncludeItemTypes=$3&Recursive=true&Limit=0${4:-}" | j "d['TotalRecordCount']" 2>/dev/null || echo -1; }
+prod_existing() {
+  ssh server "sudo sqlite3 -readonly /home/admin/services/jellyfin/config/data/jellyfin.db \"select Path from BaseItems where Type='$1'\" | sed 's#^/media/#/mnt/unas/#' | while IFS= read -r f; do [ -e \"\$f\" ] && echo; done | wc -l"
+}
 if [ -n "${PROD_API_KEY:-}" ]; then
   for t in Movie Series Episode MusicAlbum Audio BoxSet Playlist; do
-    s=$(cnt "$U" "$K" $t); p=$(cnt "$P" "$PROD_API_KEY" $t)
-    if python3 -c "import sys;s,p=$s,$p;sys.exit(0 if p==0 and s==0 or abs(s-p)/max(p,1)<=0.01 else 1)"; then
-      ok "count $t staging=$s prod=$p"
-    else bad "count $t staging=$s prod=$p"; fi
+    uq="&userId=$AUID"; case $t in BoxSet|Playlist) uq="";; esac   # playlists are per user, count them server-wide
+    s=$(cnt "$U" "$K" $t "$uq"); p=$(cnt "$P" "$PROD_API_KEY" $t); base=$p; note=""
+    case $t in
+      Movie)   base=$(prod_existing MediaBrowser.Controller.Entities.Movies.Movie); note=" prod-on-disk=$base";;
+      Series)  base=$(prod_existing MediaBrowser.Controller.Entities.TV.Series); note=" prod-on-disk=$base";;
+      Episode) base=$(prod_existing MediaBrowser.Controller.Entities.TV.Episode); note=" prod-on-disk=$base";;
+    esac
+    if python3 -c "import sys;s,p=$s,$base;sys.exit(0 if s>=0 and (p==s or abs(s-p)/max(p,1)<=0.01) else 1)"; then
+      ok "count $t staging=$s prod=$p$note"
+    else bad "count $t staging=$s prod=$p$note"; fi
   done
 else
   echo "SKIP  prod count comparison (set PROD_API_KEY)"

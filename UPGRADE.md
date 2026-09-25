@@ -31,7 +31,7 @@ jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b6
 
 1. **encoding.xml gets wiped.** Prod has `<EncoderPreset xsi:nil="true" />`. 12.1 cannot parse that, logs `Error loading configuration file: /config/config/encoding.xml`, and rewrites the file with defaults. That silently turns off NVENC, tonemapping, HEVC/AV1 encoding and the hw decode codec list. Fix it before first start (step 6). With the fix, staging kept `nvenc` and all 8 decode codecs.
 2. **The migration deletes items whose files are missing.** `MigrateLinkedChildren` checks every item path (182k items). On staging it removed 1685 stale items (files really gone, for example The Wire S04). If `/mnt/unas` or `/mnt/wd_nvme1/music` is unmounted or wedged at that moment, it would treat the whole library as missing and wipe watch history. The UNAS pre-check below is not optional.
-3. **Playlists:** prod lists 196, staging 180 after migration. The 16 missing are auto-made music playlists from `.m3u` files in album folders (Mahler discs, T-Square, etc). See the scan notes at the bottom for whether the full scan brings them back.
+3. **Playlists and counts drop until the scan runs.** Right after the migration staging showed 180 playlists (prod 196). The missing ones were music playlists made from `.m3u` files in album folders. The full scan brought them back (196). Movies / Series / Episodes drop for good: 1516 to 1260, 284 to 195, 13436 to 12628. That is exactly the number of prod items whose file still exists on disk (checked one by one), so nothing real is lost. Expect the same on prod.
 4. Streaming Collections 1.0.1.0 targets 10.11. It has to be rebuilt for net10/12 (release step 1 in the plan) before it can go back on.
 
 ## Measured on staging
@@ -229,8 +229,8 @@ Then play a 4K HDR file in a browser with a forced low bitrate and check the Das
 
 - [ ] `/System/Info/Public` says 12.1.0
 - [ ] web login works (a normal user, not only admin)
-- [ ] Movies / Shows / Episodes / Albums / Songs counts within 1% of the numbers taken before stop
-- [ ] Collections 242, playlists close to 196 (see finding 3)
+- [ ] Albums / Songs within 1% of before. Movies / Series / Episodes match "items whose file exists" (finding 3), roughly 1260 / 195 / 12628
+- [ ] Collections 242, playlists about 196 after the scan
 - [ ] a movie and an episode play, one direct and one transcoded on NVENC
 - [ ] resume points and watched state look right for a couple of users
 - [ ] all plugins Active
