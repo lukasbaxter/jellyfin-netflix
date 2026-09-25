@@ -39,8 +39,13 @@ public class FeedService
     // one running build per kind; concurrent callers share it instead of starting their own
     private readonly Dictionary<BaseItemKind, Task<List<Guid>>> _top10Builds = new();
 
-    // per user feed cache: (user|feed|args|day) -> (built, value)
+    // per user feed cache: (user|feed|args) -> (built, value). Stale while revalidate, see Cached.
     private readonly ConcurrentDictionary<string, (DateTime Built, object Value)> _feedCache = new();
+
+    // one running build per feed key; a cold caller and the background refresh share it
+    private readonly ConcurrentDictionary<string, Lazy<Task<object>>> _feedBuilds = new();
+
+    private static readonly TimeSpan FeedKeepTime = TimeSpan.FromDays(8);
 
     private (DateTime Built, string[] Paths)? _excludedPathCache;
 
@@ -294,6 +299,8 @@ public class FeedService
         var cutoff = DateTime.UtcNow.AddDays(-30);
         var recentScore = new Dictionary<Guid, double>();
         var allTimeScore = new Dictionary<Guid, double>();
+        var people = new Dictionary<Guid, int>();
+        int minPeople = Math.Max(1, Plugin.Instance?.Configuration.Top10MinDistinctUsers ?? 2);
         var sourceKind = kind == BaseItemKind.Series ? BaseItemKind.Episode : kind;
 
         try
@@ -319,6 +326,7 @@ public class FeedService
 
                 var batch = _userDataManager.GetUserDataBatch(played, u);
                 var counted = new HashSet<Guid>();
+                var mine = new HashSet<Guid>();
                 foreach (var item in played)
                 {
                     if (!counted.Add(item.Id) || !batch.TryGetValue(item.Id, out var data))
@@ -337,6 +345,11 @@ public class FeedService
                         continue;
                     }
 
+                    if (mine.Add(key))
+                    {
+                        people[key] = people.GetValueOrDefault(key) + 1;
+                    }
+
                     allTimeScore[key] = allTimeScore.GetValueOrDefault(key) + Math.Max(1, data.PlayCount);
                     if (data.LastPlayedDate.HasValue && data.LastPlayedDate.Value >= cutoff)
                     {
@@ -350,13 +363,17 @@ public class FeedService
             _logger.LogWarning(ex, "NetflixUi: Top 10 scoring failed for {Kind}", kind);
         }
 
+        // privacy: a title one person watched alone never shows up for everyone
+        bool Shared(Guid id) => people.GetValueOrDefault(id) >= minPeople;
+
         var ordered = recentScore
+            .Where(kv => Shared(kv.Key))
             .OrderByDescending(kv => kv.Value)
             .ThenByDescending(kv => allTimeScore.GetValueOrDefault(kv.Key))
             .Select(kv => kv.Key)
             .ToList();
 
-        foreach (var kv in allTimeScore.OrderByDescending(kv => kv.Value))
+        foreach (var kv in allTimeScore.Where(kv => Shared(kv.Key)).OrderByDescending(kv => kv.Value))
         {
             if (ordered.Count >= 30)
             {
@@ -518,31 +535,103 @@ public class FeedService
         dto.PlayPositionTicks = data is not null && !data.Played ? data.PlaybackPositionTicks : 0;
     }
 
+    /// <summary>
+    /// Stale while revalidate. A fresh value (under 10 min, built today) is returned as is.
+    /// An older one is still returned right away and rebuilt in the background, so a
+    /// person's first visit of the day does not wait on a cold build. Only when nothing is
+    /// cached at all does the caller wait. One build per key runs at a time.
+    /// </summary>
     private T Cached<T>(User user, string feed, string args, Func<T> build)
         where T : class
     {
-        string key = user.Id.ToString("N") + "|" + feed + "|" + args + "|" + DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        if (_feedCache.TryGetValue(key, out var hit) && DateTime.UtcNow - hit.Built < FeedCacheTime && hit.Value is T value)
+        string key = user.Id.ToString("N") + "|" + feed + "|" + args;
+        if (_feedCache.TryGetValue(key, out var hit) && hit.Value is T value)
         {
+            bool fresh = DateTime.UtcNow - hit.Built < FeedCacheTime && hit.Built.Date == DateTime.UtcNow.Date;
+            if (!fresh)
+            {
+                _ = StartFeedBuild(key, () => build());
+            }
+
             return value;
         }
 
-        var fresh = build();
-        _feedCache[key] = (DateTime.UtcNow, fresh);
-
-        // drop stale entries now and then so the dictionary cannot grow forever
-        if (_feedCache.Count > 500)
+        try
         {
-            foreach (var kv in _feedCache)
+            return (T)StartFeedBuild(key, () => build()).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "NetflixUi: {Feed} build failed", feed);
+            throw;
+        }
+    }
+
+    private Task<object> StartFeedBuild(string key, Func<object> build)
+    {
+        var lazy = _feedBuilds.GetOrAdd(key, k => new Lazy<Task<object>>(() => Task.Run(() =>
+        {
+            try
             {
-                if (DateTime.UtcNow - kv.Value.Built >= FeedCacheTime)
-                {
-                    _feedCache.TryRemove(kv.Key, out _);
-                }
+                var v = build();
+                _feedCache[k] = (DateTime.UtcNow, v);
+                Trim();
+                return v;
             }
+            finally
+            {
+                _feedBuilds.TryRemove(k, out _);
+            }
+        })));
+        return lazy.Value;
+    }
+
+    // drop entries nobody asked for in a week so the dictionary cannot grow forever
+    private void Trim()
+    {
+        if (_feedCache.Count <= 500)
+        {
+            return;
         }
 
-        return fresh;
+        foreach (var kv in _feedCache)
+        {
+            if (DateTime.UtcNow - kv.Value.Built >= FeedKeepTime)
+            {
+                _feedCache.TryRemove(kv.Key, out _);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Build the hero and genre rows for people who used the server in the last week,
+    /// so their first visit after a restart is warm too. Runs in the background.
+    /// </summary>
+    public void WarmFeeds(int heroLimit, int genreCount, CancellationToken token)
+    {
+        var cutoff = DateTime.UtcNow.AddDays(-7);
+        foreach (var u in _userManager.GetUsers())
+        {
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (u.LastActivityDate is null || u.LastActivityDate.Value < cutoff)
+            {
+                continue;
+            }
+
+            try
+            {
+                GetHero(u, heroLimit);
+                GetGenreRows(u, genreCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "NetflixUi: warm-up failed for a user");
+            }
+        }
     }
 
     /// <summary>

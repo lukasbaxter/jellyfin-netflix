@@ -551,11 +551,15 @@
         });
         var c = api();
         if (!c || !ids.length) { applyShapes(container); return; }
-        var batch = ids.slice(0, 100);
+        // the Ids query is capped at 100 per call, so fetch every batch
+        for (var i = 0; i < ids.length; i += 100) fetchShapes(c, container, ids.slice(i, i + 100));
+    }
+
+    function fetchShapes(c, container, batch) {
         batch.forEach(function (id) { shapePending[id] = true; });
         c.getItems(userId(), {
             Ids: batch.join(','),
-            EnableImageTypes: 'Thumb,Backdrop,Logo',
+            EnableImageTypes: 'Primary,Thumb,Backdrop,Logo',
             ImageTypeLimit: 1,
             Fields: 'Genres,Overview',
             EnableTotalRecordCount: false
@@ -565,6 +569,7 @@
             applyShapes(container);
         }).catch(function (e) {
             batch.forEach(function (id) { delete shapePending[id]; });
+            applyShapes(container); // cards whose item never came back are kept as they are
             warn('shape', e);
         });
     }
@@ -581,22 +586,31 @@
         return '';
     }
 
+    // Every card in a home row ends up 16:9 so heights match (Netflix rows never mix shapes).
+    // No landscape art: the poster is cropped into the 16:9 box (nfx-crop), and with no art at
+    // all the stock placeholder sits in a 16:9 box (nfx-noart).
     function applyShapes(container) {
         var cards = container.querySelectorAll('.card[data-nfx-shape="pending"]');
         Array.prototype.forEach.call(cards, function (card) {
-            var it = state.items[card.getAttribute('data-id')];
-            var src = dtoLandscape(it && it.ImageTags ? it : null);
-            if (!src) { card.setAttribute('data-nfx-shape', 'kept'); return; }
+            var id = card.getAttribute('data-id');
+            if (shapePending[id]) return; // its batch is still loading
+            var it = state.items[id];
+            if (!it) { card.setAttribute('data-nfx-shape', 'kept'); return; }
+            var src = dtoLandscape(it.ImageTags ? it : null);
+            var kind = 'backdrop';
+            if (!src && it.ImageTags && it.ImageTags.Primary) { src = img(it.Id, 'Primary', it.ImageTags.Primary, 640); kind = 'crop'; }
+            if (!src) kind = 'noart';
             card.classList.remove('overflowPortraitCard');
             card.classList.add('overflowBackdropCard');
+            if (kind !== 'backdrop') card.classList.add('nfx-' + kind);
             var pad = card.querySelector('.cardPadder');
             if (pad) { pad.classList.remove('cardPadder-overflowPortrait'); pad.classList.add('cardPadder-overflowBackdrop'); }
             var box = card.querySelector('.cardImageContainer');
-            if (box) {
+            if (box && src) {
                 box.setAttribute('data-src', src);
                 if (!box.classList.contains('lazy')) box.style.backgroundImage = 'url("' + src + '")';
             }
-            card.setAttribute('data-nfx-shape', 'backdrop');
+            card.setAttribute('data-nfx-shape', kind);
         });
     }
 

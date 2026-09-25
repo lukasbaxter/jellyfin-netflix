@@ -13,6 +13,12 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public int GenreRowCount { get; set; } = 4;
 
+    /// <summary>
+    /// A title only makes the Top 10 when at least this many different people played it,
+    /// so one person's viewing is never shown to everyone. 1 turns the check off.
+    /// </summary>
+    public int Top10MinDistinctUsers { get; set; } = 2;
+
     public bool EnableHoverPreview { get; set; } = true;
 
     public bool EnableHeroTrailer { get; set; } = false;

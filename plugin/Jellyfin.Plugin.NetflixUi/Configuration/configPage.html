@@ -39,6 +39,11 @@
                 </div>
 
                 <div class="inputContainer">
+                    <input is="emby-input" type="number" id="Top10MinDistinctUsers" name="Top10MinDistinctUsers" min="1" max="20" label="Top 10: people needed per title" />
+                    <div class="fieldDescription">A title is only ranked when at least this many different people played it, so nobody's own viewing is shown to everyone. The rest of the row is filled with well rated titles. 1 turns this off.</div>
+                </div>
+
+                <div class="inputContainer">
                     <input is="emby-input" type="number" id="GenreRowCount" name="GenreRowCount" min="0" max="10" label="Genre rows" />
                     <div class="fieldDescription">Rows built from the genres each person watches most. 0 turns them off.</div>
                 </div>
@@ -112,6 +117,7 @@
                     renderLibraries(config.ExcludedLibraryIds).catch(function () { /* list stays empty */ });
                     bools.forEach(function (k) { page.querySelector('#' + k).checked = !!config[k]; });
                     page.querySelector('#GenreRowCount').value = config.GenreRowCount;
+                    page.querySelector('#Top10MinDistinctUsers').value = config.Top10MinDistinctUsers || 2;
                     page.querySelector('#HomeCardShape').value = config.HomeCardShape || 'backdrop';
                     Dashboard.hideLoadingMsg();
                 });
@@ -123,6 +129,7 @@
                 ApiClient.getPluginConfiguration(pluginId).then(function (config) {
                     bools.forEach(function (k) { config[k] = page.querySelector('#' + k).checked; });
                     config.GenreRowCount = parseInt(page.querySelector('#GenreRowCount').value, 10) || 0;
+                    config.Top10MinDistinctUsers = Math.max(1, parseInt(page.querySelector('#Top10MinDistinctUsers').value, 10) || 2);
                     config.HomeCardShape = page.querySelector('#HomeCardShape').value;
                     config.ExcludedLibraryIds = Array.prototype.filter.call(page.querySelectorAll('.nfxLib'), function (c) { return c.checked; })
                         .map(function (c) {

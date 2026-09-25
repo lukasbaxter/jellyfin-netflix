@@ -109,12 +109,6 @@ public class NetflixUiController : ControllerBase
         return Guid.TryParse(raw, out var id) ? _feeds.GetUser(id) : null;
     }
 
-    private static bool IsPluginVersion(string v)
-    {
-        string pv = AssetStore.PluginVersion;
-        return v == pv || (pv.EndsWith(".0", StringComparison.Ordinal) && v == pv[..^2]);
-    }
-
     private ActionResult Serve(AssetStore.Asset? asset, string? v)
     {
         if (asset is null)
@@ -123,10 +117,12 @@ public class NetflixUiController : ControllerBase
         }
 
         string etag = "\"" + asset.Hash + "\"";
-        // ?v= is the content hash (index.html injection) or the plugin version (branding @import fallback).
-        // Both change whenever the file changes, so both may be cached forever.
-        bool versioned = !string.IsNullOrEmpty(v) && (v == AssetStore.Version || v == asset.Hash || IsPluginVersion(v));
-        Response.Headers.CacheControl = versioned ? "public, max-age=31536000, immutable" : "no-cache";
+        // Only a content hash in ?v= (the index.html injection uses AssetStore.Version) is safe to
+        // cache forever: it changes whenever a file changes. Anything else (no v, the plugin
+        // version from a branding @import, a typo) gets a short cache plus the ETag, because the
+        // plugin version does not change on every rebuild.
+        bool contentVersioned = !string.IsNullOrEmpty(v) && (v == AssetStore.Version || v == asset.Hash);
+        Response.Headers.CacheControl = contentVersioned ? "public, max-age=31536000, immutable" : "public, max-age=3600";
         Response.Headers.ETag = etag;
         if (Request.Headers.IfNoneMatch.ToString() == etag)
         {

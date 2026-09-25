@@ -81,6 +81,19 @@ mkdir -p "$HERE/dist"
 scp -q "$HOST:$REMOTE/netflix-ui_$VER.zip" "$HERE/dist/"
 ( cd "$HERE/dist" && md5 -q "netflix-ui_$VER.zip" 2>/dev/null > "netflix-ui_$VER.zip.md5" || md5sum "netflix-ui_$VER.zip" | cut -d' ' -f1 > "netflix-ui_$VER.zip.md5" )
 echo "== built plugin/dist/netflix-ui_$VER.zip md5=$(cat "$HERE/dist/netflix-ui_$VER.zip.md5")"
+# keep manifest.json in step with the zip that was just built (checksum + timestamp of this version)
+python3 - "$HERE/manifest.json" "$VER" "$(cat "$HERE/dist/netflix-ui_$VER.zip.md5")" "$TS" <<'PY'
+import json, sys
+path, ver, md5, ts = sys.argv[1:]
+m = json.load(open(path))
+for v in m[0]["versions"]:
+    if v["version"] == ver:
+        v["checksum"] = md5
+        v["timestamp"] = ts[:19] + "Z"
+json.dump(m, open(path, "w"), indent=2)
+open(path, "a").write("\n")
+PY
+echo "== manifest.json checksum set to $(cat "$HERE/dist/netflix-ui_$VER.zip.md5")"
 
 if [[ $INSTALL -eq 1 ]]; then
   # shellcheck disable=SC1091

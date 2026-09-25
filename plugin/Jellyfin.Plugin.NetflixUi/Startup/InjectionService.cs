@@ -69,6 +69,12 @@ public class InjectionService : IHostedService, IDisposable
             // let the server finish starting before the heavier queries
             await Task.Delay(TimeSpan.FromSeconds(45), token).ConfigureAwait(false);
             _feeds.WarmTop10();
+            var c = Plugin.Instance?.Configuration;
+            if (c is null || c.EnableHero || c.GenreRowCount > 0)
+            {
+                // same args the client asks with (hero limit 6, GenreRowCount)
+                _feeds.WarmFeeds(6, Math.Clamp(c?.GenreRowCount ?? 4, 0, 10), token);
+            }
         }
         catch (TaskCanceledException)
         {
