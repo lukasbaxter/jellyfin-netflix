@@ -1,0 +1,7 @@
+.staging.env
+node_modules/
+bin/
+obj/
+dist/
+!theme/dist/
+test/out/
