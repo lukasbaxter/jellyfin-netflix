@@ -24,4 +24,13 @@ rsync -a --delete "$P/plugins/configurations/" "$S/plugins/configurations/"
 for f in "$S"/root/default/*/options.xml; do
   sed -i -E 's#<(SaveLocalMetadata|SaveSubtitlesWithMedia|SaveTrickplayWithMedia|SaveLyricsWithMedia)>true#<\1>false#g' "$f"
 done
+# 12.1 cannot parse <EncoderPreset xsi:nil="true" /> and resets encoding.xml to defaults. Fix it.
+# Staging has no GPU, so hardware accel is off here too.
+sed -i -e 's#<EncoderPreset xsi:nil="true" />#<EncoderPreset>auto</EncoderPreset>#' \
+       -e 's#<HardwareAccelerationType>[a-z]*</HardwareAccelerationType>#<HardwareAccelerationType>none</HardwareAccelerationType>#' \
+       -e 's#<EnableHardwareEncoding>true#<EnableHardwareEncoding>false#' "$S/config/encoding.xml"
+# own identity, so client apps never mix staging up with prod
+cat /proc/sys/kernel/random/uuid | tr -d '-\n' > "$S/data/device.txt"
+sed -i 's#<ServerName>.*</ServerName>#<ServerName>baxtergroup-staging</ServerName>#' "$S/config/system.xml"
+sed -i 's#manifest.json  </Url>#manifest.json</Url>#' "$S/config/system.xml"
 echo "sync done in $(( $(date +%s)-t0 ))s"; du -sh "$S"
