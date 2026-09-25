@@ -37,8 +37,8 @@ jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b6
 ## Measured on staging
 
 - `MigrateSystem`: **195 s** (about 3.5 min). Log: `staging/migrate-20260925.log`.
-- Full library scan: see the scan notes at the bottom.
-- Plan a **60 minute window**. Backup is the slow part (about 42 GB of config).
+- Full library scan: **75 min** (08:27 to 09:42 UTC). Movies and shows were done in about 5 min. The rest was the music library, held up by MusicBrainz rate limits on album lookups. Post-scan tasks took 2.5 min.
+- Plan a **45 minute downtime window** (stop, backup of about 42 GB, migrate, start, plugins). The scan then runs with the server already up, so plan about 90 more minutes of "music may look odd". Do not restart during the scan: every restart aborts it, and staging lost 5 scan runs that way.
 
 ## Who breaks when legacy auth is off
 
@@ -194,7 +194,7 @@ Intro Skipper: staging turned off `AutoDetectIntros` so it would not hammer the 
 
 ## 9. Full library scan (required)
 
-Dashboard > Scheduled Tasks > Scan Media Library > Run. Do not restart the server while it runs (a restart aborts it). Watch the UNAS the whole time.
+Dashboard > Scheduled Tasks > Scan Media Library > Run. About 75 min on staging. Do not restart the server while it runs (a restart aborts it, and 12 also starts a scan on boot that a restart cancels). Watch the UNAS the whole time (`tail -f /var/log/unas-stall.log`). Expected log noise: `Read-only file system ... album.nfo` from the Music library, since `/music` is mounted `:ro`.
 
 ## 10. Auth: day one
 
