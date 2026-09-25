@@ -4,6 +4,7 @@ using Jellyfin.Plugin.NetflixUi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.NetflixUi.Api;
 
@@ -17,10 +18,34 @@ public class NetflixUiController : ControllerBase
     private const string UserIdClaim = "Jellyfin-UserId";
 
     private readonly FeedService _feeds;
+    private readonly ILogger<NetflixUiController> _logger;
 
-    public NetflixUiController(FeedService feeds)
+    public NetflixUiController(FeedService feeds, ILogger<NetflixUiController> logger)
     {
         _feeds = feeds;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Client performance samples (long frames, slow input, slow requests), only sent when
+    /// PerfBeacon is on. Written to the server log so real-device lag can be diagnosed remotely.
+    /// </summary>
+    [HttpPost("Perf")]
+    [Authorize]
+    [Consumes("text/plain", "application/json")]
+    public async Task<ActionResult> PostPerf()
+    {
+        if (!(Plugin.Instance?.Configuration.PerfBeacon ?? false))
+        {
+            return NoContent();
+        }
+
+        using var reader = new StreamReader(Request.Body);
+        var buf = new char[16384];
+        var n = await reader.ReadBlockAsync(buf, 0, buf.Length).ConfigureAwait(false);
+        var user = CurrentUser();
+        _logger.LogInformation("NfxPerf {User} {Sample}", user?.Username ?? "?", new string(buf, 0, n).Replace('\n', ' '));
+        return NoContent();
     }
 
     [HttpGet("netflix.css")]
@@ -53,6 +78,7 @@ public class NetflixUiController : ControllerBase
             EnableHeroTrailer = c.EnableHeroTrailer,
             HomeCardShape = string.IsNullOrEmpty(c.HomeCardShape) ? "backdrop" : c.HomeCardShape,
             ExcludedLibraryIds = c.ExcludedLibraryIds ?? Array.Empty<Guid>(),
+            PerfBeacon = c.PerfBeacon,
         };
     }
 

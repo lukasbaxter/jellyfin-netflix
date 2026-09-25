@@ -33,6 +33,9 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public bool InjectCss { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether clients send perf samples to the server log (diagnostics only).</summary>
+    public bool PerfBeacon { get; set; }
+
     /// <summary>
     /// Libraries (CollectionFolder ids) left out of the hero, Top 10 and genre rows, for example Demos.
     /// </summary>

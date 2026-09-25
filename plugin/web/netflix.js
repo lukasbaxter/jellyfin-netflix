@@ -120,7 +120,8 @@
                         EnableHoverPreview: c.EnableHoverPreview !== false,
                         EnableHeroTrailer: c.EnableHeroTrailer === true,
                         HomeCardShape: c.HomeCardShape || 'backdrop',
-                        ExcludedLibraryIds: c.ExcludedLibraryIds || []
+                        ExcludedLibraryIds: c.ExcludedLibraryIds || [],
+                        PerfBeacon: c.PerfBeacon === true
                     };
                     return state.cfg;
                 });
@@ -824,6 +825,46 @@
             var k = SEARCH_KIND[((h && h.textContent) || '').trim().toLowerCase()] || 'title';
             if (sec.getAttribute('data-nfx-kind') !== k) sec.setAttribute('data-nfx-kind', k);
         });
+    }
+
+    // ------------------------------------------------------------------ perf beacon (diagnostics)
+    // Off unless the plugin's PerfBeacon setting is on. Sends compact samples of what the real
+    // device felt: long animation frames (with the scripts in them), slow input, dropped frames,
+    // slow requests. Goes to the server log as "NfxPerf".
+    var perf = { on: false, q: [], drops: 0, frames: 0, worst: 0, last: 0 };
+    function perfPush(x) { if (perf.q.length < 60) perf.q.push(x); }
+    function shortUrl(u) { return String(u || '').replace(location.origin, '').replace(/[?&](api_key|ApiKey|tag)=[^&]*/g, '').slice(0, 90); }
+    function startPerf() {
+        if (perf.on || !window.PerformanceObserver) return;
+        perf.on = true;
+        var obs = function (type, fn, extra) { try { new PerformanceObserver(function (l) { l.getEntries().forEach(fn); }).observe(Object.assign({ type: type, buffered: false }, extra || {})); } catch (_) { /* unsupported */ } };
+        obs('long-animation-frame', function (e) {
+            if (e.duration < 80) return;
+            perfPush({ k: 'loaf', d: Math.round(e.duration), blk: Math.round(e.blockingDuration || 0), sl: Math.round(e.styleAndLayoutStart ? (e.startTime + e.duration - e.styleAndLayoutStart) : 0),
+                s: (e.scripts || []).slice(0, 3).map(function (x) { return Math.round(x.duration) + 'ms ' + (x.invoker || '') + ' ' + shortUrl(x.sourceURL).split('/').pop() + ':' + (x.sourceFunctionName || ''); }), h: location.hash.slice(0, 30) });
+        });
+        obs('event', function (e) {
+            if (e.duration < 120) return;
+            perfPush({ k: 'input', n: e.name, d: Math.round(e.duration), proc: Math.round(e.processingEnd - e.processingStart), t: e.target && e.target.className ? String(e.target.className).slice(0, 40) : '' });
+        }, { durationThreshold: 104 });
+        obs('resource', function (e) {
+            if (e.duration < 900) return;
+            perfPush({ k: 'slowreq', d: Math.round(e.duration), u: shortUrl(e.name) });
+        });
+        var tick = function (t) {
+            if (!doc.hidden && perf.last) { var dt = t - perf.last; perf.frames++; if (dt > 50) perf.drops++; if (dt > perf.worst && dt < 2000) perf.worst = dt; }
+            perf.last = t;
+            requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+        setInterval(function () {
+            if (!perf.q.length && !perf.drops) { perf.frames = 0; return; }
+            var c = api();
+            var body = JSON.stringify({ v: VERSION, dpr: window.devicePixelRatio, vw: innerWidth, ua: (navigator.userAgentData && navigator.userAgentData.brands || []).map(function (b) { return b.brand + b.version; }).join(','),
+                frames: perf.frames, drops: perf.drops, worst: Math.round(perf.worst), h: location.hash.slice(0, 30), q: perf.q });
+            perf.q = []; perf.drops = 0; perf.frames = 0; perf.worst = 0;
+            try { fetch(url('NetflixUi/Perf'), { method: 'POST', headers: { 'Content-Type': 'text/plain', Authorization: 'MediaBrowser Token="' + (c && c.accessToken ? c.accessToken() : '') + '"' }, body: body, keepalive: true }).catch(function () { }); } catch (_) { /* */ }
+        }, 15000);
     }
 
     // ------------------------------------------------------------------ hide collections
@@ -1803,7 +1844,7 @@
         if (!api() || !userId()) return;
         setRootClass('nfx-own-chrome', true);
         loadUser();
-        loadConfig().then(function () { return loadViews().catch(function () { return []; }); }).then(safe('header', ensureHeader));
+        loadConfig().then(function () { if (state.cfg.PerfBeacon) startPerf(); return loadViews().catch(function () { return []; }); }).then(safe('header', ensureHeader));
         ensureDetailBackdrop();
         tagSearch();
         hideCollections();

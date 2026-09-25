@@ -94,4 +94,7 @@ public class NfxPublicConfig
 
     /// <summary>Gets or sets libraries the home rows leave out (e.g. Demos).</summary>
     public Guid[] ExcludedLibraryIds { get; set; } = Array.Empty<Guid>();
+
+    /// <summary>Gets or sets a value indicating whether the client should send perf samples.</summary>
+    public bool PerfBeacon { get; set; }
 }
