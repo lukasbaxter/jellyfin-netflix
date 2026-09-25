@@ -1,0 +1,17 @@
+# Jellyfin 12.1 STAGING. Lives at /home/admin/services/jellyfin-staging on .85.
+# Media is read-only. No GPU. Default bridge network. Never auto-restarts.
+services:
+  jellyfin-staging:
+    image: jellyfin/jellyfin:12.1.20260915-010956@sha256:78d3ea1207d1322471fcac39a614f004f2ccf7e878f95ab2977d752f07e4dd7e
+    container_name: jellyfin-staging
+    restart: "no"
+    ports:
+      - "2199:8096"
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /mnt/unas:/media:ro
+      - /mnt/wd_nvme1/music:/music:ro
+    environment:
+      - TZ=America/Vancouver
+      - JELLYFIN_PublishedServerUrl=http://192.168.1.85:2199

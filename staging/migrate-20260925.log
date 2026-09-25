@@ -1,0 +1,448 @@
+# Trimmed: per-item 'Removing item' lines and media paths stripped (1232 stale items removed). Full log on the server: /home/admin/services/jellyfin-staging/migrate-20260925-0106.log
+ Network jellyfin-staging_default Creating 
+ Network jellyfin-staging_default Created 
+ Container jellyfin-staging-jellyfin-staging-run-378bf07e3e8b Creating 
+ Container jellyfin-staging-jellyfin-staging-run-378bf07e3e8b Created 
+[01:06:09] [INF] [1] Emby.Server.Implementations.AppBase.BaseConfigurationManager: Setting cache path: /cache
+[01:06:09] [INF] [7] Jellyfin.Server.ServerSetupApp.SetupServer: Kestrel is listening on 0.0.0.0
+[01:06:09] [INF] [7] Main: Jellyfin version: 12.1.0
+[01:06:09] [INF] [7] Main: Environment Variables: ["[JELLYFIN_PublishedServerUrl, http://192.168.1.85:2199]", "[JELLYFIN_CONFIG_DIR, /config/config]", "[JELLYFIN_CACHE_DIR, /cache]", "[JELLYFIN_WEB_DIR, /jellyfin/jellyfin-web]", "[JELLYFIN_LOG_DIR, /config/log]", "[JELLYFIN_FFMPEG, /usr/lib/jellyfin-ffmpeg/ffmpeg]", "[JELLYFIN_DATA_DIR, /config]"]
+[01:06:09] [INF] [7] Main: Arguments: ["/jellyfin/jellyfin.dll", "--mode", "MigrateSystem"]
+[01:06:09] [INF] [7] Main: Operating system: Debian GNU/Linux 13 (trixie)
+[01:06:09] [INF] [7] Main: Architecture: X64
+[01:06:09] [INF] [7] Main: 64-Bit Process: True
+[01:06:09] [INF] [7] Main: User Interactive: True
+[01:06:09] [INF] [7] Main: Processor count: 16
+[01:06:09] [INF] [7] Main: Program data path: /config
+[01:06:09] [INF] [7] Main: Log directory path: /config/log
+[01:06:09] [INF] [7] Main: Config directory path: /config/config
+[01:06:09] [INF] [7] Main: Cache path: /cache
+[01:06:09] [INF] [7] Main: Temp directory path: /tmp/jellyfin
+[01:06:09] [INF] [7] Main: Web resources path: /jellyfin/jellyfin-web
+[01:06:09] [INF] [7] Main: Application directory: /jellyfin/
+[01:06:09] [INF] [7] Jellyfin.Server.Startup: Storage path `/config/data` (Fixed) successfully checked with 403.5GiB free which is over the minimum of 2GiB.
+[01:06:09] [INF] [7] Jellyfin.Server.Startup: Storage path `/cache` (Fixed) successfully checked with 403.5GiB free which is over the minimum of 2GiB.
+[01:06:09] [INF] [7] Jellyfin.Server.Startup: Storage path `/config` (Fixed) successfully checked with 403.5GiB free which is over the minimum of 2GiB.
+[01:06:09] [INF] [7] Emby.Server.Implementations.AppBase.BaseConfigurationManager: Setting cache path: /cache
+[01:06:09] [INF] [7] Jellyfin.Database.Providers.Sqlite.SqliteDatabaseProvider: SQLite connection string: Data Source=/config/data/jellyfin.db;Cache=Private;Default Timeout=60;Pooling=True
+[01:06:09] [INF] [7] Jellyfin.Database.Providers.Sqlite.SqliteDatabaseProvider: SQLITE connection pragma command set to: 
+PRAGMA locking_mode=NORMAL;
+PRAGMA journal_size_limit=134217728;
+PRAGMA synchronous=1;
+PRAGMA temp_store=2;
+
+[01:06:09] [INF] [7] Jellyfin.Database.Implementations.Locking.NoLockBehavior: The database locking mode has been set to: NoLock.
+[01:06:09] [INF] [7] Jellyfin.Server.Migrations.JellyfinMigrationService: Initialise Migration service.
+[01:06:10] [INF] [7] Emby.Server.Implementations.AppBase.BaseConfigurationManager: Setting cache path: /cache
+[01:06:10] [INF] [7] Emby.Server.Implementations.ApplicationHost: Loading assemblies
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Defined LAN subnets: ["127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Defined LAN exclusions: []
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Used LAN subnets: ["127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Filtered interface addresses: ["127.0.0.1", "192.168.48.2"]
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Bind Addresses ["0.0.0.0"]
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Remote IP filter is Allowlist
+[01:06:10] [INF] [7] Jellyfin.Networking.Manager.NetworkManager: Filtered subnets: []
+[01:06:10] [ERR] [7] Emby.Server.Implementations.AppBase.BaseConfigurationManager: Error loading configuration file: /config/config/encoding.xml
+System.InvalidOperationException: There is an error in XML document (30, 35).
+ ---> System.InvalidOperationException: Instance validation error: '' is not a valid value for EncoderPreset.
+   at Microsoft.Xml.Serialization.GeneratedAssembly.XmlSerializationReaderEncodingOptions.Read6_EncoderPreset(String s)
+   at Microsoft.Xml.Serialization.GeneratedAssembly.XmlSerializationReaderEncodingOptions.Read10_EncodingOptions(Boolean isNullable, Boolean checkType)
+   at Microsoft.Xml.Serialization.GeneratedAssembly.XmlSerializationReaderEncodingOptions.Read11_EncodingOptions()
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+   --- End of inner exception stack trace ---
+   at System.Xml.Serialization.XmlSerializer.Deserialize(XmlReader xmlReader, String encodingStyle, XmlDeserializationEvents events)
+   at System.Xml.Serialization.XmlSerializer.Deserialize(XmlReader xmlReader)
+   at Emby.Server.Implementations.Serialization.MyXmlSerializer.DeserializeFromStream(Type type, Stream stream)
+   at Emby.Server.Implementations.Serialization.MyXmlSerializer.DeserializeFromFile(Type type, String file)
+   at Emby.Server.Implementations.AppBase.BaseConfigurationManager.LoadConfiguration(String path, Type configurationType)
+[01:06:10] [INF] [7] Jellyfin.Database.Providers.Sqlite.SqliteDatabaseProvider: SQLite connection string: Data Source=/config/data/jellyfin.db;Cache=Private;Default Timeout=60;Pooling=True
+[01:06:10] [INF] [7] Jellyfin.Database.Providers.Sqlite.SqliteDatabaseProvider: SQLITE connection pragma command set to: 
+PRAGMA locking_mode=NORMAL;
+PRAGMA journal_size_limit=134217728;
+PRAGMA synchronous=1;
+PRAGMA temp_store=2;
+
+[01:06:10] [INF] [7] Jellyfin.Database.Implementations.Locking.NoLockBehavior: The database locking mode has been set to: NoLock.
+[01:06:10] [INF] [7] Main: Prepare system for possible migrations
+[01:06:10] [INF] [7] Main: A migration will attempt to modify the jellyfin.db, will attempt to backup the file now.
+[01:06:11] [INF] [7] Main: Jellyfin database has been backed up as 20260925080610
+[01:06:11] [INF] [7] Jellyfin.Server.Migrations.JellyfinMigrationService: There are 21 migrations for stage CoreInitialisation.
+[01:06:11] [INF] [7] InternalDatabaseMigration: Perform migration 20260113102337_AddLinkedChildrenTable
+[01:06:11] [INF] [7] InternalDatabaseMigration: Migration 20260113102337_AddLinkedChildrenTable was successfully applied
+[01:06:11] [INF] [7] InternalDatabaseMigration: Perform migration 20260113203012_ChangeOwnerIdToGuid
+[01:06:14] [WRN] [9] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.7984ms with message 'Server is still starting up.'
+[01:06:19] [INF] [7] InternalDatabaseMigration: Migration 20260113203012_ChangeOwnerIdToGuid was successfully applied
+[01:06:19] [INF] [7] InternalDatabaseMigration: Perform migration 20260113233000_AddForeignKeyToOwnerId
+[01:06:19] [WRN] [7] Microsoft.EntityFrameworkCore.Migrations: An operation of type 'SqlOperation' will be attempted while a rebuild of table 'BaseItems' is pending. The database may not be in an expected state. Review the SQL generated by this migration to help diagnose any failures. Consider moving these operations to a subsequent migration.
+[01:06:19] [WRN] [7] Microsoft.EntityFrameworkCore.Migrations: An operation of type 'UpdateDataOperation' will be attempted while a rebuild of table 'BaseItems' is pending. The database may not be in an expected state. Review the SQL generated by this migration to help diagnose any failures. Consider moving these operations to a subsequent migration.
+[01:06:24] [INF] [7] InternalDatabaseMigration: Migration 20260113233000_AddForeignKeyToOwnerId was successfully applied
+[01:06:24] [INF] [7] InternalDatabaseMigration: Perform migration 20260113233500_DropExtraIdsColumn
+[01:06:30] [INF] [7] InternalDatabaseMigration: Migration 20260113233500_DropExtraIdsColumn was successfully applied
+[01:06:30] [INF] [7] InternalDatabaseMigration: Perform migration 20260116114245_AddLatestItemsDateCreatedIndexes
+[01:06:30] [INF] [7] InternalDatabaseMigration: Migration 20260116114245_AddLatestItemsDateCreatedIndexes was successfully applied
+[01:06:30] [INF] [7] InternalDatabaseMigration: Perform migration 20260118182305_AddIndicesToImageInfo
+[01:06:30] [INF] [7] InternalDatabaseMigration: Migration 20260118182305_AddIndicesToImageInfo was successfully applied
+[01:06:30] [INF] [7] InternalDatabaseMigration: Perform migration 20260130232147_AddBaseItemNameIndex
+[01:06:30] [INF] [7] InternalDatabaseMigration: Migration 20260130232147_AddBaseItemNameIndex was successfully applied
+[01:06:30] [INF] [7] InternalDatabaseMigration: Perform migration 20260206224832_IndexOptimizations
+[01:06:31] [INF] [7] InternalDatabaseMigration: Migration 20260206224832_IndexOptimizations was successfully applied
+[01:06:31] [INF] [7] InternalDatabaseMigration: Perform migration 20260215201634_ChangePrimaryVersionIdToGuid
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260215201634_ChangePrimaryVersionIdToGuid was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260308123920_AddTypeCleanNameIndex
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260308123920_AddTypeCleanNameIndex was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260504075755_AddPartialIndexForItemCounts
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260504075755_AddPartialIndexForItemCounts was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260522092303_AddNormalizedUsername
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260522092303_AddNormalizedUsername was successfully applied
+[01:06:32] [INF] [7] InternalCodeMigration: Perform migration 20260522092304_UpdateNormalizedUsername
+[01:06:32] [INF] [7] InternalCodeMigration: Migration 20260522092304_UpdateNormalizedUsername was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260524120336_AddUniqueNormalizedUsernameIndex
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260524120336_AddUniqueNormalizedUsernameIndex was successfully applied
+[01:06:32] [INF] [7] InternalCodeMigration: Perform migration 20260531160000_DisableLegacyAuthorization
+[01:06:32] [INF] [7] Emby.Server.Implementations.AppBase.BaseConfigurationManager: Saving system configuration
+[01:06:32] [INF] [7] Emby.Server.Implementations.AppBase.BaseConfigurationManager: Setting cache path: /cache
+[01:06:32] [INF] [7] InternalCodeMigration: Migration 20260531160000_DisableLegacyAuthorization was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260723111547_AllowDuplicatePlaylistChildren
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260723111547_AllowDuplicatePlaylistChildren was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260724185102_AddPrimaryVersionIdIndex
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260724185102_AddPrimaryVersionIdIndex was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260728170000_AddPeopleNameLowerIndex
+[01:06:32] [INF] [7] InternalDatabaseMigration: Migration 20260728170000_AddPeopleNameLowerIndex was successfully applied
+[01:06:32] [INF] [7] InternalDatabaseMigration: Perform migration 20260728182152_AddPeopleItemMapCoveringIndex
+[01:06:33] [INF] [7] InternalDatabaseMigration: Migration 20260728182152_AddPeopleItemMapCoveringIndex was successfully applied
+[01:06:33] [INF] [7] InternalDatabaseMigration: Perform migration 20260812050902_AddMediaStreamFilterIndex
+[01:06:33] [INF] [7] InternalDatabaseMigration: Migration 20260812050902_AddMediaStreamFilterIndex was successfully applied
+[01:06:33] [INF] [7] InternalDatabaseMigration: Perform migration 20260815063607_RemoveOrphanedUserPermissionsAndPreferences
+[01:06:33] [INF] [7] InternalDatabaseMigration: Migration 20260815063607_RemoveOrphanedUserPermissionsAndPreferences was successfully applied
+[01:06:33] [INF] [7] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: TMDb 12.1.0.0
+[01:06:33] [INF] [7] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: Studio Images 12.1.0.0
+[01:06:33] [INF] [7] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: OMDb 12.1.0.0
+[01:06:33] [INF] [7] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: MusicBrainz 12.1.0.0
+[01:06:33] [INF] [7] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: ListenBrainz Similarity Provider 12.1.0.0
+[01:06:33] [INF] [7] Emby.Server.Implementations.Plugins.PluginManager: Loaded plugin: AudioDB 12.1.0.0
+[01:06:33] [INF] [7] Emby.Server.Implementations.Library.Search.SearchManager: Registered 0 external search providers: . Fallback providers: Database (priority 100)
+[01:06:33] [INF] [7] Jellyfin.Server.Migrations.JellyfinMigrationService: There are 16 migrations for stage AppInitialisation.
+[01:06:33] [INF] [7] InternalCodeMigration: Perform migration 20260113120000_MigrateLinkedChildren
+[01:06:33] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Found 16269 potential items with LinkedChildren data to process.
+[01:06:34] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Inserting 10233 LinkedChildren records.
+[01:06:35] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Successfully inserted 10233 LinkedChildren records.
+[01:06:35] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: LinkedChildren migration completed. Processed 16269 items, dropped 5 unresolvable children.
+[01:06:35] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Cleaning up alternate version items with wrong type...
+[01:06:35] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: No wrong-type alternate version items found.
+[01:06:35] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Starting cleanup of orphaned alternate version BaseItems...
+[01:06:35] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Found 1 orphaned alternate version BaseItems to remove.
+[01:06:36] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Removed 1 orphaned alternate version BaseItems.
+[01:06:36] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Starting cleanup of items from deleted libraries...
+[01:06:36] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: No items from deleted libraries found.
+[01:06:36] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Starting cleanup of items with missing files...
+[01:06:37] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking 182611 items for missing files.
+[01:06:44] [WRN] [10] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.0249ms with message 'Server is still starting up.'
+[01:06:46] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 10000/182611 items, 19 stale so far.
+[01:06:47] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 20000/182611 items, 63 stale so far.
+[01:06:47] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 30000/182611 items, 104 stale so far.
+[01:06:47] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 40000/182611 items, 114 stale so far.
+[01:06:50] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 50000/182611 items, 176 stale so far.
+[01:06:55] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 60000/182611 items, 1637 stale so far.
+[01:07:00] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 70000/182611 items, 1637 stale so far.
+[01:07:00] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 80000/182611 items, 1637 stale so far.
+[01:07:00] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 90000/182611 items, 1656 stale so far.
+[01:07:00] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 100000/182611 items, 1656 stale so far.
+[01:07:01] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 110000/182611 items, 1656 stale so far.
+[01:07:01] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 120000/182611 items, 1656 stale so far.
+[01:07:01] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 130000/182611 items, 1656 stale so far.
+[01:07:01] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 140000/182611 items, 1659 stale so far.
+[01:07:02] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 150000/182611 items, 1662 stale so far.
+[01:07:02] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 160000/182611 items, 1662 stale so far.
+[01:07:02] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 170000/182611 items, 1675 stale so far.
+[01:07:02] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Checking for missing files: 180000/182611 items, 1675 stale so far.
+[01:07:02] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Found 1685 stale items to remove.
+[01:07:14] [WRN] [10] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.0027ms with message 'Server is still starting up.'
+[01:07:44] [WRN] [19] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.0043ms with message 'Server is still starting up.'
+[01:08:14] [WRN] [21] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.0029ms with message 'Server is still starting up.'
+[01:08:44] [WRN] [18] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.0057ms with message 'Server is still starting up.'
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Removed 1685 stale items.
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: Starting cleanup of orphaned LinkedChildren records...
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateLinkedChildren: No orphaned LinkedChildren found.
+[01:08:57] [INF] [7] InternalCodeMigration: Migration 20260113120000_MigrateLinkedChildren was successfully applied
+[01:08:57] [INF] [7] InternalCodeMigration: Perform migration 20260113230000_CleanupOrphanedExtras
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExtras: No orphaned extras found, skipping migration.
+[01:08:57] [INF] [7] InternalCodeMigration: Migration 20260113230000_CleanupOrphanedExtras was successfully applied
+[01:08:57] [INF] [7] InternalCodeMigration: Perform migration 20260115120000_FixIncorrectOwnerIdRelationships
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.FixIncorrectOwnerIdRelationships: No duplicate items found, skipping duplicate removal.
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.FixIncorrectOwnerIdRelationships: Found 36 video/movie items with incorrect OwnerId relationships (36 with parent, 0 orphaned)
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.FixIncorrectOwnerIdRelationships: Successfully cleared OwnerId for 36 items
+[01:08:57] [INF] [7] Jellyfin.Server.Migrations.Routines.FixIncorrectOwnerIdRelationships: No orphaned extras found, skipping reassignment.
+[01:08:58] [INF] [7] Jellyfin.Server.Migrations.Routines.FixIncorrectOwnerIdRelationships: No alternate version items need PrimaryVersionId population, skipping.
+[01:08:58] [INF] [7] InternalCodeMigration: Migration 20260115120000_FixIncorrectOwnerIdRelationships was successfully applied
+[01:08:58] [INF] [7] InternalCodeMigration: Perform migration 20260206200000_FixLibrarySubtitleDownloadLanguages
+[01:08:58] [INF] [7] Jellyfin.Server.Migrations.Routines.FixLibrarySubtitleDownloadLanguages: Starting to fix library subtitle download languages.
+[01:08:58] [INF] [7] Jellyfin.Server.Migrations.Routines.FixLibrarySubtitleDownloadLanguages: Library subtitle download languages fixed.
+[01:08:58] [INF] [7] InternalCodeMigration: Migration 20260206200000_FixLibrarySubtitleDownloadLanguages was successfully applied
+[01:08:58] [INF] [7] InternalCodeMigration: Perform migration 20260508120000_MergeDuplicateMusicArtists
+[01:08:58] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicateMusicArtists: Found 184 groups of case-only duplicate MusicArtist records.
+[01:08:58] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicateMusicArtists: Deleting 210 duplicate MusicArtist records...
+[01:08:58] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicateMusicArtists: Deleting duplicate MusicArtist records: 210/210
+[01:08:58] [INF] [7] InternalCodeMigration: Migration 20260508120000_MergeDuplicateMusicArtists was successfully applied
+[01:08:58] [INF] [7] InternalCodeMigration: Perform migration 20260508130000_MergeDuplicatePeople
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicatePeople: No case-only duplicate Person BaseItems found.
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicatePeople: Found 36 groups of case-only duplicate Peoples rows.
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicatePeople: Remove batch 1/0 duplicate Peoples.
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.MergeDuplicatePeople: Removed 36 duplicate Peoples rows.
+[01:08:59] [INF] [7] InternalCodeMigration: Migration 20260508130000_MergeDuplicatePeople was successfully applied
+[01:08:59] [INF] [7] InternalCodeMigration: Perform migration 20260525010000_CleanupOrphanedExternalData
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning for orphaned attachment data under /config/data/attachments
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Finished attachment cleanup: scanned 63 directories, removed 0 orphans
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning for orphaned subtitle data under /config/data/subtitles
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Finished subtitle cleanup: scanned 327 directories, removed 0 orphans
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning for orphaned trickplay data under /config/data/trickplay
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning trickplay: 500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning trickplay: 1000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning trickplay: 1500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning trickplay: 2000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Finished trickplay cleanup: scanned 2064 directories, removed 0 orphans
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning for orphaned chapter image data under /config/metadata/library
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 1000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 1500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 2000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 2500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 3000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 3500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 4000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 4500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 5000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 5500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 6000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 6500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 7000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 7500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 8000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 8500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 9000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 9500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 10000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 10500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 11000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 11500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 12000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 12500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 13000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 13500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 14000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 14500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 15000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 15500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 16000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 16500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 17000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 17500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 18000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 18500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 19000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 19500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 20000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 20500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 21000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 21500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 22000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 22500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 23000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 23500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 24000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 24500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 25000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 25500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 26000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 26500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 27000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 27500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 28000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 28500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 29000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 29500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 30000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 30500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 31000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 31500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 32000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 32500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 33000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 33500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 34000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 34500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 35000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 35500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 36000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 36500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 37000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 37500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 38000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 38500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 39000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 39500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 40000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 40500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 41000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 41500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 42000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 42500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 43000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 43500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 44000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 44500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 45000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 45500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 46000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 46500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 47000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 47500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 48000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 48500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 49000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 49500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 50000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 50500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 51000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 51500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 52000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 52500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 53000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 53500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 54000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 54500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 55000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 55500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 56000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 56500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 57000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 57500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 58000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 58500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 59000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 59500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 60000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 60500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 61000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 61500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 62000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 62500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 63000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 63500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 64000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 64500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 65000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 65500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 66000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 66500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 67000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 67500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 68000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 68500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 69000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 69500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 70000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 70500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 71000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 71500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 72000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 72500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 73000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 73500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 74000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 74500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 75000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 75500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 76000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 76500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 77000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 77500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 78000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 78500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 79000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 79500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 80000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 80500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 81000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 81500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 82000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 82500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 83000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 83500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 84000 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Scanning chapter image: 84500 directories examined, 0 orphans removed so far
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.CleanupOrphanedExternalData: Finished chapter image cleanup: scanned 84738 directories, removed 0 orphans
+[01:08:59] [INF] [7] InternalCodeMigration: Migration 20260525010000_CleanupOrphanedExternalData was successfully applied
+[01:08:59] [INF] [7] InternalCodeMigration: Perform migration 20260610120000_RefreshCleanNamesAndValues
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Refreshing CleanName for 194528 library items
+[01:08:59] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 0/194528 - Updated: 0 - Time: 00:00:00.0142664
+[01:09:00] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 10000/194528 - Updated: 2488 - Time: 00:00:00.7335923
+[01:09:00] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 20000/194528 - Updated: 4970 - Time: 00:00:01.3989151
+[01:09:01] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 30000/194528 - Updated: 7427 - Time: 00:00:02.0649873
+[01:09:02] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 40000/194528 - Updated: 9916 - Time: 00:00:02.6148937
+[01:09:02] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 50000/194528 - Updated: 12483 - Time: 00:00:03.2013281
+[01:09:03] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 60000/194528 - Updated: 15040 - Time: 00:00:03.7672762
+[01:09:03] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 70000/194528 - Updated: 17510 - Time: 00:00:04.3679193
+[01:09:04] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 80000/194528 - Updated: 20040 - Time: 00:00:04.9953917
+[01:09:05] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 90000/194528 - Updated: 22497 - Time: 00:00:05.5815406
+[01:09:05] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 100000/194528 - Updated: 25007 - Time: 00:00:06.2242172
+[01:09:06] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 110000/194528 - Updated: 27451 - Time: 00:00:06.8764109
+[01:09:07] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 120000/194528 - Updated: 29984 - Time: 00:00:07.5434118
+[01:09:07] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 130000/194528 - Updated: 32429 - Time: 00:00:08.1563512
+[01:09:08] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 140000/194528 - Updated: 34971 - Time: 00:00:08.8249575
+[01:09:09] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 150000/194528 - Updated: 37416 - Time: 00:00:09.5066077
+[01:09:09] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 160000/194528 - Updated: 39998 - Time: 00:00:10.2181661
+[01:09:10] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 170000/194528 - Updated: 42465 - Time: 00:00:10.8989574
+[01:09:11] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 180000/194528 - Updated: 44924 - Time: 00:00:11.6709902
+[01:09:11] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 190000/194528 - Updated: 47459 - Time: 00:00:12.4362558
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Refreshed CleanName for 48560 out of 194528 items in 00:00:12.8964809
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Refreshing CleanValue for 22216 item values
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 0/22216 - Updated: 0 - Time: 00:00:00.0032272
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 10000/22216 - Updated: 1371 - Time: 00:00:00.1219957
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Processed: 20000/22216 - Updated: 2732 - Time: 00:00:00.1915348
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshCleanNamesAndValues: Refreshed CleanValue for 3032 out of 22216 item values in 00:00:00.2257865
+[01:09:12] [INF] [7] InternalCodeMigration: Migration 20260610120000_RefreshCleanNamesAndValues was successfully applied
+[01:09:12] [INF] [7] InternalCodeMigration: Perform migration 20260722120000_RefreshForcedSortNames
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshForcedSortNames: Refreshing SortName for 3 library items with a forced sort name
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshForcedSortNames: Processed: 0/3 - Updated: 0 - Time: 00:00:00.0433474
+[01:09:12] [INF] [7] Jellyfin.Server.Migrations.Routines.RefreshForcedSortNames: Refreshed SortName for 1 out of 3 items in 00:00:00.2817060
+[01:09:12] [INF] [7] InternalCodeMigration: Migration 20260722120000_RefreshForcedSortNames was successfully applied
+[01:09:12] [INF] [7] InternalCodeMigration: Perform migration 20260729120000_RestorePlaylistChildrenFromMetadata
+[01:09:13] [WRN] [7] Jellyfin.Server.Migrations.Routines.RestorePlaylistChildrenFromMetadata: Playlist ၊၊||၊|။||||။‌‌‌‌၊| • 2:08 (452e9a5a-76f5-cfd5-5418-c5bba5f1ad1a) holds 108 entries but /config/data/playlists/၊၊  ၊ ။    ။‌‌‌‌၊  • 2 08/playlist.xml lists 109. Not restoring automatically.
+[01:09:13] [WRN] [7] Jellyfin.Server.Migrations.Routines.RestorePlaylistChildrenFromMetadata: Playlist 2022 (6a91261d-7ad3-b706-abd6-9a3863997abe) holds 39 entries but /config/data/playlists/afd/playlist.xml lists 40. Not restoring automatically.
+[01:09:13] [WRN] [7] Jellyfin.Server.Migrations.Routines.RestorePlaylistChildrenFromMetadata: Playlist Liked Songs (0efcffc9-8545-1bdc-6f2e-9344a3728f39) holds 1404 entries but /config/data/playlists/Liked Songs/playlist.xml lists 1406. Not restoring automatically.
+[01:09:13] [WRN] [7] Jellyfin.Server.Migrations.Routines.RestorePlaylistChildrenFromMetadata: Playlist other flipy thing (0881790b-780f-a5f9-1b49-999c5ef28110) holds 4 entries but /config/data/playlists/other flipy thing/playlist.xml lists 5. Not restoring automatically.
+[01:09:13] [INF] [7] InternalCodeMigration: Migration 20260729120000_RestorePlaylistChildrenFromMetadata was successfully applied
+[01:09:13] [INF] [7] InternalCodeMigration: Perform migration 20260821120000_RecomputeSeriesPresentationKey
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.RecomputeSeriesPresentationKey: Recomputing presentation unique key for 284 series
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.RecomputeSeriesPresentationKey: Processed 250/284 series - Updated: 78 - Time: 00:00:00.0428479
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.RecomputeSeriesPresentationKey: Recomputed presentation unique key for 89 of 284 series and 83 seasons in 00:00:00.1172426
+[01:09:13] [INF] [7] InternalCodeMigration: Migration 20260821120000_RecomputeSeriesPresentationKey was successfully applied
+[01:09:13] [INF] [7] InternalCodeMigration: Perform migration 20260825200000_ConsolidateLocalizedUserViews
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.ConsolidateLocalizedUserViews: Moved 0 items and dropped 1 stale livetv views in favour of 54c4e8db-dc43-511d-9b3a-452c48adf58a
+[01:09:13] [INF] [7] InternalCodeMigration: Migration 20260825200000_ConsolidateLocalizedUserViews was successfully applied
+[01:09:13] [INF] [7] InternalCodeMigration: Perform migration 20260831100000_EnableLocalSimilarityProviders
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.EnableLocalSimilarityProviders: Enabled local similarity providers ["Local Genre/Tag"] for 'MusicArtist' in library 'Music'.
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.EnableLocalSimilarityProviders: Enabled local similarity providers ["Local Genre/Tag"] for 'MusicAlbum' in library 'Music'.
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.EnableLocalSimilarityProviders: Enabled local similarity providers ["Local Genre/Tag"] for 'Audio' in library 'Music'.
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.EnableLocalSimilarityProviders: Enabled local similarity providers ["Local Genre/Tag"] for 'Movie' in library 'Demos'.
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.EnableLocalSimilarityProviders: Enabled local similarity providers ["Local Genre/Tag"] for 'Series' in library 'Shows'.
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.EnableLocalSimilarityProviders: Enabled local similarity providers ["Local Genre/Tag"] for 'Movie' in library 'Movies'.
+[01:09:13] [INF] [7] InternalCodeMigration: Migration 20260831100000_EnableLocalSimilarityProviders was successfully applied
+[01:09:13] [INF] [7] InternalCodeMigration: Perform migration 20260908120000_RepairAlternateVersionLinks
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.RepairAlternateVersionLinks: No alternate version links found, nothing to repair.
+[01:09:13] [INF] [7] InternalCodeMigration: Migration 20260908120000_RepairAlternateVersionLinks was successfully applied
+[01:09:13] [INF] [7] InternalCodeMigration: Perform migration 20260910120000_MigrateRatingLevels
+[01:09:13] [INF] [7] Jellyfin.Server.Migrations.Routines.MigrateRatingLevels: Recalculating parental rating levels based on rating string.
+[01:09:14] [WRN] [19] Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService: Health check StartupCheck with status Degraded completed after 0.003ms with message 'Server is still starting up.'
+[01:09:16] [INF] [7] InternalCodeMigration: Migration 20260910120000_MigrateRatingLevels was successfully applied
+[01:09:16] [INF] [7] InternalCodeMigration: Perform migration 20260911120000_StripEmbeddedLinkedChildren
+[01:09:17] [INF] [7] Jellyfin.Server.Migrations.Routines.StripEmbeddedLinkedChildren: Dropped dead keys from the serialized data of 103957 items
+[01:09:17] [INF] [7] InternalCodeMigration: Migration 20260911120000_StripEmbeddedLinkedChildren was successfully applied
+[01:09:17] [INF] [7] Main: Attempt to cleanup JellyfinDb backup.
+[01:09:17] [INF] [7] Main: Migrations have been applied, optimizing the database... This might take a while
+[01:09:22] [INF] [7] Jellyfin.Database.Providers.Sqlite.SqliteDatabaseProvider: jellyfin.db optimized successfully!
+[01:09:22] [INF] [7] Main: Preparing the database for shutdown...
+[01:09:22] [INF] [7] Emby.Server.Implementations.ApplicationHost: Disposing CoreAppHost
+[01:09:22] [INF] [7] Emby.Server.Implementations.ApplicationHost: Disposing Plugin
+MIGRATE rc=0 duration=195s
