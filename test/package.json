@@ -1,0 +1,11 @@
+{
+  "name": "jellyfin-netflix-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "shoot": "node shoot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

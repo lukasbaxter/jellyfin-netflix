@@ -1,0 +1,220 @@
+/* ---- 80 login and user select ---- */
+#loginPage:not(.hide) {
+    background: var(--nfx-login-bg);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* when the splash screen collage is on, let it show through a vignette */
+body:has(#loginPage:not(.hide)) .backdropContainer ~ .backgroundContainer.withBackdrop,
+body:has(#loginPage:not(.hide)) .backgroundContainer.withBackdrop {
+    background: linear-gradient(180deg, rgba(0, 0, 0, .8) 0%, rgba(0, 0, 0, .35) 40%, rgba(0, 0, 0, .8) 100%) !important;
+    opacity: 1;
+}
+
+body:has(#loginPage:not(.hide)) .backdropContainer:not(:empty) ~ * #loginPage,
+body:has(.backdropContainer .backdropImage) #loginPage {
+    background: none;
+}
+
+#loginPage > .padded-left {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* manual sign in: the black Netflix panel */
+#loginPage .manualLoginForm {
+    max-width: 450px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 6vh auto 0;
+    padding: 48px 56px 40px;
+    background: rgba(0, 0, 0, .75);
+    border-radius: var(--nfx-radius);
+}
+
+#loginPage .manualLoginForm .sectionTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 28px;
+    padding: 0;
+    text-align: left;
+    width: 100%;
+}
+
+#loginPage .manualLoginForm > .padded-left {
+    justify-content: flex-start !important;
+    padding: 0 !important;
+}
+
+#loginPage .inputContainer {
+    margin-bottom: 16px;
+}
+
+#loginPage .inputLabel {
+    color: #8c8c8c;
+    font-size: .9rem;
+}
+
+#loginPage .emby-input {
+    background: #333 !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: var(--nfx-radius);
+    height: 50px;
+    padding: 0 20px;
+    font-size: 1rem;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+#loginPage .emby-input:focus {
+    background: #454545 !important;
+    border-bottom-color: #e87c03 !important;
+}
+
+#loginPage .manualLoginForm .button-submit {
+    width: 100%;
+    height: 48px;
+    margin: 24px 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: var(--nfx-radius);
+    background: var(--nfx-red);
+}
+
+#loginPage .manualLoginForm .button-submit:hover,
+#loginPage .manualLoginForm .button-submit:focus {
+    background: var(--nfx-red-hover);
+}
+
+#loginPage .checkboxContainer {
+    color: #b3b3b3;
+    font-size: .9rem;
+}
+
+#loginPage .raised.cancel,
+#loginPage .btnSelectServer {
+    background: transparent !important;
+    color: #b3b3b3;
+    font-weight: 400;
+    font-size: .95rem;
+    box-shadow: none;
+}
+
+#loginPage .raised.cancel:hover,
+#loginPage .raised.cancel:focus,
+#loginPage .btnSelectServer:hover,
+#loginPage .btnSelectServer:focus {
+    color: #fff;
+    text-decoration: underline;
+    background: transparent !important;
+}
+
+#loginPage .readOnlyContent > .btnManual.hide,
+#loginPage .readOnlyContent > .hide {
+    display: none !important;
+}
+
+#loginPage .readOnlyContent {
+    max-width: 450px !important;
+    margin: 0 auto !important;
+    padding: 0 56px;
+    box-sizing: border-box;
+}
+
+#loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent {
+    background: rgba(0, 0, 0, .75);
+    border-radius: 0 0 var(--nfx-radius) var(--nfx-radius);
+    padding-bottom: 24px;
+    margin-top: -4px !important;
+}
+
+#loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent .btnManual {
+    display: none;
+}
+
+/* "Who's watching?" */
+#loginPage .visualLoginForm h1 {
+    font-size: clamp(2rem, 3.5vw, 3.5rem);
+    font-weight: 500;
+    color: #fff;
+    margin: 12vh 0 2em !important;
+}
+
+#loginPage #divUsers {
+    gap: 2vw;
+}
+
+#loginPage #divUsers .card {
+    width: clamp(84px, 10vw, 200px);
+}
+
+#loginPage #divUsers .cardBox {
+    margin: 0 !important;
+    background: none !important;
+}
+
+#loginPage #divUsers .cardScalable {
+    border-radius: var(--nfx-radius);
+    border: 3px solid transparent !important;
+    transition: border-color .15s;
+}
+
+#loginPage #divUsers .cardImageContainer,
+#loginPage #divUsers .cardPadder,
+#loginPage #divUsers .cardContent {
+    border-radius: var(--nfx-radius) !important;
+}
+
+#loginPage #divUsers .card:hover .cardScalable,
+#loginPage #divUsers .card:focus .cardScalable {
+    border-color: #fff !important;
+}
+
+#loginPage #divUsers .cardText {
+    color: #808080;
+    font-size: 1.1rem;
+    margin-top: .6em;
+}
+
+#loginPage #divUsers .card:hover .cardText,
+#loginPage #divUsers .card:focus .cardText {
+    color: #e5e5e5;
+}
+
+#loginPage #divUsers .cardFooter,
+#loginPage #divUsers .visualCardBox .cardFooter {
+    background: none;
+}
+
+#loginPage .loginDisclaimer {
+    color: #737373;
+    font-size: .85rem;
+}
+
+@media (max-width: 600px) {
+    #loginPage .manualLoginForm {
+        background: transparent;
+        padding: 24px 0 8px;
+        margin-top: 2vh;
+    }
+
+    #loginPage .readOnlyContent,
+    #loginPage .manualLoginForm:not(.hide) ~ .readOnlyContent {
+        padding: 0;
+        background: transparent;
+    }
+
+    #loginPage #divUsers .card {
+        width: 30vw;
+    }
+}
+
+/* select server page gets the same look */
+#selectServerPage .card .cardScalable {
+    border-radius: var(--nfx-radius);
+}

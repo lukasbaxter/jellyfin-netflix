@@ -1,0 +1,215 @@
+/* ---- 70 player OSD ---- */
+#videoOsdPage .videoOsdBottom {
+    background: linear-gradient(0deg, rgba(0, 0, 0, .85) 0%, rgba(0, 0, 0, .45) 45%, rgba(0, 0, 0, 0) 100%);
+    padding-top: 9em;
+}
+
+#videoOsdPage .osdControls {
+    padding: 0 var(--nfx-gutter);
+}
+
+#videoOsdPage .osdTitle,
+#videoOsdPage .osdMainTextContainer {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.15em;
+}
+
+#videoOsdPage .osdSecondaryMediaInfo {
+    color: var(--nfx-text-2);
+}
+
+#videoOsdPage .osdTextContainer.osdPositionText,
+#videoOsdPage .osdTextContainer.osdDurationText,
+#videoOsdPage .osdTimeText {
+    color: #e5e5e5;
+    font-variant-numeric: tabular-nums;
+}
+
+/* red scrubber */
+#videoOsdPage .mdl-slider-background-lower {
+    background-color: var(--nfx-red) !important;
+}
+
+#videoOsdPage .mdl-slider-background-upper {
+    background-color: rgba(255, 255, 255, .45) !important;
+}
+
+#videoOsdPage .mdl-slider-background-flex {
+    background: rgba(255, 255, 255, .25);
+}
+
+#videoOsdPage .mdl-slider::-webkit-slider-thumb {
+    background: var(--nfx-red);
+    border: 0;
+}
+
+#videoOsdPage .mdl-slider::-moz-range-thumb {
+    background: var(--nfx-red);
+    border: 0;
+}
+
+#videoOsdPage .osdVolumeSlider .mdl-slider-background-lower,
+#videoOsdPage .osdVolumeSliderContainer .mdl-slider-background-lower {
+    background-color: #fff !important;
+}
+
+#videoOsdPage .sliderMarker {
+    background-color: rgba(255, 255, 255, .55);
+    width: 2px;
+}
+
+#videoOsdPage .sliderMarker.watched {
+    background-color: rgba(255, 255, 255, .35);
+}
+
+#videoOsdPage .sliderBubble {
+    background: #141414;
+    border-radius: var(--nfx-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .6);
+}
+
+#videoOsdPage .chapterThumb {
+    border-radius: var(--nfx-radius);
+}
+
+/* plain white icons that grow on hover */
+#videoOsdPage .videoOsdBottom .buttons button,
+#videoOsdPage .osdHeader .headerButton {
+    color: #fff;
+    background: none !important;
+    transition: transform .15s var(--nfx-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    #videoOsdPage .videoOsdBottom .buttons button:hover {
+        transform: scale(1.25);
+        color: #fff;
+    }
+}
+
+#videoOsdPage .videoOsdBottom .buttons button:focus {
+    transform: scale(1.2);
+}
+
+#videoOsdPage .osdHeader,
+.skinHeader-withBackground.osdHeader {
+    background: linear-gradient(180deg, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, 0) 100%) !important;
+}
+
+/* touch: big centred rewind / pause / forward, like the Netflix app */
+@media (hover: none) and (pointer: coarse) {
+    #videoOsdPage .videoOsdBottom .btnPause,
+    #videoOsdPage .videoOsdBottom .btnRewind,
+    #videoOsdPage .videoOsdBottom .btnFastForward {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin: 0;
+        transform: translate(-50%, -50%);
+        font-size: 1.9em;
+        pointer-events: auto;
+    }
+
+    #videoOsdPage .videoOsdBottom .btnRewind {
+        left: calc(50% - 30vw);
+        font-size: 1.4em;
+    }
+
+    #videoOsdPage .videoOsdBottom .btnFastForward {
+        left: calc(50% + 30vw);
+        font-size: 1.4em;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+    #videoOsdPage .videoOsdBottom .btnRewind {
+        left: calc(50% - 18vw);
+    }
+
+    #videoOsdPage .videoOsdBottom .btnFastForward {
+        left: calc(50% + 18vw);
+    }
+}
+
+/* Next Episode card, bottom right */
+.upNextContainer {
+    background: rgba(20, 20, 20, .92);
+    border-radius: var(--nfx-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .7);
+    width: min(30em, calc(100vw - 2em));
+    padding: 1.2em;
+}
+
+.upNextContainer .upNextDialog-nextVideoText {
+    font-size: 1em;
+    color: var(--nfx-text-2);
+    font-weight: 400;
+}
+
+.upNextContainer .upNextDialog-title {
+    font-size: 1.2em;
+    color: #fff;
+    font-weight: 700;
+    width: auto;
+}
+
+.upNextContainer .upNextDialog-poster,
+.upNextContainer .upNextDialog-poster img {
+    border-radius: var(--nfx-radius);
+}
+
+.upNextContainer .upNextDialog-buttons {
+    width: auto;
+    gap: .6em;
+}
+
+.upNextContainer .upNextDialog-button {
+    border-radius: var(--nfx-radius);
+    font-weight: 700;
+    margin: 0;
+}
+
+.upNextContainer .btnStartNow {
+    background: #fff;
+    color: #000;
+}
+
+.upNextContainer .btnStartNow:hover,
+.upNextContainer .btnStartNow:focus {
+    background: rgba(255, 255, 255, .75);
+    color: #000;
+}
+
+.upNextContainer .btnHide {
+    background: rgba(109, 109, 110, .7);
+    color: #fff;
+}
+
+/* Skip Intro pill (media segments, Intro Skipper) */
+.skip-button {
+    background: rgba(20, 20, 20, .55) !important;
+    color: #fff !important;
+    border: 2px solid rgba(255, 255, 255, .85) !important;
+    border-radius: var(--nfx-radius) !important;
+    padding: .7em 1.5em !important;
+    font-weight: 700;
+    font-size: 1.1em;
+    margin-right: var(--nfx-gutter) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .5);
+    transition: opacity .2s ease-out, background-color .15s, color .15s;
+}
+
+.skip-button:hover,
+.skip-button:focus {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+.skip-button .material-icons {
+    display: none;
+}
+
+.skip-button-container {
+    bottom: 9rem;
+}

@@ -1,0 +1,272 @@
+/* ---- 95 plugin elements (see CONTRACT.md) ---- */
+
+/* header goes solid on scroll (plugin toggles html.nfx-scrolled); handled in 20-header */
+
+/* ---- Top 10: big outlined numeral left of the poster ---- */
+.nfx-row .scrollSlider > .nfx-card--top10 {
+    width: calc((100vw - 8vw) / 5.2);
+    display: block;
+    position: relative;
+    text-decoration: none;
+    color: #fff;
+}
+
+.nfx-card--top10 .nfx-card__img,
+.nfx-card--top10 > .cardBox {
+    width: 52%;
+    margin-left: 48%;
+}
+
+.nfx-card--top10 .nfx-rank {
+    position: absolute;
+    left: 0;
+    bottom: -.08em;
+    width: 60%;
+    z-index: 0;
+    font-size: calc((100vw - 8vw) / 5.2 * .75);
+    line-height: .82;
+    font-weight: 800;
+    letter-spacing: -.08em;
+    text-align: right;
+    color: #141414;
+    -webkit-text-stroke: max(2px, .25vw) #595959;
+    paint-order: stroke fill;
+    user-select: none;
+    pointer-events: none;
+}
+
+.nfx-card--top10 .nfx-card__img,
+.nfx-card--top10 .cardBox {
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- generic plugin card ---- */
+.nfx-card {
+    display: block;
+    flex-shrink: 0;
+    text-decoration: none;
+    color: #fff;
+    outline: none;
+}
+
+.nfx-row .scrollSlider > .nfx-card:not(.nfx-card--top10) {
+    margin-right: max(4px, .4vw);
+}
+
+.nfx-card__img {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--nfx-radius);
+    background: var(--nfx-bg-elev2);
+    aspect-ratio: 16 / 9;
+}
+
+.nfx-card--top10 .nfx-card__img {
+    aspect-ratio: 2 / 3;
+}
+
+.nfx-card__img > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.nfx-card__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: #4d4d4d;
+}
+
+.nfx-card__progress > i {
+    display: block;
+    height: 100%;
+    background: var(--nfx-red);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nfx-row .scrollSlider > .nfx-card {
+        transition: transform .3s var(--nfx-ease), box-shadow .3s var(--nfx-ease);
+        position: relative;
+    }
+
+    .nfx-row .scrollSlider > .nfx-card:hover {
+        z-index: 5;
+        transform: scale(1.08);
+        transition-delay: .25s;
+    }
+
+    .nfx-row .scrollSlider > .nfx-card:first-child,
+    .nfx-row .scrollSlider > .nfx-card.nfx-edge-left {
+        transform-origin: left center;
+    }
+
+    .nfx-row .scrollSlider > .nfx-card.nfx-edge-right {
+        transform-origin: right center;
+    }
+}
+
+.nfx-card:focus-visible .nfx-card__img,
+html.layout-tv .nfx-card:focus .nfx-card__img {
+    outline: 3px solid #fff;
+    outline-offset: 0;
+}
+
+html.layout-tv .nfx-row .scrollSlider > .nfx-card:focus {
+    transform: scale(1.1);
+    z-index: 5;
+    transition: transform .15s var(--nfx-ease);
+}
+
+@media (max-width: 600px) {
+    .nfx-row .scrollSlider > .nfx-card--top10 {
+        width: calc((100vw - 16px) / 2.4);
+    }
+
+    .nfx-card--top10 .nfx-rank {
+        font-size: calc((100vw - 16px) / 2.4 * .75);
+    }
+
+    .nfx-row .scrollSlider > .nfx-card:not(.nfx-card--top10) {
+        margin-right: 8px;
+    }
+}
+
+html.layout-tv .nfx-row .scrollSlider > .nfx-card--top10 {
+    width: calc((100vw - 10vw) / 5);
+}
+
+html.layout-tv .nfx-card--top10 .nfx-rank {
+    font-size: calc((100vw - 10vw) / 5 * .75);
+}
+
+/* ---- hover preview card ---- */
+.nfx-preview {
+    position: absolute;
+    z-index: 1000;
+    background: var(--nfx-bg-elev);
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .75);
+    overflow: hidden;
+    color: #fff;
+    opacity: 0;
+    transform: scale(.66);
+    transform-origin: center center;
+    pointer-events: none;
+    transition: opacity .2s var(--nfx-ease), transform .25s var(--nfx-ease);
+}
+
+.nfx-preview.is-open {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+.nfx-preview__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.nfx-preview__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.nfx-preview__media .nfx-preview__logo,
+.nfx-preview__media img.nfx-preview__logo {
+    position: absolute;
+    left: 1em;
+    bottom: .8em;
+    width: 45%;
+    height: auto;
+    max-height: 40%;
+    object-fit: contain;
+    object-position: left bottom;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .6));
+}
+
+.nfx-preview__media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, var(--nfx-bg-elev) 0%, transparent 35%);
+    pointer-events: none;
+}
+
+.nfx-preview__body {
+    padding: .8em 1.1em 1.1em;
+}
+
+.nfx-preview__actions {
+    display: flex;
+    align-items: center;
+    gap: .5em;
+    margin-bottom: .8em;
+}
+
+.nfx-preview__actions .nfx-btn--icon {
+    font-size: .95rem;
+}
+
+.nfx-preview__actions .nfx-btn--more {
+    margin-left: auto;
+}
+
+.nfx-preview__title {
+    font-weight: 700;
+    margin: 0 0 .4em;
+    font-size: 1rem;
+}
+
+.nfx-preview__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5em;
+    font-size: .85rem;
+    color: #bcbcbc;
+    margin-bottom: .5em;
+}
+
+.nfx-preview__genres {
+    font-size: .85rem;
+    color: #fff;
+}
+
+.nfx-preview__genres > * + *::before {
+    content: "\2022";
+    margin: 0 .45em;
+    color: #646464;
+}
+
+html.nfx-preview-open .homeSectionsContainer .card:hover > .cardBox {
+    transform: none;
+}
+
+/* ---- plugin rows use the stock row styles (30-home-rows) plus this ---- */
+.nfx-row .nfx-row__items {
+    display: flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.nfx-row .emby-scroller:not(.scrollX) {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nfx-preview,
+    .nfx-row .scrollSlider > .nfx-card {
+        transition: none;
+        transform: none !important;
+    }
+}

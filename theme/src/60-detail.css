@@ -1,0 +1,712 @@
+/* ---- 60 detail page ---- */
+/* Full-bleed backdrop with the logo, meta and buttons laid over its lower left. */
+#itemDetailPage:not(.hide) {
+    --nfx-detail-h: min(56.25vw, 82vh);
+    --nfx-detail-pull: 13vw;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    background: transparent;
+}
+
+/* With backdrops on, the art is the fixed full-screen .backdropContainer and #itemBackdrop
+   stays empty. Either way #itemBackdrop is the frame and carries the gradients. */
+body:has(#itemDetailPage:not(.hide)) .backgroundContainer.withBackdrop {
+    background-color: transparent !important;
+    opacity: 1;
+}
+
+#itemDetailPage .itemBackdrop {
+    grid-area: 1 / 1;
+    display: block !important;
+    height: var(--nfx-detail-h) !important;
+    margin-top: calc(-1 * var(--nfx-header-h)) !important;
+    background-attachment: scroll !important;
+    background-position: center 20% !important;
+    position: relative;
+}
+
+#itemDetailPage .itemBackdrop::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    background:
+        linear-gradient(77deg, rgba(0, 0, 0, .8) 0%, rgba(0, 0, 0, .45) 38%, transparent 75%),
+        linear-gradient(180deg, rgba(0, 0, 0, .5) 0, transparent 16%, transparent 45%, rgba(20, 20, 20, .75) 75%, var(--nfx-bg) 100%) !important;
+}
+
+/* No art at all (narrow desktop window, backdrops off): shrink the frame to fit the logo */
+body:not(:has(.backdropContainer .backdropImage)) #itemDetailPage:not(.hide):not(:has(.itemBackdrop[style*="background-image"])) {
+    --nfx-detail-h: calc(var(--nfx-header-h) + 30vw);
+}
+
+/* Logo sits bottom-left over the backdrop, just above the meta line */
+#itemDetailPage .detailLogo {
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: start;
+    display: block;
+    position: relative;
+    inset: auto;
+    width: min(34vw, 560px);
+    height: min(12vw, 22vh);
+    margin: 0 0 calc(var(--nfx-detail-pull) + 1.2vw) var(--nfx-gutter);
+    background-position: left bottom;
+    z-index: 3;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5));
+}
+
+#itemDetailPage .detailLogo.hide {
+    display: none;
+}
+
+/* content pulled up over the bottom of the backdrop, solid below */
+#itemDetailPage .detailPageWrapperContainer {
+    grid-area: 2 / 1;
+    position: relative;
+    z-index: 2;
+    margin-top: calc(-1 * var(--nfx-detail-pull)) !important;
+    background: linear-gradient(180deg, transparent 0, var(--nfx-bg) var(--nfx-detail-pull));
+    display: block;
+    height: auto !important;
+    min-height: 40vh;
+}
+
+#itemDetailPage:not(.hide) {
+    grid-template-rows: auto auto;
+    align-content: start;
+}
+
+#itemDetailPage .detailPageSecondaryContainer {
+    background: var(--nfx-bg);
+}
+
+/* quieter extras */
+#itemDetailPage .itemExternalLinks,
+#itemDetailPage .itemTags {
+    color: var(--nfx-text-3);
+}
+
+#itemDetailPage .itemExternalLinks a,
+#itemDetailPage .itemTags a {
+    color: var(--nfx-text-2) !important;
+    font-weight: 400;
+}
+
+#itemDetailPage .trackSelections .selectLabel,
+#itemDetailPage .trackSelections label {
+    color: var(--nfx-text-3);
+}
+
+/* no poster: logo and backdrop replace it */
+#itemDetailPage .detailImageContainer {
+    display: none !important;
+}
+
+#itemDetailPage .detailRibbon {
+    display: block;
+    height: auto !important;
+    margin-top: 0 !important;
+    padding: 0 var(--nfx-gutter) !important;
+    background: none !important;
+    position: relative;
+}
+
+#itemDetailPage .infoWrapper {
+    padding-left: 0 !important;
+    max-width: 60%;
+}
+
+/* title: hidden when the logo is there (the h3 episode name stays) */
+#itemDetailPage:has(.detailLogo:not(.hide)) .nameContainer > h1 {
+    display: none;
+}
+
+#itemDetailPage .nameContainer .itemName,
+#itemDetailPage .nameContainer .parentName {
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, .45);
+    white-space: normal;
+}
+
+#itemDetailPage .nameContainer h1 {
+    font-size: clamp(2rem, 3.5vw, 4.5rem);
+    line-height: 1.05;
+    margin: 0 0 .3em;
+}
+
+#itemDetailPage .nameContainer h3.itemName,
+#itemDetailPage .nameContainer .subtitle {
+    font-size: clamp(1.1rem, 1.5vw, 1.8rem);
+    font-weight: 700;
+    margin: .2em 0 .3em;
+    padding-left: 0;
+}
+
+#itemDetailPage .nameContainer .originalTitle {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--nfx-text-2);
+}
+
+/* meta line: green rating, year, badge, runtime */
+#itemDetailPage .itemMiscInfo {
+    color: #bcbcbc;
+    font-size: clamp(.9rem, 1.05vw, 1.15rem);
+    gap: .2em;
+}
+
+#itemDetailPage .itemMiscInfo .mediaInfoItem {
+    margin-right: .8em;
+}
+
+#itemDetailPage .itemMiscInfo .mediaInfoItem:first-child,
+#itemDetailPage .itemMiscInfo .starRatingContainer {
+    color: #fff;
+}
+
+#itemDetailPage .itemMiscInfo .starRatingContainer {
+    color: var(--nfx-match);
+    font-weight: 700;
+}
+
+#itemDetailPage .itemMiscInfo .starRatingContainer .starIcon {
+    color: var(--nfx-match);
+}
+
+#itemDetailPage .itemMiscInfo .mediaInfoOfficialRating {
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: 0;
+    padding: 0 .4em;
+    color: #fff;
+}
+
+#itemDetailPage .itemMiscInfo .mediaInfoCriticRating {
+    color: #fff;
+}
+
+#itemDetailPage .itemMiscInfo .mediaInfoText,
+#itemDetailPage .itemMiscInfo .mediaInfoIconItem {
+    border: 1px solid rgba(255, 255, 255, .4);
+    background: none;
+    border-radius: 3px;
+    padding: 0 .35em;
+    font-size: .78em;
+    font-weight: 600;
+    color: #fff;
+}
+
+#itemDetailPage .itemMiscInfo .endsAt {
+    color: var(--nfx-text-3);
+}
+
+/* buttons: Play/Resume white, the rest round outline icons */
+#itemDetailPage .mainDetailButtons {
+    margin: 1em 0 .5em !important;
+    padding: 0 !important;
+    gap: .6em;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+#itemDetailPage .mainDetailButtons .detailButton {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 2.6em;
+    height: 2.6em;
+    min-width: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, .5);
+    background: rgba(42, 42, 42, .6);
+    color: #fff;
+    font-size: clamp(.95rem, 1.1vw, 1.2rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s, background-color .15s, transform .15s;
+}
+
+#itemDetailPage .mainDetailButtons .detailButton.hide {
+    display: none;
+}
+
+#itemDetailPage .mainDetailButtons .detailButton:hover,
+#itemDetailPage .mainDetailButtons .detailButton:focus {
+    border-color: #fff;
+    background: rgba(255, 255, 255, .12);
+}
+
+#itemDetailPage .mainDetailButtons .detailButton-content {
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#itemDetailPage .mainDetailButtons .detailButton-icon {
+    font-size: 1.4em;
+    padding: 0;
+}
+
+#itemDetailPage .mainDetailButtons .detailButton-text {
+    display: none;
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay,
+#itemDetailPage .mainDetailButtons .btnReplay {
+    width: auto;
+    border-radius: var(--nfx-radius);
+    border: 0;
+    background: #fff;
+    color: #000;
+    padding: 0 1.6em 0 1.2em !important;
+    font-weight: 700;
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay:hover,
+#itemDetailPage .mainDetailButtons .btnPlay:focus,
+#itemDetailPage .mainDetailButtons .btnReplay:hover,
+#itemDetailPage .mainDetailButtons .btnReplay:focus {
+    background: rgba(255, 255, 255, .75);
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay .detailButton-icon,
+#itemDetailPage .mainDetailButtons .btnReplay .detailButton-icon {
+    font-size: 1.9em;
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay .detailButton-content::after {
+    content: "Play";
+    font-size: 1.1em;
+    margin-left: .3em;
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay[data-action="resume"] .detailButton-content::after {
+    content: "Resume";
+}
+
+#itemDetailPage .mainDetailButtons .btnReplay .detailButton-content::after {
+    content: "Start over";
+    font-size: 1.1em;
+    margin-left: .3em;
+}
+
+/* when Resume is showing, Replay becomes a round icon */
+#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay {
+    width: 2.6em;
+    padding: 0 !important;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, .5);
+    background: rgba(42, 42, 42, .6);
+    color: #fff;
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay .detailButton-content::after {
+    content: none;
+}
+
+#itemDetailPage .mainDetailButtons .btnPlay:not(.hide) ~ .btnReplay .detailButton-icon {
+    font-size: 1.4em;
+}
+
+#itemDetailPage .btnUserRating .detailButton-icon.ratingbutton-icon-withrating,
+#itemDetailPage .btnUserRating[data-isfavorite="true"] .detailButton-icon {
+    color: var(--nfx-red);
+}
+
+#itemDetailPage .btnPlaystate[data-played="true"] .detailButton-icon,
+#itemDetailPage .btnPlaystate .playstatebutton-icon-played {
+    color: var(--nfx-match);
+}
+
+/* body: overview left, details right */
+#itemDetailPage .detailPagePrimaryContent {
+    padding: .5em var(--nfx-gutter) 0 !important;
+}
+
+#itemDetailPage .detailSection {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    column-gap: 3vw;
+    align-items: start;
+}
+
+#itemDetailPage .detailSection > * {
+    grid-column: 1 / -1;
+}
+
+#itemDetailPage .detailSection > .detailSectionContent {
+    grid-column: 1;
+}
+
+#itemDetailPage .detailSection > .itemDetailsGroup {
+    grid-column: 2;
+    margin: 0;
+}
+
+#itemDetailPage .detailSectionContent .overview {
+    font-size: clamp(1rem, 1.15vw, 1.3rem);
+    line-height: 1.5;
+    color: #fff;
+    margin-top: .4em;
+}
+
+#itemDetailPage .detailSectionContent .tagline {
+    font-weight: 700;
+    color: #fff;
+    margin: .6em 0 0;
+}
+
+#itemDetailPage .itemGenres {
+    color: var(--nfx-text-2);
+    margin: .3em 0;
+}
+
+#itemDetailPage .overview-expand {
+    color: var(--nfx-text-2);
+}
+
+/* details list: grey label, white value */
+#itemDetailPage .itemDetailsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: .35em;
+    font-size: .95em;
+    padding-top: .5em;
+}
+
+#itemDetailPage .detailsGroupItem {
+    display: block;
+    margin: 0;
+    line-height: 1.5;
+}
+
+#itemDetailPage .detailsGroupItem .label {
+    display: inline;
+    color: var(--nfx-text-3);
+    flex-basis: auto;
+    margin-right: .3em;
+    text-transform: none;
+}
+
+#itemDetailPage .detailsGroupItem .label::after {
+    content: ":";
+}
+
+#itemDetailPage .detailsGroupItem .content {
+    display: inline;
+    color: #ddd;
+}
+
+#itemDetailPage .detailsGroupItem .content a {
+    color: #ddd;
+}
+
+#itemDetailPage .detailsGroupItem .content a:hover {
+    text-decoration: underline;
+}
+
+/* audio/subtitle pickers */
+#itemDetailPage .trackSelections {
+    margin: 0 0 1em;
+    max-width: 60%;
+}
+
+#itemDetailPage .trackSelections .selectContainer .detailTrackSelect {
+    padding-right: 2.2em;
+    text-overflow: ellipsis;
+    background: #242424;
+    border: 1px solid #4d4d4d;
+    border-radius: var(--nfx-radius);
+    color: #fff;
+}
+
+/* section rows below */
+#itemDetailPage .detailPageSecondaryContainer {
+    padding-left: var(--nfx-gutter) !important;
+    padding-top: 2em;
+}
+
+#itemDetailPage .detailVerticalSection {
+    margin-bottom: 2.4em;
+}
+
+#itemDetailPage .detailVerticalSection .sectionTitle {
+    font-size: clamp(1.15rem, 1.6vw, 1.8rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: .6em;
+}
+
+#itemDetailPage .detailVerticalSection .emby-scroller {
+    padding-top: .9vw !important;
+    padding-bottom: .9vw !important;
+    margin-top: -.9vw;
+}
+
+/* ---- episode list (Netflix "Episodes") ---- */
+#itemDetailPage #childrenContent .listItem {
+    display: block;
+    padding: 1.4em 1em;
+    margin: 0;
+    border-bottom: 1px solid #404040;
+    border-radius: var(--nfx-radius);
+    background: transparent;
+}
+
+#itemDetailPage #childrenContent .listItem:hover,
+#itemDetailPage #childrenContent .listItem:focus-within {
+    background: #2a2a2a;
+}
+
+#itemDetailPage #childrenContent .listItem-content {
+    display: flex;
+    align-items: center;
+    gap: 1.4em;
+}
+
+#itemDetailPage #childrenContent .listItemImage {
+    width: clamp(130px, 13vw, 240px) !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--nfx-radius);
+    background-size: cover;
+    flex-shrink: 0;
+    margin: 0 !important;
+    position: relative;
+}
+
+#itemDetailPage #childrenContent .listItemImage .itemProgressBar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: #4d4d4d;
+}
+
+#itemDetailPage #childrenContent .listItemImageButton {
+    background: rgba(30, 30, 30, .6);
+    border: 1px solid #fff;
+    color: #fff;
+    opacity: 0;
+    transition: opacity .2s;
+}
+
+#itemDetailPage #childrenContent .listItem:hover .listItemImageButton,
+#itemDetailPage #childrenContent .listItem:focus-within .listItemImageButton {
+    opacity: 1;
+}
+
+#itemDetailPage #childrenContent .listItemBody {
+    padding: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+#itemDetailPage #childrenContent .listItemBodyText {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05em;
+    margin: 0 0 .25em;
+}
+
+#itemDetailPage #childrenContent .listItemMediaInfo {
+    color: var(--nfx-text-2);
+    font-weight: 400;
+    font-size: .9em;
+}
+
+#itemDetailPage #childrenContent .listItemMediaInfo .starRatingContainer {
+    color: var(--nfx-match);
+    font-weight: 700;
+}
+
+#itemDetailPage #childrenContent .listItemMediaInfo .starIcon {
+    color: var(--nfx-match);
+    font-size: 1em;
+}
+
+#itemDetailPage #childrenContent .listItemMediaInfo .endsAt {
+    display: none;
+}
+
+#itemDetailPage #childrenContent .listItem-overview {
+    color: #d2d2d2;
+    font-weight: 400;
+    font-size: .92em;
+    line-height: 1.45;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#itemDetailPage #childrenContent .listItem-overview p {
+    margin: 0;
+}
+
+#itemDetailPage #childrenContent .listViewUserDataButtons .listItemButton {
+    color: var(--nfx-text-2);
+}
+
+#itemDetailPage #childrenContent .listViewUserDataButtons .listItemButton:hover {
+    color: #fff;
+    background: none;
+}
+
+#itemDetailPage #childrenContent .playstatebutton-icon-played {
+    color: var(--nfx-match);
+}
+
+#itemDetailPage #childrenContent .listItem-bottomoverview {
+    color: #d2d2d2;
+    font-size: .9em;
+    line-height: 1.45;
+    margin-top: .6em;
+}
+
+/* rows under the detail page use the same row grid as home */
+#itemDetailPage .detailVerticalSection:not(.hide) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+#itemDetailPage .detailVerticalSection > .emby-scroller,
+#itemDetailPage .detailVerticalSection > .emby-scrollbuttons {
+    grid-row: 2;
+    grid-column: 1;
+}
+
+#itemDetailPage .detailVerticalSection .emby-scrollbuttons-button {
+    pointer-events: auto;
+    width: var(--nfx-gutter-px);
+    min-width: 36px;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    color: #fff;
+    background: rgba(20, 20, 20, .5) !important;
+    opacity: 0;
+    transition: opacity .2s;
+}
+
+#itemDetailPage .detailVerticalSection:hover .emby-scrollbuttons-button {
+    opacity: 1;
+}
+
+#itemDetailPage .detailVerticalSection .emby-scrollbuttons-button[disabled] {
+    visibility: hidden;
+}
+
+#itemDetailPage .detailVerticalSection .emby-scrollbuttons-button > .material-icons {
+    font-size: 2.4vw;
+}
+
+/* person cards: round photo, no square plate behind */
+#itemDetailPage .personCard .cardScalable,
+#itemDetailPage .personCard .blurhash-canvas {
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+#itemDetailPage .personCard .cardPadder {
+    background: transparent;
+}
+
+#itemDetailPage .personCard {
+    width: clamp(96px, 9vw, 160px) !important;
+}
+
+/* ---- phones ---- */
+@media (max-width: 600px) {
+    #itemDetailPage:not(.hide) {
+        --nfx-detail-h: calc(62vw + var(--nfx-header-h));
+        --nfx-detail-pull: 0px;
+    }
+
+    #itemDetailPage .itemBackdrop::before {
+        background: linear-gradient(180deg, rgba(0, 0, 0, .55) 0, transparent 30%, transparent 60%, var(--nfx-bg) 100%) !important;
+    }
+
+    #itemDetailPage .detailLogo {
+        justify-self: stretch;
+        width: auto;
+        height: 22vw;
+        margin: 0 16px 12px;
+        background-position: center bottom;
+    }
+
+    #itemDetailPage .detailRibbon {
+        padding: .6em 16px 0 !important;
+    }
+
+    #itemDetailPage .infoWrapper,
+    #itemDetailPage .trackSelections {
+        max-width: none;
+        padding: 0 !important;
+    }
+
+    #itemDetailPage .nameContainer,
+    #itemDetailPage .itemMiscInfo {
+        text-align: left;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    #itemDetailPage .nameContainer h1 {
+        font-size: 1.7rem;
+    }
+
+    #itemDetailPage .mainDetailButtons {
+        justify-content: flex-start;
+    }
+
+    /* Netflix phone: big full-width Play */
+    #itemDetailPage .mainDetailButtons .btnPlay:not(.hide),
+    #itemDetailPage .mainDetailButtons .btnPlay.hide + .btnReplay:not(.hide) {
+        flex: 1 1 100%;
+        width: 100%;
+        height: 44px;
+        justify-content: center;
+    }
+
+    #itemDetailPage .detailPagePrimaryContent {
+        padding: 0 16px !important;
+    }
+
+    #itemDetailPage .detailSection {
+        display: block;
+    }
+
+    #itemDetailPage .itemTags,
+    #itemDetailPage .itemExternalLinks {
+        display: none !important;
+    }
+
+    #itemDetailPage .detailPageSecondaryContainer {
+        padding-left: 16px !important;
+    }
+
+    #itemDetailPage #childrenContent .listItem {
+        padding: 1em 0;
+    }
+
+    #itemDetailPage #childrenContent .listItem-content {
+        gap: .9em;
+    }
+
+    #itemDetailPage #childrenContent .listItemImage {
+        width: 42% !important;
+    }
+
+    #itemDetailPage #childrenContent .listItem-content .listItem-overview,
+    #itemDetailPage #childrenContent .listViewUserDataButtons {
+        display: none;
+    }
+}

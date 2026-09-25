@@ -1,0 +1,304 @@
+/* ---- 40 cards ---- */
+body:not(.dashboardDocument) .cardImageContainer,
+body:not(.dashboardDocument) .cardContent,
+body:not(.dashboardDocument) .cardOverlayContainer,
+body:not(.dashboardDocument) .blurhash-canvas,
+body:not(.dashboardDocument) .cardBox:not(.visualCardBox) .cardPadder {
+    border-radius: var(--nfx-radius);
+}
+
+body:not(.dashboardDocument) .cardBox:not(.visualCardBox) .cardPadder,
+body:not(.dashboardDocument) .defaultCardBackground {
+    background-color: var(--nfx-bg-elev2);
+}
+
+body:not(.dashboardDocument) .cardText {
+    color: #e5e5e5;
+}
+
+body:not(.dashboardDocument) .cardText-secondary {
+    color: var(--nfx-text-2);
+}
+
+/* progress: thin red bar flush to the bottom of the art */
+body:not(.dashboardDocument) .innerCardFooter.fullInnerCardFooter {
+    background: none !important;
+    padding: 0 !important;
+}
+
+body:not(.dashboardDocument) .cardScalable .itemProgressBar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: #4d4d4d;
+    border-radius: 0 0 var(--nfx-radius) var(--nfx-radius);
+    overflow: hidden;
+}
+
+body:not(.dashboardDocument) .itemProgressBarForeground {
+    background-color: var(--nfx-red) !important;
+}
+
+/* indicators: small and quiet */
+body:not(.dashboardDocument) .cardIndicators .playedIndicator {
+    background: rgba(0, 0, 0, .6) !important;
+    color: var(--nfx-match);
+    width: 1.5em;
+    height: 1.5em;
+    box-shadow: none;
+}
+
+body:not(.dashboardDocument) .cardIndicators .playedIndicator .indicatorIcon {
+    font-size: 1.1em;
+}
+
+body:not(.dashboardDocument) .cardIndicators .countIndicator {
+    background: rgba(0, 0, 0, .6) !important;
+    color: #fff;
+    min-width: 1.5em;
+    height: 1.5em;
+    width: auto;
+    padding: 0 .35em;
+    font-size: 78%;
+    font-weight: 700;
+    box-shadow: none;
+    border-radius: 3px;
+}
+
+/* stock hover overlay: bottom shade + small round buttons instead of the grey veil */
+body:not(.dashboardDocument) .cardOverlayContainer {
+    background: linear-gradient(0deg, rgba(0, 0, 0, .75), rgba(0, 0, 0, 0) 55%);
+}
+
+body:not(.dashboardDocument) .cardOverlayContainer > .cardOverlayFab-primary {
+    background: rgba(20, 20, 20, .6);
+    border: 2px solid rgba(255, 255, 255, .8);
+    width: 2.6em;
+    height: 2.6em;
+    margin-top: -1.3em;
+    margin-left: -1.3em;
+    color: #fff;
+}
+
+body:not(.dashboardDocument) .cardOverlayContainer > .cardOverlayFab-primary:hover {
+    background: #fff;
+    color: #000;
+    transform: scale(1.1);
+}
+
+body:not(.dashboardDocument) .cardOverlayButton-br .cardOverlayButton {
+    color: #fff;
+}
+
+/* ---------- home and nfx rows: sizing ---------- */
+:is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card {
+    contain: layout style;
+}
+
+:is(.homeSectionsContainer, .nfx-row) .itemsContainer > .card > .cardBox {
+    margin: 0 max(4px, .4vw) 0 0 !important;
+}
+
+:is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    width: calc((100vw - 8vw) / 6);
+}
+
+:is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowPortraitCard, .portraitCard) {
+    width: calc((100vw - 8vw) / 8.2);
+}
+
+:is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowSquareCard, .squareCard) {
+    width: calc((100vw - 8vw) / 8.2);
+}
+
+@media (max-width: 1400px) {
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: calc((100vw - 8vw) / 5); }
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowPortraitCard, .portraitCard, .overflowSquareCard, .squareCard) { width: calc((100vw - 8vw) / 7); }
+}
+
+@media (max-width: 1100px) {
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: calc((100vw - 8vw) / 4); }
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowPortraitCard, .portraitCard, .overflowSquareCard, .squareCard) { width: calc((100vw - 8vw) / 5.6); }
+}
+
+@media (max-width: 800px) {
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: calc((100vw - 8vw) / 3); }
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowPortraitCard, .portraitCard, .overflowSquareCard, .squareCard) { width: calc((100vw - 8vw) / 4.3); }
+}
+
+/* phones: 2.3 backdrops or 3.3 posters */
+@media (max-width: 600px) {
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: calc((100vw - 16px) / 2.3); }
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowPortraitCard, .portraitCard, .overflowSquareCard, .squareCard) { width: calc((100vw - 16px) / 3.3); }
+}
+
+/* Netflix rows are image-only. In 12 the card text lines sit straight in .cardBox
+   (.cardText-first, .cardText-secondary), older builds wrap them in .cardFooter.
+   Posters and library tiles carry their own title, so their text is hidden.
+   Plain backdrops get the name laid over the bottom of the art. */
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowPortraitCard, .portraitCard, .overflowSquareCard, .squareCard) .cardBox > :is(.cardText, .cardFooter),
+:is(.homeSectionsContainer, .nfx-row) .card[data-type="CollectionFolder"] .cardBox > :is(.cardText, .cardFooter),
+:is(.homeSectionsContainer, .nfx-row) .card[data-type="UserView"] .cardBox > :is(.cardText, .cardFooter) {
+    display: none;
+}
+
+:is(.homeSectionsContainer, .nfx-row) .cardBox-bottompadded {
+    margin-bottom: 0 !important;
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox {
+    position: relative;
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard):not([data-type="CollectionFolder"], [data-type="UserView"]) .cardBox:has(> .cardText) > .cardScalable::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 60%;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 0 0 var(--nfx-radius) var(--nfx-radius);
+    background: linear-gradient(0deg, rgba(0, 0, 0, .85), rgba(0, 0, 0, 0));
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: .55em;
+    z-index: 2;
+    margin: 0;
+    padding: 0 .7em;
+    pointer-events: none;
+    text-align: left !important;
+    font-size: .82em;
+    line-height: 1.3;
+    color: #d2d2d2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText-first {
+    font-weight: 700;
+    color: #fff;
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText-first:has(+ .cardText) {
+    bottom: calc(.55em + 1.3em);
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardText + .cardText + .cardText {
+    display: none;
+}
+
+:is(.homeSectionsContainer, .nfx-row) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) .cardBox > .cardFooter {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 1.6em .7em .5em;
+    margin: 0;
+    pointer-events: none;
+    text-align: left;
+}
+
+:is(.homeSectionsContainer, .nfx-row) .cardText a {
+    pointer-events: none;
+}
+
+:is(.homeSectionsContainer, .nfx-row) .btnCardOptions {
+    display: none;
+}
+
+/* keep the progress bar above the title shade */
+:is(.homeSectionsContainer, .nfx-row) .innerCardFooter {
+    z-index: 3;
+}
+
+/* touch: no stock hover overlay (a tap opens the item, like Netflix) */
+@media (hover: none) {
+    :is(.homeSectionsContainer, .nfx-row) .cardOverlayContainer {
+        display: none !important;
+    }
+}
+
+/* ---------- hover: grow after a beat (mouse only) ---------- */
+@media (hover: hover) and (pointer: fine) {
+    :is(.homeSectionsContainer, .nfx-row, .detailVerticalSection) .scrollSlider > .card > .cardBox {
+        transition: transform .3s var(--nfx-ease), box-shadow .3s var(--nfx-ease);
+        transform-origin: center center;
+        will-change: transform;
+    }
+
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card:hover {
+        z-index: 5;
+        position: relative;
+    }
+
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card:hover > .cardBox {
+        transform: scale(1.08);
+        transition-delay: .25s;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .75);
+        border-radius: var(--nfx-radius);
+    }
+
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card:first-child > .cardBox,
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card.nfx-edge-left > .cardBox {
+        transform-origin: left center;
+    }
+
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card.nfx-edge-right > .cardBox {
+        transform-origin: right center;
+    }
+}
+
+/* ---------- focus (keyboard, remote) ---------- */
+body:not(.dashboardDocument) .card:focus .cardBox:not(.visualCardBox) .cardScalable,
+body:not(.dashboardDocument) .card:focus .cardBox.visualCardBox {
+    border-color: #fff !important;
+}
+
+:is(.homeSectionsContainer, .nfx-row) .card:focus-visible > .cardBox {
+    transform: scale(1.05);
+    outline: 2px solid #fff;
+    outline-offset: 0;
+    border-radius: var(--nfx-radius);
+}
+
+/* ---------- library grids and other pages ---------- */
+body:not(.dashboardDocument) .itemsContainer.vertical-wrap .cardFooter .cardText:first-child {
+    font-weight: 600;
+}
+
+body:not(.dashboardDocument) .visualCardBox {
+    background-color: var(--nfx-bg-elev);
+}
+
+/* person cards: small, round */
+body:not(.dashboardDocument) .personCard .cardImageContainer,
+body:not(.dashboardDocument) .personCard .cardPadder,
+body:not(.dashboardDocument) .personCard .cardOverlayContainer {
+    border-radius: 50%;
+}
+
+body:not(.dashboardDocument) .personCard .cardPadder-overflowPortrait,
+body:not(.dashboardDocument) .personCard .cardPadder-portrait {
+    padding-bottom: 100%;
+}
+
+body:not(.dashboardDocument) .personCard .cardFooter {
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body:not(.dashboardDocument) .card > .cardBox,
+    body:not(.dashboardDocument) .card:hover > .cardBox,
+    body:not(.dashboardDocument) .card:focus > .cardBox {
+        transform: none !important;
+        transition: none !important;
+    }
+}

@@ -1,0 +1,145 @@
+/* ---- 10 base ---- */
+/* Tokens above apply everywhere. Everything that could touch the dashboard is scoped to
+   body:not(.dashboardDocument), because the plugin <link> also loads on dashboard pages. */
+body:not(.dashboardDocument) {
+    font-family: var(--nfx-font);
+    color: var(--nfx-text);
+    background-color: var(--nfx-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body:not(.dashboardDocument) .backgroundContainer {
+    background-color: var(--nfx-bg);
+    background-image: none;
+}
+
+body:not(.dashboardDocument) .backgroundContainer.withBackdrop {
+    opacity: 1;
+    background-color: rgba(20, 20, 20, .82);
+}
+
+body:not(.dashboardDocument) .MuiTypography-root,
+body:not(.dashboardDocument) .MuiButtonBase-root,
+body:not(.dashboardDocument) h1,
+body:not(.dashboardDocument) h2,
+body:not(.dashboardDocument) h3,
+body:not(.dashboardDocument) button,
+body:not(.dashboardDocument) input,
+body:not(.dashboardDocument) select,
+body:not(.dashboardDocument) textarea {
+    font-family: var(--nfx-font);
+}
+
+/* thin dark scrollbars; horizontal rows hide theirs (see rows) */
+body:not(.dashboardDocument) * {
+    scrollbar-color: #4d4d4d transparent;
+}
+
+body:not(.dashboardDocument) ::selection {
+    background: var(--nfx-red);
+    color: #fff;
+}
+
+/* generic buttons: Netflix grey, red for the primary submit */
+body:not(.dashboardDocument) .raised,
+body:not(.dashboardDocument) .fab,
+body:not(.dashboardDocument) a[data-role="button"] {
+    background: rgba(109, 109, 110, .7);
+    color: #fff;
+    border-radius: var(--nfx-radius);
+    font-weight: 600;
+}
+
+body:not(.dashboardDocument) .raised:hover,
+body:not(.dashboardDocument) .fab:hover {
+    background: rgba(109, 109, 110, .45);
+}
+
+body:not(.dashboardDocument) .raised:focus,
+body:not(.dashboardDocument) .fab:focus {
+    background: #fff;
+    color: #000;
+}
+
+body:not(.dashboardDocument) .button-submit {
+    background: var(--nfx-red);
+    color: #fff;
+}
+
+body:not(.dashboardDocument) .button-submit:hover {
+    background: var(--nfx-red-hover);
+}
+
+body:not(.dashboardDocument) .button-submit:focus {
+    background: var(--nfx-red-hover);
+    color: #fff;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+body:not(.dashboardDocument) .button-link,
+body:not(.dashboardDocument) .button-flat {
+    color: inherit;
+}
+
+/* dialogs, menus, action sheets */
+body:not(.dashboardDocument) .dialog,
+body:not(.dashboardDocument) .actionSheet,
+body:not(.dashboardDocument) .MuiMenu-paper,
+body:not(.dashboardDocument) .MuiPopover-paper {
+    background-color: #181818;
+    border-radius: var(--nfx-radius);
+}
+
+body:not(.dashboardDocument) .actionSheetMenuItem:hover,
+body:not(.dashboardDocument) .MuiMenuItem-root:hover {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+body:not(.dashboardDocument) .emby-input,
+body:not(.dashboardDocument) .emby-textarea,
+body:not(.dashboardDocument) .emby-select-withcolor {
+    background-color: #333;
+    border: 1px solid #333;
+    border-radius: var(--nfx-radius);
+    color: #fff;
+}
+
+body:not(.dashboardDocument) .emby-input:focus,
+body:not(.dashboardDocument) .emby-textarea:focus,
+body:not(.dashboardDocument) .emby-select-withcolor:focus {
+    border-color: #fff;
+}
+
+body:not(.dashboardDocument) .emby-checkbox:checked + span + .checkboxOutline {
+    background-color: var(--nfx-red);
+    border-color: var(--nfx-red);
+}
+
+body:not(.dashboardDocument) .toast {
+    background: #fff;
+    color: #000;
+    border-radius: var(--nfx-radius);
+}
+
+/* section titles everywhere look like Netflix row titles */
+body:not(.dashboardDocument) .sectionTitle {
+    color: #e5e5e5;
+    font-weight: 700;
+}
+
+/* Several rules below set display on stock elements; .hide must always win. */
+body:not(.dashboardDocument) .hide {
+    display: none !important;
+}
+
+/* Desktop rows scroll by transform (data-scroll-mode-x="custom"); clip them so the page
+   itself never scrolls sideways. clip keeps position:sticky working. */
+body:not(.dashboardDocument) .emby-scroller[data-scroll-mode-x="custom"] {
+    overflow-x: clip;
+    overflow-y: visible;
+}
+
+html:has(body:not(.dashboardDocument)) {
+    overflow-x: clip;
+}

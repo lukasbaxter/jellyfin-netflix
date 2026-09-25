@@ -1,0 +1,136 @@
+/* ---- 91 tv ---- */
+/* 10-foot UI: bigger type, strong focus, no hover, no blur, overscan safe. */
+html.layout-tv {
+    font-size: 125%;
+}
+
+html.layout-tv body:not(.dashboardDocument) * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.layout-tv .homeSectionsContainer .sectionTitleContainer,
+html.layout-tv .nfx-row .sectionTitleContainer {
+    padding-left: 5vw !important;
+}
+
+html.layout-tv .homeSectionsContainer .emby-scroller,
+html.layout-tv .nfx-row .emby-scroller {
+    padding-left: 5vw !important;
+    padding-top: 1.4vw !important;
+    padding-bottom: 1.4vw !important;
+    margin: -1.4vw 0 !important;
+}
+
+html.layout-tv .homeSectionsContainer .sectionTitle,
+html.layout-tv .nfx-row .sectionTitle {
+    font-size: 1.5vw;
+}
+
+/* 5 backdrops per row, portraits at 7 */
+html.layout-tv :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    width: calc((100vw - 10vw) / 5);
+}
+
+html.layout-tv :is(.homeSectionsContainer, .nfx-row) .scrollSlider > :is(.overflowPortraitCard, .portraitCard, .overflowSquareCard, .squareCard) {
+    width: calc((100vw - 10vw) / 7);
+}
+
+/* focus ring instead of hover */
+html.layout-tv .card .cardBox {
+    transition: transform .15s var(--nfx-ease);
+}
+
+html.layout-tv .card.show-animation:focus > .cardBox,
+html.layout-tv .card:focus > .cardBox {
+    transform: scale(1.1);
+}
+
+html.layout-tv .card:focus .cardBox:not(.visualCardBox) .cardScalable,
+html.layout-tv .card:focus .cardBox.visualCardBox {
+    border-color: #fff !important;
+    box-shadow: 0 0 0 3px #fff, 0 12px 30px rgba(0, 0, 0, .8);
+    border-radius: var(--nfx-radius);
+}
+
+html.layout-tv .card.show-focus:not(.show-animation) .cardBox:not(.visualCardBox) .cardScalable {
+    border-width: 3px;
+}
+
+html.layout-tv .emby-button:focus,
+html.layout-tv .detailButton:focus,
+html.layout-tv .raised:focus,
+html.layout-tv .emby-tab-button:focus {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+    transform: scale(1.1);
+    transition: transform .15s var(--nfx-ease);
+}
+
+/* hero shorter on TV */
+html.layout-tv .nfx-hero {
+    min-height: 60vh;
+    --nfx-hero-h: 60vh;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+html.layout-tv .nfx-hero__content {
+    bottom: 7vh;
+    width: 40%;
+}
+
+html.layout-tv .nfx-hero__logo {
+    max-height: 9vw;
+    max-width: 80%;
+}
+
+html.layout-tv .nfx-hero__overview {
+    -webkit-line-clamp: 2;
+}
+
+html.layout-tv .nfx-hero__badge {
+    bottom: 7vh;
+}
+
+html.layout-tv .nfx-hero__content {
+    left: 5vw;
+}
+
+html.layout-tv .nfx-hero__dots {
+    display: none;
+}
+
+/* detail page on TV: stock hides the backdrop frame, ours stays */
+html.layout-tv #itemDetailPage:not(.hide) {
+    --nfx-detail-h: 72vh;
+    --nfx-detail-pull: 22vh;
+}
+
+html.layout-tv #itemDetailPage .detailLogo {
+    margin-left: 5vw;
+}
+
+html.layout-tv #itemDetailPage .detailRibbon,
+html.layout-tv #itemDetailPage .detailPagePrimaryContent {
+    padding-left: 5vw !important;
+    padding-right: 5vw !important;
+}
+
+html.layout-tv #itemDetailPage .detailPageSecondaryContainer {
+    padding-left: 5vw !important;
+}
+
+html.layout-tv .skinHeader {
+    padding-left: 5vw;
+    padding-right: 5vw;
+}
+
+html.layout-tv .padded-bottom-page {
+    padding-bottom: 5vh;
+}
+
+/* no hover growth on TV, focus handles it */
+html.layout-tv :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card:hover > .cardBox {
+    box-shadow: none;
+}

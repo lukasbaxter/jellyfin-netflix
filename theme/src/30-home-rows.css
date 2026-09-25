@@ -1,0 +1,220 @@
+/* ---- 30 home rows ---- */
+/* Full-bleed rows. Title above, cards in a single line that peeks at the right edge. */
+.homeSectionsContainer {
+    padding-bottom: 4em;
+}
+
+.homeSectionsContainer .verticalSection:not(.hide),
+.nfx-row:not(.hide) {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0 0 var(--nfx-row-gap) 0;
+    padding: 0;
+}
+
+/* Latest Media wraps one verticalSection per library: no extra gap on the wrapper */
+.homeSectionsContainer .verticalSection:has(> .verticalSection) {
+    margin-bottom: 0;
+}
+
+.homeSectionsContainer .verticalSection > .emby-scroller,
+.homeSectionsContainer .verticalSection > .emby-scrollbuttons,
+.nfx-row > .emby-scroller,
+.nfx-row > .emby-scrollbuttons {
+    grid-row: 2;
+    grid-column: 1;
+}
+
+/* row titles */
+.homeSectionsContainer .sectionTitleContainer,
+.homeSectionsContainer .verticalSection > .sectionTitle,
+.nfx-row .sectionTitleContainer {
+    padding-left: var(--nfx-gutter) !important;
+    padding-right: var(--nfx-gutter) !important;
+    margin: 0 0 .5em 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    display: flex;
+    align-items: baseline;
+}
+
+.homeSectionsContainer .sectionTitle,
+.nfx-row .sectionTitle {
+    font-size: clamp(1.05rem, 1.4vw, 1.6rem);
+    font-weight: 700;
+    color: #e5e5e5;
+    margin: 0;
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
+.homeSectionsContainer .sectionTitleTextButton,
+.nfx-row .sectionTitleTextButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #e5e5e5 !important;
+    background: none !important;
+    text-decoration: none;
+}
+
+.homeSectionsContainer .sectionTitleTextButton > .material-icons,
+.nfx-row .sectionTitleTextButton > .material-icons {
+    font-size: 1.4em;
+    margin: 0 0 0 .1em;
+    padding: 0;
+    color: #54b9c5;
+    opacity: 0;
+    transform: translateX(-.4em);
+    transition: opacity .3s var(--nfx-ease), transform .3s var(--nfx-ease);
+}
+
+.homeSectionsContainer .verticalSection:hover .sectionTitleTextButton > .material-icons,
+.homeSectionsContainer .sectionTitleTextButton:focus > .material-icons,
+.nfx-row:hover .sectionTitleTextButton > .material-icons {
+    opacity: 1;
+    transform: none;
+}
+
+/* the scroller: gutter on the left only, cards run off the right edge */
+.homeSectionsContainer .emby-scroller,
+.nfx-row .emby-scroller {
+    padding-left: var(--nfx-gutter) !important;
+    padding-right: 0 !important;
+    padding-top: .9vw !important;
+    padding-bottom: .9vw !important;
+    margin: -.9vw 0 !important;
+    scroll-padding-inline: var(--nfx-gutter);
+    scrollbar-width: none;
+}
+
+.homeSectionsContainer .emby-scroller::-webkit-scrollbar,
+.nfx-row .emby-scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.homeSectionsContainer .scrollSlider,
+.nfx-row .scrollSlider {
+    padding-right: var(--nfx-gutter);
+}
+
+/* wrapping (non-scrolling) sections like My Media */
+.homeSectionsContainer .itemsContainer.vertical-wrap {
+    padding-left: var(--nfx-gutter) !important;
+    padding-right: var(--nfx-gutter) !important;
+}
+
+/* My Media library buttons */
+.homeSectionsContainer .homeLibraryButton {
+    background: var(--nfx-bg-elev2);
+    border-radius: var(--nfx-radius);
+    color: #e5e5e5;
+    font-weight: 600;
+}
+
+.homeSectionsContainer .homeLibraryButton:hover,
+.homeSectionsContainer .homeLibraryButton:focus {
+    background: #fff;
+    color: #000;
+}
+
+/* scroll buttons: full-height side gradients with chevrons (desktop mouse only) */
+.homeSectionsContainer .emby-scrollbuttons,
+.nfx-row .emby-scrollbuttons,
+.detailVerticalSection .emby-scrollbuttons {
+    position: relative;
+    inset: auto;
+    top: auto;
+    right: auto;
+    left: auto;
+    z-index: 4;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 0 !important;
+    min-width: 0;
+    pointer-events: none;
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button,
+.nfx-row .emby-scrollbuttons-button {
+    pointer-events: auto;
+    width: var(--nfx-gutter-px);
+    min-width: 36px;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    color: #fff;
+    background: rgba(20, 20, 20, .5) !important;
+    opacity: 0;
+    transition: opacity .2s, background-color .2s;
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button:first-child,
+.nfx-row .emby-scrollbuttons-button:first-child {
+    border-radius: 0 var(--nfx-radius) var(--nfx-radius) 0;
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button:last-child,
+.nfx-row .emby-scrollbuttons-button:last-child {
+    border-radius: var(--nfx-radius) 0 0 var(--nfx-radius);
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button[disabled],
+.nfx-row .emby-scrollbuttons-button[disabled] {
+    visibility: hidden;
+}
+
+.homeSectionsContainer .verticalSection:hover .emby-scrollbuttons-button,
+.nfx-row:hover .emby-scrollbuttons-button {
+    opacity: 1;
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button:hover,
+.nfx-row .emby-scrollbuttons-button:hover {
+    background: rgba(20, 20, 20, .7) !important;
+    color: #fff !important;
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button > .material-icons,
+.nfx-row .emby-scrollbuttons-button > .material-icons {
+    font-size: 2.6vw;
+    min-width: 0;
+    transition: transform .2s;
+}
+
+.homeSectionsContainer .emby-scrollbuttons-button:hover > .material-icons,
+.nfx-row .emby-scrollbuttons-button:hover > .material-icons {
+    transform: scale(1.25);
+}
+
+/* phones and touch: native scroll with snap */
+@media (hover: none), (max-width: 600px) {
+    .homeSectionsContainer .emby-scroller,
+    .nfx-row .emby-scroller {
+        scroll-snap-type: x mandatory;
+    }
+
+    .homeSectionsContainer .scrollSlider > .card,
+    .nfx-row .scrollSlider > .card {
+        scroll-snap-align: start;
+    }
+}
+
+html.layout-mobile .homeSectionsContainer .emby-scroller,
+html.layout-mobile .nfx-row .emby-scroller {
+    scroll-snap-type: x mandatory;
+}
+
+html.layout-mobile .homeSectionsContainer .scrollSlider > .card,
+html.layout-mobile .nfx-row .scrollSlider > .card {
+    scroll-snap-align: start;
+}
+
+/* home tabs (Home / Favorites) row under the app bar */
+.homePage .tabContent {
+    padding-top: 0;
+}

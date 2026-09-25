@@ -1,0 +1,158 @@
+/* ---- 20 header ---- */
+/* Modern layout: MUI AppBar. Legacy/TV: .skinHeader. Transparent over content with a top
+   gradient; solid once html.nfx-scrolled is set by the plugin JS. */
+body:not(.dashboardDocument) .MuiAppBar-root,
+body:not(.dashboardDocument) .skinHeader {
+    background-color: transparent;
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent) !important;
+    box-shadow: none !important;
+    border-bottom: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: background-color .4s var(--nfx-ease);
+}
+
+html.nfx-scrolled body:not(.dashboardDocument) .MuiAppBar-root,
+html.nfx-scrolled body:not(.dashboardDocument) .skinHeader {
+    background-color: var(--nfx-bg);
+}
+
+/* Without the plugin JS: fade the bar to solid over the first 80px of scroll where the
+   browser supports scroll-driven animations. */
+@supports (animation-timeline: scroll()) {
+    html:not(.nfx) body:not(.dashboardDocument) .MuiAppBar-root,
+    html:not(.nfx) body:not(.dashboardDocument) .skinHeader {
+        animation: nfx-bar-solid linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 80px;
+    }
+}
+
+@keyframes nfx-bar-solid {
+    from { background-color: transparent; }
+    to { background-color: #141414; }
+}
+
+/* Pages that are not home/detail have content right under the bar, keep those solid */
+body:not(.dashboardDocument):has(.page:not(.hide):is(#searchPage, .type-interior, #myPreferencesMenuPage, #displayPreferencesPage, .libraryPage:not(.homePage, .itemDetailPage))) .MuiAppBar-root {
+    background-color: var(--nfx-bg) !important;
+    animation: none;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiToolbar-root {
+    min-height: var(--nfx-header-h);
+    padding-left: var(--nfx-gutter) !important;
+    padding-right: var(--nfx-gutter) !important;
+}
+
+/* library nav reads like Netflix text nav */
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root {
+    color: #e5e5e5;
+    text-transform: none;
+    font-size: .875rem;
+    font-weight: 400;
+    background: none !important;
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 0;
+    transition: color .3s;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root:hover {
+    color: #b3b3b3;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root.Mui-selected,
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root[aria-current="page"],
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root.active {
+    color: #fff;
+    font-weight: 700;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-startIcon {
+    display: none;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiIconButton-root {
+    color: #fff;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiIconButton-root:hover {
+    background: rgba(255, 255, 255, .1);
+}
+
+/* square profile avatar like Netflix */
+body:not(.dashboardDocument) .MuiAppBar-root .MuiAvatar-root {
+    border-radius: var(--nfx-radius);
+    width: 32px;
+    height: 32px;
+}
+
+/* sub toolbars (library tabs, sort/filter) sit on the page bg */
+body:not(.dashboardDocument) .MuiAppBar-root .MuiTabs-root {
+    min-height: 40px;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiTab-root {
+    color: #b3b3b3;
+    text-transform: none;
+    font-size: .9rem;
+    min-height: 40px;
+    min-width: 0;
+    padding: 6px 14px;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiTab-root.Mui-selected {
+    color: #fff;
+    font-weight: 700;
+}
+
+body:not(.dashboardDocument) .MuiAppBar-root .MuiTabs-indicator {
+    background-color: var(--nfx-red);
+    height: 2px;
+}
+
+/* legacy header */
+body:not(.dashboardDocument) .skinHeader .headerTabs .emby-tab-button,
+body:not(.dashboardDocument) .emby-tab-button {
+    color: #b3b3b3;
+    font-weight: 400;
+    text-transform: none;
+    background: none !important;
+}
+
+body:not(.dashboardDocument) .emby-tab-button-active,
+body:not(.dashboardDocument) .emby-tab-button.emby-button-foreground {
+    color: #fff !important;
+    font-weight: 700;
+}
+
+body:not(.dashboardDocument) .emby-tab-button::after,
+body:not(.dashboardDocument) .emby-tab-button-active::after {
+    display: none;
+}
+
+body:not(.dashboardDocument) .skinHeader .pageTitle {
+    color: #fff;
+    font-weight: 700;
+}
+
+body:not(.dashboardDocument) .skinHeader .headerButton,
+body:not(.dashboardDocument) .skinHeader .headerTabs {
+    color: #fff;
+}
+
+/* drawers */
+body:not(.dashboardDocument) .MuiDrawer-paper,
+body:not(.dashboardDocument) .mainDrawer {
+    background-color: var(--nfx-bg) !important;
+    background-image: none !important;
+    border-right: 0 !important;
+}
+
+body:not(.dashboardDocument) .MuiDrawer-paper .Mui-selected,
+body:not(.dashboardDocument) .mainDrawer .navMenuOption-selected {
+    background-color: rgba(255, 255, 255, .08) !important;
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--nfx-red);
+}

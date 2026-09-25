@@ -1,0 +1,63 @@
+/* ---- 90 mobile ---- */
+@media (max-width: 600px) {
+    body:not(.dashboardDocument) .homeSectionsContainer .sectionTitle,
+    body:not(.dashboardDocument) .nfx-row .sectionTitle {
+        font-size: 1.1rem;
+    }
+
+    /* comfortable tap targets */
+    body:not(.dashboardDocument) .MuiAppBar-root .MuiIconButton-root,
+    body:not(.dashboardDocument) .skinHeader .headerButton,
+    body:not(.dashboardDocument) .sectionTitleTextButton {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    body:not(.dashboardDocument) .homeSectionsContainer .itemsContainer > .card > .cardBox,
+    body:not(.dashboardDocument) .nfx-row .itemsContainer > .card > .cardBox {
+        margin-right: 8px !important;
+    }
+
+    /* the chevron is always visible on touch, there is no hover */
+    .homeSectionsContainer .sectionTitleTextButton > .material-icons,
+    .nfx-row .sectionTitleTextButton > .material-icons {
+        opacity: 1;
+        transform: none;
+        color: #e5e5e5;
+    }
+
+    /* library grid: 3 posters across */
+    body:not(.dashboardDocument) .itemsContainer.vertical-wrap > .portraitCard {
+        width: 33.333%;
+    }
+
+    body:not(.dashboardDocument) .itemsContainer.vertical-wrap .cardBox {
+        margin: 4px;
+    }
+}
+
+html.layout-mobile .homeSectionsContainer .sectionTitleTextButton > .material-icons {
+    opacity: 1;
+    transform: none;
+}
+
+@media (hover: none) {
+    :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card > .cardBox {
+        transform: none !important;
+    }
+}
+
+/* bottom nav and now-playing bar stay dark */
+body:not(.dashboardDocument) .MuiBottomNavigation-root,
+body:not(.dashboardDocument) .nowPlayingBar {
+    background: #121212 !important;
+    border-top: 1px solid #262626;
+}
+
+body:not(.dashboardDocument) .nowPlayingBar .nowPlayingBarPositionSlider .mdl-slider-background-lower {
+    background-color: var(--nfx-red) !important;
+}
+
+body:not(.dashboardDocument) .MuiBottomNavigationAction-root.Mui-selected {
+    color: #fff;
+}

@@ -1,0 +1,61 @@
+/* ---- 00 tokens ---- */
+:root {
+    --nfx-bg: #141414;
+    --nfx-bg-elev: #181818;
+    --nfx-bg-elev2: #232323;
+    --nfx-red: #E50914;
+    --nfx-red-hover: #F6121D;
+    --nfx-text: #FFFFFF;
+    --nfx-text-2: #B3B3B3;
+    --nfx-text-3: #808080;
+    --nfx-match: #46D369;
+    --nfx-radius: 4px;
+    --nfx-gutter: 4%;
+    --nfx-gutter-px: 4vw;
+    --nfx-row-gap: max(24px, 3vw);
+    --nfx-ease: cubic-bezier(.2, .8, .2, 1);
+    --nfx-font: "Netflix Sans", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --nfx-header-h: 68px;
+    --nfx-login-bg: radial-gradient(ellipse at 30% 20%, rgba(229, 9, 20, .28), transparent 55%),
+        radial-gradient(ellipse at 80% 90%, rgba(120, 10, 20, .35), transparent 60%),
+        linear-gradient(160deg, #1f0a0c 0%, #0b0b0b 55%, #000 100%);
+}
+
+/* jellyfin 12 theme variables. Not applied on the dashboard (the plugin <link> loads there too). */
+:root:not(:has(body.dashboardDocument)) {
+    --jf-palette-background-default: var(--nfx-bg);
+    --jf-palette-background-paper: #181818;
+    --jf-palette-background-defaultImage: none;
+    --jf-palette-primary-main: var(--nfx-red);
+    --jf-palette-primary-dark: #b20710;
+    --jf-palette-primary-mainChannel: 229 9 20;
+    --jf-palette-secondary-main: #FFFFFF;
+    --jf-palette-secondary-contrastText: #000;
+    --jf-palette-text-primary: #FFFFFF;
+    --jf-palette-text-secondary: #B3B3B3;
+    --jf-palette-AppBar-defaultBg: #141414;
+    --jf-palette-AppBar-transparentBg: transparent;
+    --jf-palette-AppBar-gradient: linear-gradient(180deg, rgba(0, 0, 0, .7) 10%, transparent);
+    --jf-palette-Button-inheritContainedBg: rgba(109, 109, 110, .7);
+    --jf-palette-Button-inheritContainedHoverBg: rgba(109, 109, 110, .5);
+    --jf-card-borderRadius: var(--nfx-radius);
+}
+
+@media (max-width: 600px) {
+    :root {
+        --nfx-gutter: 16px;
+        --nfx-gutter-px: 16px;
+        --nfx-header-h: 56px;
+    }
+}
+
+html.layout-mobile {
+    --nfx-gutter: 16px;
+    --nfx-gutter-px: 16px;
+    --nfx-header-h: 56px;
+}
+
+html.layout-tv {
+    --nfx-gutter: 5vw;
+    --nfx-gutter-px: 5vw;
+}
