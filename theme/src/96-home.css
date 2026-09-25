@@ -306,7 +306,8 @@ html.nfx-mode-list #nfx-hero { display: none !important; }
     display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 12px; min-height: 34px;
     background: none; border: 0; color: #fff; font: inherit; text-align: left; cursor: pointer;
 }
-.nfx-menu__item:hover span, .nfx-menu__item:focus-visible span { text-decoration: underline; }
+.nfx-menu__item :is(.material-icons, .nfx-prof__img) { text-decoration: none !important; }
+.nfx-menu__item:hover > span:last-child, .nfx-menu__item:focus-visible > span:last-child { text-decoration: underline; }
 .nfx-menu__item:focus-visible { outline: none; background: rgba(255, 255, 255, .08); }
 .nfx-menu__item .material-icons { font-size: 22px; color: #b3b3b3; width: 32px; text-align: center; }
 .nfx-menu__prof .nfx-prof__img { width: 32px; height: 32px; border: 0; font-size: 15px; flex: none; }

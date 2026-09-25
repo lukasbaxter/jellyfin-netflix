@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+import fs from 'node:fs';
+const env = Object.fromEntries(fs.readFileSync('../.staging.env','utf8').split('\n').filter(l=>l.includes('=')).map(l=>l.split(/=(.*)/s).slice(0,2)));
+const b = await chromium.launch(); const ctx = await b.newContext({viewport:{width:1440,height:900}});
+await ctx.route(/\/NetflixUi\/netflix\.css/, r=>r.fulfill({contentType:'text/css',body:fs.readFileSync('../theme/dist/netflix.css')}));
+const p = await ctx.newPage();
+await p.goto(env.STAGING_URL+'/web/#/login'); await p.waitForTimeout(2500);
+if (await p.locator('.btnManual').isVisible().catch(()=>false)) await p.locator('.btnManual').click();
+await p.fill('#txtManualName', env.STAGING_ADMIN_USER); await p.fill('#txtManualPassword', env.STAGING_ADMIN_PASS);
+await p.locator('.manualLoginForm .button-submit').click(); await p.waitForTimeout(5000);
+await p.hover('.nfx-avatar'); await p.waitForTimeout(400);
+const it = p.locator('.nfx-menu__item', { hasText: 'Admin Dashboard' });
+await it.hover(); await p.waitForTimeout(300);
+console.log(await it.evaluate(e=>[...e.children].map(c=>(c.className||'label')+': '+getComputedStyle(c).textDecorationLine)));
+await p.screenshot({ path: '../screenshots/v3/desktop/menu-hover.png', clip: { x: 1100, y: 40, width: 340, height: 300 } });
+await b.close();
