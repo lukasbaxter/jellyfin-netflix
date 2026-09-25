@@ -8,11 +8,13 @@ Target image, pinned by digest (never `:latest` again):
 jellyfin/jellyfin:12.1.20260915-010956@sha256:78d3ea1207d1322471fcac39a614f004f2ccf7e878f95ab2977d752f07e4dd7e
 ```
 
-Rollback image (what prod runs today, 10.11.5):
+Rollback image (what prod runs today, 10.11.5), pinned by its registry digest:
 
 ```
-jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b64d40c6d6f
+jellyfin/jellyfin@sha256:6d819e9ab067efcf712993b23455cc100ee5585919bb297ea5a109ac00cb626e
 ```
+
+This is the repo digest from `docker image inspect jellyfin/jellyfin:latest -f '{{.RepoDigests}}'`. Do not confuse it with the local image ID `58b57fd06c97...`, which cannot be pulled. Step 0 checks that the digest pulls, and step 6 also tags the local image as `jellyfin/jellyfin:10.11.5-rollback` so rollback works offline.
 
 ## What the official notes say (12.0 and 12.1)
 
@@ -29,10 +31,10 @@ jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b6
 
 ## Things staging found that the notes do not mention
 
-1. **encoding.xml gets wiped.** Prod has `<EncoderPreset xsi:nil="true" />`. 12.1 cannot parse that, logs `Error loading configuration file: /config/config/encoding.xml`, and rewrites the file with defaults. That silently turns off NVENC, tonemapping, HEVC/AV1 encoding and the hw decode codec list. Fix it before first start (step 6). With the fix, staging kept `nvenc` and all 8 decode codecs.
+1. **encoding.xml gets wiped.** Prod has `<EncoderPreset xsi:nil="true" />`. 12.1 cannot parse that, logs `Error loading configuration file: /config/config/encoding.xml`, and rewrites the file with defaults. That silently turns off NVENC, tonemapping, HEVC/AV1 encoding and the hw decode codec list. Fix it before first start (step 5). With the fix, staging kept `nvenc` and all 8 decode codecs.
 2. **The migration deletes items whose files are missing.** `MigrateLinkedChildren` checks every item path (182k items). On staging the log has 1817 "Removing item" lines. Most files were really gone (for example The Wire S04), but not all: 127 of the removed paths still exist on disk. 126 are MusicArtist folders that the scan re-created as new items, and 1 is `Battlestar Galactica Miniseries - Part 2.mkv`, dropped as an "orphaned alternate version". Watch history for removed items is kept on a placeholder, but it is detached from the new item (detached UserData rows went from 1707 to 1841). So after the scan, check the watch state of re-added items (step 13). If `/mnt/unas` or `/mnt/wd_nvme1/music` is unmounted or wedged at that moment, it would treat the whole library as missing and wipe watch history. The UNAS guard in step 7 is not optional.
 3. **Playlists and counts drop until the scan runs.** Right after the migration staging showed 180 playlists (prod 196). The missing ones were music playlists made from `.m3u` files in album folders. The full scan brought them back (196). Movies / Series / Episodes drop for good: 1516 to 1260, 284 to 195, 13436 to 12628. That is exactly the number of prod items whose file still exists on disk (checked one by one), so no real movie or episode is lost. Expect the same on prod.
-4. **The stock 12.1 web client needs legacy auth for its websocket.** jellyfin-web 12.1 ships jellyfin-apiclient 1.11.0, which opens `/socket?api_key=<token>`. With legacy auth off that returns 403 (`/socket?ApiKey=` gives 101). Browsers, the iPhone app and Jellyfin Media Player then lose remote control, live updates, SyncPlay and "now playing". Our plugin is not involved. Keep legacy auth ON until a jellyfin-web release fixes this (step 14).
+4. **The 12.1 web client does NOT need legacy auth.** After login it opens `/socket?ApiKey=<token>` (12.1 moved websockets to SDK subscriptions). The old `api_key=` string is still inside the bundled jellyfin-apiclient, but that code path is not used for the socket. The 3 or so `/socket` 403s on the login page are tries without a token ("Token is required" in the server log), not a legacy auth problem. Proven on staging with legacy auth OFF by `test/socket-check.mjs`: socket on `ApiKey=`, open, no 403 after login, and a remote control message from a second session reached the browser. So browsers, the iPhone app and Jellyfin Media Player are fine with legacy auth off. The only callers that need it are Jellyseerr and the 5 music-requests lines below.
 5. Streaming Collections 1.0.1.0 targets 10.11. It has to be rebuilt for net10/12 (release step 1 in the plan) before it can go back on.
 
 ## Measured on staging
@@ -45,7 +47,7 @@ jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b6
 
 | Caller | What it sends | Fix |
 |---|---|---|
-| **Stock web client websocket** (browsers, iPhone app, Jellyfin Media Player) | `/socket?api_key=` (jellyfin-apiclient 1.11.0 inside jellyfin-web 12.1) | nothing we can fix. Wait for a jellyfin-web release that sends `ApiKey`, then re-run the curl test in step 14 |
+| Stock web client websocket (browsers, iPhone app, Jellyfin Media Player) | `/socket?ApiKey=` after login | nothing, already fine (finding 4) |
 | Jellyseerr 2.7.3 (`services-jellyseerr-1`) | `X-Emby-Authorization` | move to Seerr (`ghcr.io/seerr-team/seerr`) or a build that sends `Authorization: MediaBrowser`, then re-test |
 | `music-requests/spotify_to_jellyfin.py:28` | `q["api_key"]` | `q["ApiKey"]` |
 | `music-requests/spotify_to_jellyfin.py:45` | `?api_key=` | `?ApiKey=` |
@@ -58,7 +60,7 @@ jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b6
 
 Paths are under `/home/admin/services/`. The header form `Authorization: MediaBrowser Token="<key>"` also works everywhere.
 
-Plan: turn legacy auth ON for day one, fix the table above, then turn it OFF.
+Plan: turn legacy auth ON for day one, fix Jellyseerr and the 5 music-requests lines, then turn it OFF (step 14).
 
 ## 0. Pre-checks (day before is fine)
 
@@ -77,11 +79,16 @@ time smbclient -L //192.168.1.100 -A /root/.smbcredentials-jellyfin > /dev/null
 # Touch it first (that triggers the mount), then ask for the real cifs mount.
 timeout 5 ls /mnt/unas/movies | head -1 && findmnt -t cifs /mnt/unas && findmnt -t cifs /mnt/cloud
 ls /mnt/unas | wc -l ; ls /mnt/wd_nvme1/music | wc -l   # both non-zero
+# rollback image: the 10.11.5 registry digest must still pull, and must match what prod runs
+docker image inspect jellyfin/jellyfin:latest -f '{{.Id}} {{.RepoDigests}}' | tee -a ~/jellyfin-upgrade-$(date +%Y%m%d).log
+docker pull jellyfin/jellyfin@sha256:6d819e9ab067efcf712993b23455cc100ee5585919bb297ea5a109ac00cb626e
+docker image inspect jellyfin/jellyfin@sha256:6d819e9ab067efcf712993b23455cc100ee5585919bb297ea5a109ac00cb626e -f '{{.Id}}'   # sha256:58b57fd06c97...
+docker inspect jellyfin-jellyfin-1 -f '{{.Image}}'                  # the same sha256:58b57fd06c97...
 # who is watching
 curl -s -H 'Authorization: MediaBrowser Token="<prod key>"' http://127.0.0.1:2101/Sessions | python3 -c 'import json,sys;print([s["UserName"] for s in json.load(sys.stdin) if s.get("NowPlayingItem")])'
 ```
 
-If any UNAS check hangs or is slow, stop. Do not migrate on a sick UNAS (see finding 2).
+If the digest pull fails or the IDs differ, stop and find the right rollback digest first. If any UNAS check hangs or is slow, stop. Do not migrate on a sick UNAS (see finding 2).
 
 ## 1. Stop
 
@@ -152,12 +159,16 @@ In `docker-compose.yml` change `image: jellyfin/jellyfin:latest` to:
 Nothing else in the compose file changes (GPU via CDI, `docker_internal`, volumes all stay).
 
 ```bash
+# keep the 10.11.5 image under a name that no pull can move (offline rollback)
+docker tag 58b57fd06c97 jellyfin/jellyfin:10.11.5-rollback
+grep -n 'image:' docker-compose.yml    # the 12.1 digest line
 docker compose pull
 ```
 
 ## 7. Migrate, then start
 
 ```bash
+set -o pipefail   # so a failed migration is not hidden by tee
 cd /home/admin/services/jellyfin
 # Hard guard in the SAME command: both media mounts must answer right now, or nothing runs.
 # ls first (it triggers the automount), then check it really is cifs.
@@ -170,7 +181,7 @@ timeout 5 ls /mnt/unas/movies | head -1 | grep -q . \
 tail -3 migrate-12.1-$D.log      # "jellyfin.db optimized successfully!"
 
 # Legacy auth ON before the first start. The migration writes it as false, and with it off
-# the web client websocket, Jellyseerr and the music scripts all fail (see "Who breaks").
+# Jellyseerr and the music-requests scripts fail (see "Who breaks"). The web client does not need it.
 sudo sed -i 's#<EnableLegacyAuthorization>false</EnableLegacyAuthorization>#<EnableLegacyAuthorization>true</EnableLegacyAuthorization>#' config/config/system.xml
 grep -n EnableLegacyAuthorization config/config/system.xml    # must say true
 docker compose up -d
@@ -206,7 +217,7 @@ Install from the catalog (versions staging used):
 
 Then `docker compose restart` and check Dashboard > Plugins: all Active. This is the last restart. Everything after this runs with the server up.
 
-Theme: Netflix UI injects its CSS and JS into `index.html` through File Transformation. Leave Dashboard > General > Branding > Custom CSS **empty**. Only if the log says `File Transformation plugin not found` set Custom CSS to `@import url("/NetflixUi/netflix.css?v=1.0.0.0");` as the fallback. Setting both loads the theme twice.
+Theme: Netflix UI injects its CSS and JS into `index.html` through File Transformation. Leave Dashboard > General > Branding > Custom CSS **empty**. Only if the log says `File Transformation plugin not found` set Custom CSS to `@import url("/NetflixUi/netflix.css");` as the fallback (no `?v=`: that form is served with a 1 hour cache and an ETag, so a plugin update shows up without a branding edit). Setting both loads the theme twice.
 
 Intro Skipper: staging turned off `AutoDetectIntros` so it would not hammer the UNAS. On prod decide on purpose. Turning it on means one long analysis pass over every episode over CIFS. Run it at night and watch `/var/log/unas-stall.log`.
 
@@ -265,7 +276,7 @@ Then play a 4K HDR file in a browser with a forced low bitrate and check the Das
 - [ ] a movie and an episode play, one direct and one transcoded on NVENC
 - [ ] resume points and watched state look right for a couple of users
 - [ ] after the scan, watched state of re-added items is right (finding 2): a few music artists and `Battlestar Galactica Miniseries - Part 2`
-- [ ] once logged in, the web client has no `WebSocket ... /socket failed: 403` in the browser console (legacy auth must be on). A few 403s on the login page itself are normal: the client tries the socket before it has a token
+- [ ] once logged in, the web client has no `WebSocket ... /socket failed: 403` in the browser console. A few 403s on the login page itself are normal: the client tries the socket before it has a token
 - [ ] theme loads once: `curl -s http://127.0.0.1:2101/web/ | grep -c NetflixUi/netflix.js` prints 1 and branding Custom CSS is empty
 - [ ] all plugins Active
 - [ ] subtitle settings present in each library's options (global page is gone)
@@ -278,21 +289,18 @@ Then play a 4K HDR file in a browser with a forced low bitrate and check the Das
 
 ## 14. Auth follow-up (later, not in the window)
 
-0. **Do NOT set `EnableLegacyAuthorization=false` until jellyfin-web ships an apiclient that sends `ApiKey` on the socket.** Check with this test against a staging copy with legacy auth off. It must print 101 for `api_key` too, or better, the web client bundle must no longer contain `?api_key=`:
-   ```bash
-   K=<key>; U=http://127.0.0.1:2199
-   for q in api_key ApiKey; do curl -s -o /dev/null -m 3 -w "$q %{http_code}\n" "$U/socket?$q=$K&deviceId=v" \
-     -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ=='; done
-   docker exec jellyfin-jellyfin-1 sh -c 'grep -l "?api_key=" /jellyfin/jellyfin-web/*.js' # empty = fixed
-   ```
-   `staging/verify.sh` runs the same check and prints a NOTE line.
-1. Fix every other row in the "Who breaks" table.
-2. Set `EnableLegacyAuthorization` back to false.
-3. Re-run Jellyseerr sync and one music-requests job, and check a browser console for socket errors.
+The web client is not a blocker (finding 4). Only Jellyseerr and the music-requests scripts need legacy auth.
+
+1. Fix every row in the "Who breaks" table that says something other than "nothing":
+   - Jellyseerr: move to Seerr or a build that sends `Authorization: MediaBrowser`.
+   - music-requests: the 5 `api_key` lines become `ApiKey`.
+2. Prove it on staging first with legacy auth off: `node test/socket-check.mjs` (browser socket, no 403, remote control) must print ALL PASS, and point Jellyseerr / one music script at :2199 once.
+3. Set `EnableLegacyAuthorization` to false on prod (API, no restart).
+4. Check: a browser console after login has no socket 403, remote control from a second session works (phone app "Play on" the browser), Jellyseerr sync works, one music-requests job works. If any fails, set it back to true and fix that caller.
 
 ## 15. Home screen tidy up (per user)
 
-The Demos library (Dolby test clips) shows as a row of black tiles under "Recently Added in Demos". Each user: Profile > Home > under "Latest media" untick **Demos**. Or hide Demos from home for everyone by removing it from each user's library access if nobody needs it. Netflix UI already skips items with no TMDb/IMDb/TVDb id in its own rows, and its settings page can exclude whole libraries.
+The Demos library (Dolby test clips) shows as a row of black tiles under "Recently Added in Demos". Music shows as a row of square album tiles, which breaks the 16:9 Netflix rows, and music has its own app anyway. Each user: Profile > Home > under "Latest media" untick **Demos** and **Music** (keep Music ticked only for someone who really browses music in Jellyfin). Or hide Demos from home for everyone by removing it from each user's library access if nobody needs it. Netflix UI already skips items with no TMDb/IMDb/TVDb id in its own rows, and its settings page can exclude whole libraries.
 
 ## Rollback
 
@@ -302,11 +310,17 @@ Only if 12.1 is broken and a fix is not quick.
 cd /home/admin/services/jellyfin
 docker compose stop
 sudo mv config config.broken-12.1-$(date +%Y%m%d-%H%M)
-sudo tar -I zstd -xf /home/admin/services/.backups/jellyfin-10.11.5-<D>.tar.zst
-# set image back to the 10.11.5 digest in docker-compose.yml:
-#   jellyfin/jellyfin@sha256:58b57fd06c97905fc095a2f9f188b39ef914db031ee69e9585324b64d40c6d6f
+# extract ONLY config. The tar also holds the old docker-compose.yml with :latest, and a
+# plain extract would put that back (after any pull, :latest is 12.x and would re-migrate).
+sudo tar -I zstd -xf /home/admin/services/.backups/jellyfin-10.11.5-<D>.tar.zst config
+# now set the image back to 10.11.5, by digest (or the offline tag from step 6):
+sudo sed -i 's#^\(\s*image:\).*#\1 jellyfin/jellyfin@sha256:6d819e9ab067efcf712993b23455cc100ee5585919bb297ea5a109ac00cb626e#' docker-compose.yml
+grep -n 'image:' docker-compose.yml   # must show the 6d819e9a... digest (or jellyfin/jellyfin:10.11.5-rollback), nothing else
 docker compose up -d
+until curl -sf http://127.0.0.1:2101/System/Info/Public; do sleep 3; done   # "Version":"10.11.5"
 ```
+
+If the registry is unreachable, use `image: jellyfin/jellyfin:10.11.5-rollback` instead (tagged in step 6).
 
 **Never start 10.11 on a migrated config.** Restore the tar first, always.
 

@@ -76,8 +76,8 @@ done
 
 # 5. auth forms. Staging runs with legacy auth ON (the prod day-one state, see UPGRADE.md 7).
 # The test checks both states and puts back whatever was set before.
-# The websocket check matters most: jellyfin-web 12.1 (apiclient 1.11.0) opens /socket?api_key=,
-# which only works while legacy auth is on.
+# The 12.1 web client opens /socket?ApiKey=<token> after login, so its socket does not need
+# legacy auth. The browser check at the end proves it (test/socket-check.mjs).
 authtest() {
   a=$(code -H "X-Emby-Authorization: MediaBrowser Client=\"v\", Device=\"v\", DeviceId=\"v\", Version=\"1\", Token=\"$K\"" "$U/System/Info")
   b=$(code -H "$AUTH" "$U/System/Info")
@@ -101,16 +101,25 @@ if [ "$legacy0" = True ]; then
   [ "$s1 $s2" = "101 101" ] && ok "websocket legacy-on: api_key 101, ApiKey 101 (web client socket works)" || bad "websocket legacy-on got api_key=$s1 ApiKey=$s2 (want 101 101)"
 fi
 if [ "${1:-}" != "--no-legacy-flip" ] || [ "$legacy0" != True ]; then
+  # if this script dies between the flip and the restore, put legacy auth back anyway
+  [ "$legacy0" = True ] && trap 'setlegacy True' EXIT
   [ "$legacy0" = True ] && setlegacy False
   r=$(authtest); [ "$r" = "401 200 401 200" ] && ok "auth legacy-off: X-Emby 401, MediaBrowser 200, api_key 401, ApiKey 200" || bad "auth legacy-off got '$r' (want 401 200 401 200)"
-  s1=$(sock api_key); s2=$(sock ApiKey)
-  # expected today: api_key 403 = the stock web client socket is broken with legacy off
+  s2=$(sock ApiKey)
   [ "$s2" = 101 ] && ok "websocket legacy-off: ApiKey 101" || bad "websocket legacy-off ApiKey=$s2 (want 101)"
-  [ "$s1" = 101 ] && echo "NOTE  websocket legacy-off: api_key 101, the web client socket now works with legacy off" \
-                  || echo "NOTE  websocket legacy-off: api_key $s1, web client socket BREAKS with legacy off (keep it on)"
   [ "$legacy0" = True ] && setlegacy True
   [ "$(curl -s -H "$AUTH" "$U/System/Configuration" | j "d['EnableLegacyAuthorization']")" = "$legacy0" ] \
     && ok "EnableLegacyAuthorization restored to $legacy0" || bad "EnableLegacyAuthorization not restored"
+  trap - EXIT
+  # The real web client, legacy off: socket uses ApiKey=, no 403 after login, remote control works.
+  # (It flips legacy off and restores it itself.) Needs node + playwright in test/.
+  if [ -d test/node_modules/playwright ]; then
+    node test/socket-check.mjs | sed 's/^/  /' | tee /tmp/nfx-sock
+    grep -q 'ALL PASS' /tmp/nfx-sock && ok "web client socket works with legacy auth off (test/socket-check.mjs)" \
+      || bad "web client socket check with legacy off (see above)"
+  else
+    echo "NOTE  test/node_modules missing, skipped the browser socket check (cd test && npm ci)"
+  fi
 fi
 
 # 6. plugins all Active
