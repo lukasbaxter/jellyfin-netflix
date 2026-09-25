@@ -1,12 +1,16 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
 using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Database.Implementations.Enums;
 using MediaBrowser.Controller.Drawing;
+using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.TV;
+using MediaBrowser.Model.Querying;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -19,24 +23,36 @@ namespace Jellyfin.Plugin.NetflixUi.Services;
 public class FeedService
 {
     private static readonly TimeSpan Top10CacheTime = TimeSpan.FromHours(1);
+    private static readonly TimeSpan FeedCacheTime = TimeSpan.FromMinutes(10);
+    private static readonly string[] MainProviders = { "Tmdb", "Imdb", "Tvdb" };
 
     private readonly ILibraryManager _libraryManager;
     private readonly IUserManager _userManager;
     private readonly IUserDataManager _userDataManager;
     private readonly IImageProcessor _imageProcessor;
+    private readonly ITVSeriesManager _tvSeriesManager;
     private readonly ILogger<FeedService> _logger;
 
     private readonly object _top10Lock = new object();
     private readonly Dictionary<BaseItemKind, (DateTime Built, List<Guid> Ids)> _top10Cache = new();
-    private readonly HashSet<BaseItemKind> _top10Building = new();
+
+    // one running build per kind; concurrent callers share it instead of starting their own
+    private readonly Dictionary<BaseItemKind, Task<List<Guid>>> _top10Builds = new();
+
+    // per user feed cache: (user|feed|args|day) -> (built, value)
+    private readonly ConcurrentDictionary<string, (DateTime Built, object Value)> _feedCache = new();
+
+    private (DateTime Built, string[] Paths)? _excludedPathCache;
 
     public FeedService(
         ILibraryManager libraryManager,
         IUserManager userManager,
         IUserDataManager userDataManager,
         IImageProcessor imageProcessor,
+        ITVSeriesManager tvSeriesManager,
         ILogger<FeedService> logger)
     {
+        _tvSeriesManager = tvSeriesManager;
         _libraryManager = libraryManager;
         _userManager = userManager;
         _userDataManager = userDataManager;
@@ -51,6 +67,11 @@ public class FeedService
     public List<NfxItem> GetHero(User user, int limit)
     {
         limit = Math.Clamp(limit, 1, 12);
+        return Cached(user, "hero", limit.ToString(CultureInfo.InvariantCulture), () => BuildHero(user, limit));
+    }
+
+    private List<NfxItem> BuildHero(User user, int limit)
+    {
         var result = new List<NfxItem>();
         var seen = new HashSet<Guid>();
 
@@ -67,7 +88,7 @@ public class FeedService
                 return;
             }
 
-            if (!display.HasImage(ImageType.Backdrop, 0) || !display.HasImage(ImageType.Logo, 0))
+            if (!display.HasImage(ImageType.Backdrop, 0) || !display.HasImage(ImageType.Logo, 0) || !HasMainProviderId(display))
             {
                 return;
             }
@@ -135,6 +156,12 @@ public class FeedService
     {
         var ids = GetTop10Ids(kind);
         var list = new List<NfxItem>();
+        if (ids is null)
+        {
+            // cold cache: the build runs in the background, the client hides a short row
+            return list;
+        }
+
         foreach (var id in ids)
         {
             if (list.Count >= 10)
@@ -143,7 +170,7 @@ public class FeedService
             }
 
             var item = _libraryManager.GetItemById(id);
-            if (item is null || !item.HasImage(ImageType.Primary, 0) || !item.IsVisibleStandalone(user))
+            if (item is null || !item.HasImage(ImageType.Primary, 0) || !HasMainProviderId(item) || IsExcluded(item) || !item.IsVisibleStandalone(user))
             {
                 continue;
             }
@@ -170,7 +197,7 @@ public class FeedService
                     break;
                 }
 
-                if (item.HasImage(ImageType.Primary, 0) && have.Add(item.Id))
+                if (item.HasImage(ImageType.Primary, 0) && HasMainProviderId(item) && have.Add(item.Id))
                 {
                     var dto = ToNfx(item, user);
                     dto.Rank = list.Count + 1;
@@ -184,24 +211,21 @@ public class FeedService
 
     /// <summary>
     /// Serve the cached list; when it is older than an hour, rebuild in the background
-    /// (stale while revalidate) so a request only ever waits on the very first build.
+    /// (stale while revalidate). Returns null while the very first build is still running,
+    /// so no request ever waits 10 to 20 s on it. Only one build per kind runs at a time.
     /// </summary>
-    private List<Guid> GetTop10Ids(BaseItemKind kind)
+    private List<Guid>? GetTop10Ids(BaseItemKind kind)
     {
         lock (_top10Lock)
         {
-            if (_top10Cache.TryGetValue(kind, out var cached))
+            bool have = _top10Cache.TryGetValue(kind, out var cached);
+            if (!have || DateTime.UtcNow - cached.Built >= Top10CacheTime)
             {
-                if (DateTime.UtcNow - cached.Built >= Top10CacheTime && _top10Building.Add(kind))
-                {
-                    _ = Task.Run(() => RebuildTop10(kind));
-                }
-
-                return cached.Ids;
+                StartTop10Build(kind);
             }
-        }
 
-        return RebuildTop10(kind);
+            return have ? cached.Ids : null;
+        }
     }
 
     /// <summary>
@@ -209,8 +233,28 @@ public class FeedService
     /// </summary>
     public void WarmTop10()
     {
-        RebuildTop10(BaseItemKind.Movie);
-        RebuildTop10(BaseItemKind.Series);
+        Task<List<Guid>> m, t;
+        lock (_top10Lock)
+        {
+            // a request may already have built them (cold path); only build what is missing
+            m = _top10Cache.ContainsKey(BaseItemKind.Movie) ? Task.FromResult(new List<Guid>()) : StartTop10Build(BaseItemKind.Movie);
+            t = _top10Cache.ContainsKey(BaseItemKind.Series) ? Task.FromResult(new List<Guid>()) : StartTop10Build(BaseItemKind.Series);
+        }
+
+        Task.WaitAll(m, t);
+    }
+
+    // caller holds _top10Lock
+    private Task<List<Guid>> StartTop10Build(BaseItemKind kind)
+    {
+        if (_top10Builds.TryGetValue(kind, out var running))
+        {
+            return running;
+        }
+
+        var task = Task.Run(() => RebuildTop10(kind));
+        _top10Builds[kind] = task;
+        return task;
     }
 
     private List<Guid> RebuildTop10(BaseItemKind kind)
@@ -227,11 +271,16 @@ public class FeedService
             _logger.LogInformation("NetflixUi: Top 10 {Kind} built in {Ms} ms ({Count} candidates)", kind, sw.ElapsedMilliseconds, ids.Count);
             return ids;
         }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "NetflixUi: Top 10 build failed for {Kind}", kind);
+            return new List<Guid>();
+        }
         finally
         {
             lock (_top10Lock)
             {
-                _top10Building.Remove(kind);
+                _top10Builds.Remove(kind);
             }
         }
     }
@@ -329,6 +378,11 @@ public class FeedService
     public List<NfxGenreRow> GetGenreRows(User user, int count)
     {
         count = Math.Clamp(count, 0, 10);
+        return Cached(user, "genres", count.ToString(CultureInfo.InvariantCulture), () => BuildGenreRows(user, count));
+    }
+
+    private List<NfxGenreRow> BuildGenreRows(User user, int count)
+    {
         var rows = new List<NfxGenreRow>();
         if (count == 0)
         {
@@ -389,20 +443,30 @@ public class FeedService
                 break;
             }
 
-            var items = Query(user, new[] { BaseItemKind.Movie, BaseItemKind.Series }, q =>
+            // unplayed first (filtered in the query, not per item), then played to top up.
+            // A per-day shuffle so rows change daily but not on every refresh.
+            var unplayed = Query(user, new[] { BaseItemKind.Movie, BaseItemKind.Series }, q =>
             {
                 q.Genres = new[] { genre };
+                q.IsPlayed = false;
                 q.OrderBy = new[] { (ItemSortBy.CommunityRating, SortOrder.Descending) };
                 q.Limit = 80;
             });
+            var chosen = DailyShuffle(unplayed.Where(HasMainProviderId), user.Id, "genre-" + genre).Take(20).ToList();
+            if (chosen.Count < 20)
+            {
+                var seen = Query(user, new[] { BaseItemKind.Movie, BaseItemKind.Series }, q =>
+                {
+                    q.Genres = new[] { genre };
+                    q.IsPlayed = true;
+                    q.OrderBy = new[] { (ItemSortBy.CommunityRating, SortOrder.Descending) };
+                    q.Limit = 40;
+                });
+                chosen.AddRange(DailyShuffle(seen.Where(HasMainProviderId), user.Id, "genre-p-" + genre).Take(20 - chosen.Count));
+            }
 
-            // unplayed first, then a per-day shuffle so rows change daily but not on every refresh
-            var picked = DailyShuffle(items, user.Id, "genre-" + genre)
-                .Select(i => (Item: i, Played: _userDataManager.GetUserData(user, i)?.Played ?? false))
-                .OrderBy(x => x.Played)
-                .Take(20)
-                .Select(x => ToNfx(x.Item, user))
-                .ToList();
+            // no Overview here: the hover preview fetches the full item when it opens
+            var picked = chosen.Select(i => ToNfx(i, user, light: true)).ToList();
 
             if (picked.Count < 5)
             {
@@ -425,35 +489,26 @@ public class FeedService
         BaseItem? target = resumeItem;
         if (target is null && display.GetBaseItemKind() == BaseItemKind.Series)
         {
-            var episodes = Query(user, new[] { BaseItemKind.Episode }, q =>
+            // the server's own Next Up logic (resume point, else next unwatched episode)
+            try
+            {
+                var next = _tvSeriesManager.GetNextUp(
+                    new NextUpQuery { User = user, SeriesId = display.Id, Limit = 1 },
+                    new DtoOptions(false));
+                target = next.Items.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "NetflixUi: next up failed for {Id}", display.Id);
+            }
+
+            // never watched: first regular episode (skip specials)
+            target ??= Query(user, new[] { BaseItemKind.Episode }, q =>
             {
                 q.AncestorIds = new[] { display.Id };
                 q.OrderBy = new[] { (ItemSortBy.ParentIndexNumber, SortOrder.Ascending), (ItemSortBy.IndexNumber, SortOrder.Ascending) };
-                q.Limit = 2000;
-            });
-
-            BaseItem? firstUnplayed = null;
-            foreach (var ep in episodes)
-            {
-                if (ep.ParentIndexNumber == 0)
-                {
-                    continue; // skip specials
-                }
-
-                var d = _userDataManager.GetUserData(user, ep);
-                if (d is not null && !d.Played && d.PlaybackPositionTicks > 0)
-                {
-                    target = ep;
-                    break;
-                }
-
-                if (firstUnplayed is null && (d is null || !d.Played))
-                {
-                    firstUnplayed = ep;
-                }
-            }
-
-            target ??= firstUnplayed ?? episodes.FirstOrDefault();
+                q.Limit = 30;
+            }).OrderBy(e => e.ParentIndexNumber == 0 ? 1 : 0).FirstOrDefault();
         }
 
         target ??= display;
@@ -461,6 +516,107 @@ public class FeedService
         dto.PlayItemType = target.GetBaseItemKind().ToString();
         var data = _userDataManager.GetUserData(user, target);
         dto.PlayPositionTicks = data is not null && !data.Played ? data.PlaybackPositionTicks : 0;
+    }
+
+    private T Cached<T>(User user, string feed, string args, Func<T> build)
+        where T : class
+    {
+        string key = user.Id.ToString("N") + "|" + feed + "|" + args + "|" + DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        if (_feedCache.TryGetValue(key, out var hit) && DateTime.UtcNow - hit.Built < FeedCacheTime && hit.Value is T value)
+        {
+            return value;
+        }
+
+        var fresh = build();
+        _feedCache[key] = (DateTime.UtcNow, fresh);
+
+        // drop stale entries now and then so the dictionary cannot grow forever
+        if (_feedCache.Count > 500)
+        {
+            foreach (var kv in _feedCache)
+            {
+                if (DateTime.UtcNow - kv.Value.Built >= FeedCacheTime)
+                {
+                    _feedCache.TryRemove(kv.Key, out _);
+                }
+            }
+        }
+
+        return fresh;
+    }
+
+    /// <summary>
+    /// Real titles have a TMDb, IMDb or TVDb id. Demo clips, home videos and test files do not.
+    /// </summary>
+    private static bool HasMainProviderId(BaseItem item)
+    {
+        var ids = item.ProviderIds;
+        if (ids is null)
+        {
+            return false;
+        }
+
+        foreach (var p in MainProviders)
+        {
+            if (ids.TryGetValue(p, out var v) && !string.IsNullOrWhiteSpace(v))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Folder paths of the libraries excluded in the plugin settings, cached for a minute.
+    /// Matching by path works for every item type; TopParentId in the DB is not the library id.
+    /// </summary>
+    private string[] ExcludedPaths()
+    {
+        var ids = Plugin.Instance?.Configuration.ExcludedLibraryIds;
+        if (ids is null || ids.Length == 0)
+        {
+            return Array.Empty<string>();
+        }
+
+        var cache = _excludedPathCache;
+        if (cache.HasValue && DateTime.UtcNow - cache.Value.Built < TimeSpan.FromMinutes(1))
+        {
+            return cache.Value.Paths;
+        }
+
+        var excluded = new HashSet<Guid>(ids);
+        var paths = new List<string>();
+        foreach (var vf in _libraryManager.GetVirtualFolders())
+        {
+            if (Guid.TryParse(vf.ItemId, out var g) && excluded.Contains(g) && vf.Locations is not null)
+            {
+                paths.AddRange(vf.Locations.Where(l => !string.IsNullOrEmpty(l)).Select(l => l.TrimEnd('/') + "/"));
+            }
+        }
+
+        var arr = paths.ToArray();
+        _excludedPathCache = (DateTime.UtcNow, arr);
+        return arr;
+    }
+
+    private bool IsExcluded(BaseItem item)
+    {
+        var paths = ExcludedPaths();
+        if (paths.Length == 0 || string.IsNullOrEmpty(item.Path))
+        {
+            return false;
+        }
+
+        foreach (var p in paths)
+        {
+            if (item.Path.StartsWith(p, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private IReadOnlyList<BaseItem> Query(User user, BaseItemKind[] kinds, Action<InternalItemsQuery> configure)
@@ -475,7 +631,8 @@ public class FeedService
         configure(q);
         try
         {
-            return _libraryManager.GetItemList(q);
+            var list = _libraryManager.GetItemList(q);
+            return ExcludedPaths().Length == 0 ? list : list.Where(i => !IsExcluded(i)).ToList();
         }
         catch (Exception ex)
         {
@@ -536,7 +693,7 @@ public class FeedService
         }
     }
 
-    private NfxItem ToNfx(BaseItem item, User user)
+    private NfxItem ToNfx(BaseItem item, User user, bool light = false)
     {
         var data = _userDataManager.GetUserData(user, item);
         var dto = new NfxItem
@@ -544,7 +701,7 @@ public class FeedService
             Id = item.Id,
             Name = item.Name ?? string.Empty,
             Type = item.GetBaseItemKind().ToString(),
-            Overview = item.Overview,
+            Overview = light ? null : item.Overview,
             OfficialRating = item.OfficialRating,
             ProductionYear = item.ProductionYear,
             RunTimeTicks = item.RunTimeTicks,
@@ -566,6 +723,11 @@ public class FeedService
         if (item is Episode ep && ep.SeriesId != Guid.Empty)
         {
             dto.SeriesId = ep.SeriesId;
+        }
+
+        if (light)
+        {
+            return dto;
         }
 
         try

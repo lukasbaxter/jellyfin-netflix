@@ -109,6 +109,12 @@ public class NetflixUiController : ControllerBase
         return Guid.TryParse(raw, out var id) ? _feeds.GetUser(id) : null;
     }
 
+    private static bool IsPluginVersion(string v)
+    {
+        string pv = AssetStore.PluginVersion;
+        return v == pv || (pv.EndsWith(".0", StringComparison.Ordinal) && v == pv[..^2]);
+    }
+
     private ActionResult Serve(AssetStore.Asset? asset, string? v)
     {
         if (asset is null)
@@ -117,7 +123,9 @@ public class NetflixUiController : ControllerBase
         }
 
         string etag = "\"" + asset.Hash + "\"";
-        bool versioned = !string.IsNullOrEmpty(v) && (v == AssetStore.Version || v == asset.Hash);
+        // ?v= is the content hash (index.html injection) or the plugin version (branding @import fallback).
+        // Both change whenever the file changes, so both may be cached forever.
+        bool versioned = !string.IsNullOrEmpty(v) && (v == AssetStore.Version || v == asset.Hash || IsPluginVersion(v));
         Response.Headers.CacheControl = versioned ? "public, max-age=31536000, immutable" : "no-cache";
         Response.Headers.ETag = etag;
         if (Request.Headers.IfNoneMatch.ToString() == etag)

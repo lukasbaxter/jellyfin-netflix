@@ -37,3 +37,4 @@ If Moonfin misbehaves on the XGIMI, try **Wholphin** from the Play Store. It is 
 - [ ] Trickplay: Dashboard > Libraries > enable trickplay extraction, then let the scheduled task run.
 - [ ] Intro Skipper: enable "Detect and Analyze Media Segments" in scheduled tasks. The first run over all shows takes hours.
 - [ ] Top 10 and genre rows show only in the web client and Jellyfin apps built on it, not in Moonfin.
+- [ ] Hide the Demos library from home. The Dolby test clips show as a row of black tiles. Each user: Profile > Home > under "Latest media" untick Demos. This applies on every client, TV apps included. In Netflix UI settings, also tick Demos under "Leave these libraries out".

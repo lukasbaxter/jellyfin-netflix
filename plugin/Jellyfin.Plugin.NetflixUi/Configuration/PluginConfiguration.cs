@@ -26,4 +26,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Also inject a &lt;link&gt; to the theme css into index.html (on top of the branding @import).
     /// </summary>
     public bool InjectCss { get; set; } = true;
+
+    /// <summary>
+    /// Libraries (CollectionFolder ids) left out of the hero, Top 10 and genre rows, for example Demos.
+    /// </summary>
+#pragma warning disable CA1819 // XML config needs an array
+    public Guid[] ExcludedLibraryIds { get; set; } = Array.Empty<Guid>();
+#pragma warning restore CA1819
 }

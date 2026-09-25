@@ -21,7 +21,8 @@
         items: {},          // id -> item (nfx shape or BaseItemDto), used by preview
         hero: { list: [], index: 0, timer: 0, paused: false, trailerTimer: 0 },
         scanQueued: false,
-        preview: { el: null, card: null, timer: 0, closeTimer: 0, openFor: null }
+        preview: { el: null, card: null, timer: 0, closeTimer: 0, openFor: null, armed: null },
+        lastMove: 0
     };
 
     function warn(where, e) {
@@ -229,7 +230,8 @@
 
     function setListIcon(btn, fav) {
         if (!btn) return;
-        btn.innerHTML = icon(fav ? 'check' : 'add');
+        btn.innerHTML = icon(fav ? 'check' : 'add') +
+            (btn.hasAttribute('data-label') ? '<span class="nfx-btn__label">My List</span>' : '');
         btn.setAttribute('aria-label', fav ? 'Remove from My List' : 'Add to My List');
         btn.setAttribute('title', fav ? 'Remove from My List' : 'My List');
         btn.classList.toggle('is-active', !!fav);
@@ -272,7 +274,7 @@
             '<div class="nfx-hero__actions">' +
             '<button type="button" is="emby-button" class="nfx-btn nfx-btn--play emby-button" data-focusable="true">' + icon('play_arrow') + '<span>' + heroPlayLabel(it) + '</span></button>' +
             '<button type="button" is="emby-button" class="nfx-btn nfx-btn--info emby-button" data-focusable="true">' + icon('info_outline') + '<span>More Info</span></button>' +
-            '<button type="button" is="emby-button" class="nfx-btn nfx-btn--icon nfx-btn--list emby-button" data-focusable="true"></button>' +
+            '<button type="button" is="emby-button" class="nfx-btn nfx-btn--icon nfx-btn--list emby-button" data-focusable="true" data-label></button>' +
             '</div>';
         setListIcon(content.querySelector('.nfx-btn--list'), fav);
 
@@ -407,6 +409,7 @@
             state.hero.list = list;
             var hero = buildHero(list);
             tab.insertBefore(hero, c);
+            closePreview(); // the hero just moved every card down; a pending preview would be misplaced
             renderHeroSlide(hero, 0);
             scheduleRotate(hero);
             if (isTv()) {
@@ -738,8 +741,17 @@
         }
     }
 
+    function onMove(e) {
+        state.lastMove = Date.now();
+        var p = state.preview;
+        if (p.armed || !state.cfg || !state.cfg.EnableHoverPreview) return;
+        var card = e.target && e.target.closest ? e.target.closest('.card[data-id]') : null;
+        if (card && card !== p.card) onOver(e);
+    }
+
     function closePreview() {
         clearTimeout(state.preview.timer);
+        state.preview.armed = null;
         var p = state.preview.el;
         state.preview.openFor = null;
         state.preview.card = null;
@@ -755,6 +767,9 @@
         var card = target.closest('.card[data-id]');
         if (!card) return null;
         if (!card.closest('.homeSectionsContainer, #homeTab')) return null;
+        // library tiles (My Media) and folders: Play would queue a whole library
+        if (/^(CollectionFolder|UserView|Folder|Channel|Playlist)$/.test(card.getAttribute('data-type') || '')) return null;
+        if (card.closest('.section0')) return null;
         return card;
     }
 
@@ -769,15 +784,30 @@
         card.classList.toggle('nfx-edge-right', right - cr.right < cr.width * 0.5);
     }
 
+    // card position ignoring its own hover transform (scale), so only real layout shifts count
+    function layoutPos(card) {
+        var r = (card.parentNode || card).getBoundingClientRect();
+        return { x: r.left + card.offsetLeft, y: r.top + card.offsetTop };
+    }
+
     function onOver(e) {
         if (isTv() || !finePointer()) return;
         var card = homeCardFrom(e.target);
         if (!card) return;
         markEdges(card);
         if (!state.cfg || !state.cfg.EnableHoverPreview) return;
-        if (state.preview.card === card) return;
+        if (state.preview.card === card || state.preview.armed === card) return;
         clearTimeout(state.preview.timer);
+        state.preview.armed = null;
+        // content rendering under a still cursor fires mouseover too; only a moving mouse
+        // counts (onMove arms it on the next real move if this one was stale)
+        if (Date.now() - state.lastMove > 500) return;
+        state.preview.armed = card;
+        var r0 = layoutPos(card);
         state.preview.timer = setTimeout(safe('preview', function () {
+            state.preview.armed = null;
+            var r1 = layoutPos(card);
+            if (Math.abs(r1.x - r0.x) > 4 || Math.abs(r1.y - r0.y) > 4) return; // layout shifted
             if (card.matches(':hover')) openPreview(card);
         }), PREVIEW_DELAY_MS);
     }
@@ -789,6 +819,7 @@
         if (to && card.contains(to)) return;
         card.classList.remove('nfx-edge-left', 'nfx-edge-right');
         clearTimeout(state.preview.timer);
+        state.preview.armed = null;
         var p = state.preview.el;
         if (to && p && p.contains(to)) return;
         if (state.preview.card === card) closePreview();
@@ -808,6 +839,42 @@
         if (state.preview.openFor) closePreview();
     }
 
+    // ------------------------------------------------------------------ detail backdrop
+    // Stock only paints #itemBackdrop on desktop >= 1000px wide, never in TV layout.
+
+    function ensureDetailBackdrop() {
+        var page = doc.querySelector('#itemDetailPage:not(.hide)');
+        var bd = page && page.querySelector('#itemBackdrop');
+        if (!bd) return;
+        var m = /[?&]id=([0-9a-f-]{32,36})/i.exec(location.hash || location.search);
+        var id = m && m[1];
+        if (!id) return;
+        var mine = bd.getAttribute('data-nfx-bd');
+        if (mine === id) return;
+        if (!mine && bd.style.backgroundImage) return;              // stock painted it
+        if (doc.querySelector('.backdropContainer .backdropImage')) return; // full-screen backdrop is on
+        if (mine) { bd.style.backgroundImage = ''; bd.classList.remove('nfx-detail-backdrop'); }
+        bd.setAttribute('data-nfx-bd', id);
+        var c = api();
+        if (!c || !c.getItem) return;
+        c.getItem(userId(), id).then(safe('detailBackdrop', function (it) {
+            if (bd.getAttribute('data-nfx-bd') !== id || !it) return;
+            var src = '';
+            if (it.BackdropImageTags && it.BackdropImageTags.length) src = img(it.Id, 'Backdrop', it.BackdropImageTags[0], 1920);
+            else if (it.ParentBackdropItemId && it.ParentBackdropImageTags && it.ParentBackdropImageTags.length) {
+                src = img(it.ParentBackdropItemId, 'Backdrop', it.ParentBackdropImageTags[0], 1920);
+            } else if (it.SeriesId) src = img(it.SeriesId, 'Backdrop', null, 1920);
+            if (!src || bd.style.backgroundImage) return;
+            bd.style.backgroundImage = 'url("' + src + '")';
+            bd.classList.add('nfx-detail-backdrop');
+        }), function (e) { warn('detail backdrop', e); });
+    }
+
+    function osdOpen() {
+        var o = doc.getElementById('videoOsdPage');
+        return !!(o && !o.classList.contains('hide'));
+    }
+
     // ------------------------------------------------------------------ scan
 
     function activeHomeTab() {
@@ -824,6 +891,7 @@
         root.classList.toggle('nfx-legacy', !doc.querySelector('.MuiAppBar-root'));
         if (onDashboard()) { closePreview(); return; }
         if (!api() || !userId()) return;
+        ensureDetailBackdrop();
         var tab = activeHomeTab();
         if (!tab) { root.classList.remove('nfx-on-home'); return; }
         var container = tab.querySelector('.homeSectionsContainer');
@@ -851,6 +919,7 @@
     function init() {
         root.classList.add('nfx');
         new MutationObserver(function (muts) {
+            if (state.scanQueued || osdOpen()) return; // the OSD clock mutates constantly
             for (var i = 0; i < muts.length; i++) {
                 if (muts[i].addedNodes.length) { queueScan(); return; }
             }
@@ -859,6 +928,7 @@
         window.addEventListener('hashchange', safe('hashchange', onNavigate));
         window.addEventListener('popstate', safe('popstate', onNavigate));
         window.addEventListener('scroll', safe('scroll', onScroll), { passive: true });
+        doc.addEventListener('mousemove', safe('move', onMove), { passive: true });
         doc.addEventListener('mouseover', safe('over', onOver), { passive: true });
         doc.addEventListener('mouseout', safe('out', onOut), { passive: true });
         window.addEventListener('resize', safe('resize', closePreview), { passive: true });

@@ -58,12 +58,18 @@
                     </select>
                 </div>
 
+                <div class="verticalSection">
+                    <h3 class="sectionTitle">Leave these libraries out</h3>
+                    <div class="fieldDescription">Nothing from a ticked library shows in the hero, Top 10 or genre rows. Good for Demos or home videos. Items with no TMDb, IMDb or TVDb id are always left out.</div>
+                    <div id="NfxLibraries" class="checkboxList paperList" style="padding:.5em 1em;"></div>
+                </div>
+
                 <div class="checkboxContainer checkboxContainer-withDescription">
                     <label class="emby-checkbox-label">
                         <input id="InjectCss" name="InjectCss" type="checkbox" is="emby-checkbox" />
                         <span>Load the theme css from index.html too</span>
                     </label>
-                    <div class="fieldDescription checkboxFieldDescription">Keeps the theme on even if Branding custom css is cleared.</div>
+                    <div class="fieldDescription checkboxFieldDescription">Leave on, and leave Branding custom css empty. Setting both loads the theme twice.</div>
                 </div>
 
                 <div>
@@ -80,9 +86,30 @@
             var bools = ['EnableHero', 'EnableHeroTrailer', 'EnableTop10', 'EnableHoverPreview', 'InjectCss'];
             var page = document.querySelector('#NetflixUiConfigPage');
 
+            function esc(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            function norm(id) { return String(id || '').replace(/-/g, '').toLowerCase(); }
+
+            function renderLibraries(excluded) {
+                var ex = (excluded || []).map(norm);
+                return ApiClient.getJSON(ApiClient.getUrl('Library/VirtualFolders')).then(function (libs) {
+                    page.querySelector('#NfxLibraries').innerHTML = (libs || []).map(function (l) {
+                        var on = ex.indexOf(norm(l.ItemId)) >= 0;
+                        return '<label class="emby-checkbox-label" style="display:block;margin:.4em 0;">' +
+                            '<input type="checkbox" is="emby-checkbox" class="nfxLib" data-id="' + esc(l.ItemId) + '"' + (on ? ' checked' : '') + ' />' +
+                            '<span>' + esc(l.Name) + '</span></label>';
+                    }).join('');
+                });
+            }
+
             page.addEventListener('pageshow', function () {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    renderLibraries(config.ExcludedLibraryIds).catch(function () { /* list stays empty */ });
                     bools.forEach(function (k) { page.querySelector('#' + k).checked = !!config[k]; });
                     page.querySelector('#GenreRowCount').value = config.GenreRowCount;
                     page.querySelector('#HomeCardShape').value = config.HomeCardShape || 'backdrop';
@@ -97,6 +124,12 @@
                     bools.forEach(function (k) { config[k] = page.querySelector('#' + k).checked; });
                     config.GenreRowCount = parseInt(page.querySelector('#GenreRowCount').value, 10) || 0;
                     config.HomeCardShape = page.querySelector('#HomeCardShape').value;
+                    config.ExcludedLibraryIds = Array.prototype.filter.call(page.querySelectorAll('.nfxLib'), function (c) { return c.checked; })
+                        .map(function (c) {
+                            // dashed form, which every Guid parser accepts
+                            var h = norm(c.getAttribute('data-id'));
+                            return h.length === 32 ? h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20) : h;
+                        });
                     ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
                     });

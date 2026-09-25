@@ -33,6 +33,12 @@ else
   ssh "$HOST" "rm -f $REMOTE/theme/dist/netflix.css"
 fi
 
+# Light minify of the embedded js copy (source stays readable): drop indentation, blank lines
+# and whole-line // comments. Safe here because netflix.js has no template literals or
+# multi-line strings (checked below).
+if grep -q '`' "$HERE/web/netflix.js"; then echo "netflix.js has a template literal, minify would be unsafe" >&2; exit 1; fi
+ssh "$HOST" "perl -i -ne 's/^[ \t]+//; next if /^\s*\$/ || m{^//}; print' $REMOTE/plugin/web/netflix.js && wc -c < $REMOTE/plugin/web/netflix.js | xargs echo 'embedded netflix.js bytes:'"
+
 TS="$(date -u +%Y-%m-%dT%H:%M:%S.0000000Z)"
 META=$(cat <<EOF
 {

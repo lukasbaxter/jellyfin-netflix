@@ -122,7 +122,8 @@ async function runViewport(vpName) {
             const closed = await page.evaluate(() => !document.querySelector('.nfx-preview.is-open'));
             check('desktop: hover preview closes on leave', closed);
             // hover preview on a stock card too
-            const stock = page.locator('.homeSectionsContainer .verticalSection:not([data-nfx-row]) .card[data-id]').first();
+            // a content card, not a My Media library tile (those never get a preview, review 1 finding 7)
+            const stock = page.locator('.homeSectionsContainer .verticalSection:not([data-nfx-row]):not(.section0) .card[data-id]:not([data-type="CollectionFolder"]):not([data-type="UserView"])').first();
             if (await stock.count()) {
                 await stock.scrollIntoViewIfNeeded();
                 await stock.hover();
