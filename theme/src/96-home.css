@@ -287,3 +287,36 @@ html.nfx-mode-list #nfx-hero { display: none !important; }
 .nfx-list__empty { color: #808080; font-size: 18px; }
 #nfx-home[data-mode^="p"].nfx-list { padding: calc(var(--nfx-mobile-head, 100px) + 8px) 12px 40px; }
 #nfx-home[data-mode^="p"] .nfx-list__grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+/* ---------------- account dropdown (Netflix 2022) ---------------- */
+.nfx-account { position: relative; }
+.nfx-account .nfx-avatar { background: none; border: 0; padding: 0; cursor: pointer; }
+.nfx-menu {
+    position: absolute; top: calc(100% + 18px); right: 0; min-width: 220px;
+    background: rgba(0, 0, 0, .9); border: 1px solid hsla(0, 0%, 100%, .15);
+    padding: 10px 0 0; font-size: 13px; color: #fff;
+    opacity: 0; visibility: hidden; transition: opacity .15s, visibility .15s; z-index: 1001;
+}
+.nfx-account.is-open .nfx-menu { opacity: 1; visibility: visible; }
+.nfx-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -20px; height: 20px; } /* hover bridge */
+.nfx-menu__caret {
+    position: absolute; top: -16px; right: 32px; border: 7px solid transparent; border-bottom-color: #e5e5e5;
+}
+.nfx-menu__item {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 12px; min-height: 34px;
+    background: none; border: 0; color: #fff; font: inherit; text-align: left; cursor: pointer;
+}
+.nfx-menu__item:hover span, .nfx-menu__item:focus-visible span { text-decoration: underline; }
+.nfx-menu__item:focus-visible { outline: none; background: rgba(255, 255, 255, .08); }
+.nfx-menu__item .material-icons { font-size: 22px; color: #b3b3b3; width: 32px; text-align: center; }
+.nfx-menu__prof .nfx-prof__img { width: 32px; height: 32px; border: 0; font-size: 15px; flex: none; }
+.nfx-menu hr { border: 0; border-top: 1px solid hsla(0, 0%, 100%, .25); margin: 8px 0 0; }
+.nfx-menu__signout { justify-content: center; padding: 12px; }
+@media (max-width: 800px) {
+    .nfx-menu { position: fixed; top: 56px; right: 8px; left: auto; min-width: 240px; }
+    .nfx-menu__caret { right: 14px; }
+}
+/* the stock header no longer takes space on home: hero starts at the very top on every layout */
+html.nfx-own-home #indexPage { padding-top: 0 !important; }
+html.nfx-own-home #nfx-hero:not(.nfx-hero--card) { margin-top: 0 !important; }
+html.layout-tv.nfx-has-hero #nfx-home { margin-top: -2vw; }

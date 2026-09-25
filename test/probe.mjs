@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+import fs from 'node:fs';
+const env = Object.fromEntries(fs.readFileSync('../.staging.env','utf8').split('\n').filter(l=>l.includes('=')).map(l=>l.split(/=(.*)/s).slice(0,2)));
+const b = await chromium.launch(); const ctx = await b.newContext({viewport:{width:+(process.env.W||1440),height:+(process.env.H||900)}}); if (process.env.LAYOUT) await ctx.addInitScript(l=>localStorage.setItem("layout",l), process.env.LAYOUT); if (process.env.NFX_LOCAL) { await ctx.route(/\/NetflixUi\/netflix\.css/, r=>r.fulfill({contentType:"text/css",body:fs.readFileSync("../theme/dist/netflix.css")})); await ctx.route(/\/NetflixUi\/netflix\.js/, r=>r.fulfill({contentType:"application/javascript",body:fs.readFileSync("../plugin/web/netflix.js")})); } const p = await ctx.newPage();
+await p.goto(env.STAGING_URL+'/web/#/login'); await p.waitForTimeout(2500);
+if (await p.locator('.btnManual').isVisible().catch(()=>false)) await p.locator('.btnManual').click();
+await p.fill('#txtManualName', process.env.ADMIN ? env.STAGING_ADMIN_USER : env.STAGING_VIEWER_USER); await p.fill('#txtManualPassword', process.env.ADMIN ? env.STAGING_ADMIN_PASS : env.STAGING_VIEWER_PASS);
+await p.locator('.manualLoginForm .button-submit').click(); await p.waitForTimeout(5000);
+const code = process.argv[2];
+console.log(JSON.stringify(await p.evaluate(new Function(code)), null, 1));
+if (process.env.SHOT) await p.screenshot({ path: process.env.SHOT });
+await b.close();

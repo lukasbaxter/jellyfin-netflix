@@ -5,7 +5,7 @@
     'use strict';
 
     if (window.__NFX_VERSION__) return;
-    var VERSION = '2.0.0';
+    var VERSION = '2.1.0';
     window.__NFX_VERSION__ = VERSION;
 
     var doc = document;
@@ -272,7 +272,7 @@
             ? '<img class="nfx-hero__logo" alt="' + esc(it.Name) + '" src="' + esc(img(it.Id, 'Logo', it.LogoTag, 800)) + '">'
             : '<h1 class="nfx-hero__title">' + esc(it.Name) + '</h1>';
         var fav = it.UserData && it.UserData.IsFavorite;
-        content.innerHTML = title +
+        content.innerHTML = kindLabel(it.Type) + title +
             '<div class="nfx-hero__meta">' + metaHtml(it) + '</div>' +
             '<p class="nfx-hero__overview">' + esc(it.Overview || '') + '</p>' +
             '<div class="nfx-hero__genres">' + genresHtml(it.Genres) + '</div>' +
@@ -332,7 +332,7 @@
         if (isMobile() || isTv() || reducedMotion() || state.hero.list.length < 2) return;
         state.hero.timer = setInterval(safe('rotate', function () {
             if (!hero.isConnected) { clearInterval(state.hero.timer); return; }
-            if (state.hero.paused || !heroActive(hero)) return;
+            if (state.hero.paused || !heroActive(hero) || doc.getElementById('nfx-modal') || doc.getElementById('nfx-gate')) return;
             if (hero.querySelector('video')) return; // let a trailer finish
             renderHeroSlide(hero, (state.hero.index + 1) % state.hero.list.length);
         }), HERO_ROTATE_MS);
@@ -369,7 +369,7 @@
                 play(it.PlayItemId || it.Id, it.PlayItemType || it.Type, it.PlayPositionTicks, it.Id);
             } else if (t.closest('.nfx-btn--info')) {
                 e.preventDefault();
-                goDetails(it.Id);
+                if (useModal()) openModal(it.Id); else goDetails(it.Id);
             } else if (t.closest('.nfx-btn--list')) {
                 e.preventDefault();
                 toggleFavorite(it.Id, t.closest('.nfx-btn--list'));
@@ -659,7 +659,7 @@
     function navLinks() {
         return [
             ['home', 'Home', '#/home'],
-            ['shows', 'Shows', viewHash(mainView('tvshows'))],
+            ['shows', 'TV Shows', viewHash(mainView('tvshows'))],
             ['movies', 'Movies', viewHash(mainView('movies'))],
             ['new', 'New & Popular', '#/home?nfx=new'],
             ['list', 'My List', '#/home?nfx=list']
@@ -684,6 +684,46 @@
         return '';
     }
 
+    function renderMenu(menu) {
+        var me = userId();
+        var others = profilesFor(serverId()).filter(function (p) { return p.UserId !== me; });
+        var admin = !!(state.user && state.user.Policy && state.user.Policy.IsAdministrator);
+        var item = function (act, ic, label, extra) {
+            return '<button type="button" role="menuitem" class="nfx-menu__item" data-act="' + act + '"' + (extra || '') + '>' + ic + '<span>' + esc(label) + '</span></button>';
+        };
+        menu.innerHTML = '<span class="nfx-menu__caret"></span>' +
+            others.map(function (p, i) {
+                return '<button type="button" role="menuitem" class="nfx-menu__item nfx-menu__prof" data-act="switch" data-uid="' + esc(p.UserId) + '">' +
+                    avatarHtml(p, i + 1) + '<span>' + esc(p.Name) + '</span></button>';
+            }).join('') +
+            item('manage', icon('edit'), 'Manage Profiles') +
+            item('profiles', icon('switch_account'), 'Switch Profile') +
+            '<hr>' +
+            item('go', icon('person_outline'), 'Account & Settings', ' data-href="#/mypreferencesmenu"') +
+            (admin ? item('go', icon('dashboard'), 'Admin Dashboard', ' data-href="#/dashboard"') +
+                item('go', icon('edit_note'), 'Metadata Manager', ' data-href="#/metadata"') : '') +
+            '<hr>' +
+            '<button type="button" role="menuitem" class="nfx-menu__item nfx-menu__signout" data-act="signout"><span>Sign out of ' + esc(BRAND.charAt(0) + BRAND.slice(1).toLowerCase()) + '</span></button>';
+    }
+
+    function signOut() {
+        // a real sign-out: revoke the token and forget this profile on this device
+        forgetProfile(serverId(), userId());
+        var c = api();
+        var done = function () {
+            var cs = credStore();
+            var srv = currentServer(cs);
+            if (srv) { srv.AccessToken = null; srv.UserId = null; cs.store.setItem('jellyfin_credentials', JSON.stringify(cs.creds)); }
+            ssSet(GATE_KEY, '1');
+            location.hash = '#/login';
+            location.reload();
+        };
+        try {
+            fetch(url('Sessions/Logout'), { method: 'POST', headers: { Authorization: 'MediaBrowser Token="' + (c && c.accessToken ? c.accessToken() : '') + '"' } })
+                .then(done, done);
+        } catch (e) { done(); }
+    }
+
     function ensureHeader() {
         var h = doc.getElementById('nfx-header');
         if (!h) {
@@ -697,10 +737,42 @@
                 '<div class="nfx-header__right">' +
                 '<a class="nfx-hbtn nfx-hbtn--search" href="#/search" aria-label="Search">' + icon('search') + '</a>' +
                 '<button type="button" class="nfx-hbtn nfx-hbtn--cast" aria-label="Cast">' + icon('cast') + '</button>' +
-                '<a class="nfx-avatar" href="#/mypreferencesmenu" aria-label="Profile"><span class="nfx-avatar__img"></span>' + icon('arrow_drop_down') + '</a>' +
+                '<div class="nfx-account">' +
+                '<button type="button" class="nfx-avatar" aria-label="Account menu" aria-haspopup="true" aria-expanded="false"><span class="nfx-avatar__img"></span>' + icon('arrow_drop_down') + '</button>' +
+                '<div class="nfx-menu" role="menu"></div></div>' +
                 '</div>' +
                 '<nav class="nfx-chips" aria-label="Categories"></nav>';
             h.querySelector('.nfx-header__back').addEventListener('click', function () { history.back(); });
+            var acct = h.querySelector('.nfx-account');
+            var openMenu = function (on) {
+                acct.classList.toggle('is-open', on);
+                acct.querySelector('.nfx-avatar').setAttribute('aria-expanded', on ? 'true' : 'false');
+                if (on) renderMenu(acct.querySelector('.nfx-menu'));
+            };
+            var hideTimer = 0;
+            acct.addEventListener('mouseenter', function () { if (!finePointer()) return; clearTimeout(hideTimer); openMenu(true); });
+            acct.addEventListener('mouseleave', function () { if (!finePointer()) return; hideTimer = setTimeout(function () { openMenu(false); }, 250); });
+            acct.querySelector('.nfx-avatar').addEventListener('click', function (e) {
+                e.stopPropagation();
+                openMenu(!acct.classList.contains('is-open'));
+                var first = acct.querySelector('.nfx-menu a, .nfx-menu button');
+                if (acct.classList.contains('is-open') && first && !finePointer()) first.focus();
+            });
+            acct.querySelector('.nfx-menu').addEventListener('click', safe('menu', function (e) {
+                var t = e.target.closest('[data-act]');
+                if (!t) { openMenu(false); return; }
+                e.preventDefault();
+                openMenu(false);
+                var act = t.getAttribute('data-act');
+                if (act === 'switch') {
+                    var p = profilesFor(serverId()).filter(function (x) { return x.UserId === t.getAttribute('data-uid'); })[0];
+                    if (p) switchTo(p);
+                } else if (act === 'profiles') { openGate(); }
+                else if (act === 'manage') { openGate(); var g = doc.getElementById('nfx-gate'); if (g) { g.classList.add('is-managing'); renderGate(g); } }
+                else if (act === 'signout') { signOut(); }
+                else if (act === 'go') { location.hash = t.getAttribute('data-href'); }
+            }));
+            doc.addEventListener('click', function (e) { if (!acct.contains(e.target)) openMenu(false); });
             h.querySelector('.nfx-hbtn--cast').addEventListener('click', function () {
                 var b = doc.querySelector('.headerCastButton, button[aria-label="Cast to Device"]');
                 if (b) b.click();
@@ -733,12 +805,12 @@
         var c = api();
         if (state.user || state.userLoading || !c || !c.getCurrentUser) return;
         state.userLoading = true;
-        c.getCurrentUser().then(function (u) { state.user = u; state.userLoading = false; ensureHeader(); },
+        c.getCurrentUser().then(function (u) { state.user = u; state.userLoading = false; ensureHeader(); rememberProfile(); ensureGate(); },
             function () { state.userLoading = false; });
     }
 
     // search: titles first, people after, music/studios hidden (Netflix only shows titles)
-    var SEARCH_KIND = { movies: 'title', shows: 'title', series: 'title', episodes: 'title', collections: 'title', 'live tv': 'title', programs: 'title',
+    var SEARCH_KIND = { movies: 'title', shows: 'title', series: 'title', episodes: 'title', collections: 'noise', 'live tv': 'title', programs: 'title',
         people: 'people', studios: 'noise', artists: 'noise', albums: 'noise', songs: 'noise', 'music videos': 'noise', playlists: 'noise', books: 'noise', photos: 'noise', 'photo albums': 'noise', videos: 'noise' };
     function tagSearch() {
         var pg = doc.querySelector('#searchPage:not(.hide)');
@@ -748,6 +820,406 @@
             var k = SEARCH_KIND[((h && h.textContent) || '').trim().toLowerCase()] || 'title';
             if (sec.getAttribute('data-nfx-kind') !== k) sec.setAttribute('data-nfx-kind', k);
         });
+    }
+
+    // ------------------------------------------------------------------ hide collections
+    // Collections (incl. the studio/streaming ones) never show: search section, detail
+    // "Collections" row, library "Collections" tab, BoxSet cards.
+    function hideCollections() {
+        var sel = '#itemDetailPage:not(.hide) .verticalSection, .emby-tab-button, .MuiTab-root, .MuiMenuItem-root';
+        Array.prototype.forEach.call(doc.querySelectorAll(sel), function (el) {
+            var h = el.matches('.verticalSection') ? el.querySelector('h2, .sectionTitle') : el;
+            var txt = ((h && h.textContent) || '').trim();
+            var hide = /^collections?$/i.test(txt);
+            if (hide && !el.hasAttribute('data-nfx-hide')) el.setAttribute('data-nfx-hide', '');
+        });
+    }
+
+    // ------------------------------------------------------------------ More Info modal (2022)
+
+    function useModal() { return !isTv() && !isMobile() && window.innerWidth > 800; }
+
+    function kindLabel(type) {
+        var k = type === 'Series' || type === 'Episode' || type === 'Season' ? 'SERIES' : 'FILM';
+        return '<div class="nfx-kind"><span class="nfx-kind__b">' + esc(BRAND.charAt(0)) + '</span><span class="nfx-kind__t">' + k + '</span></div>';
+    }
+
+    function peopleOf(it, types) {
+        return (it.People || []).filter(function (p) { return types.indexOf(p.Type) > -1; }).map(function (p) { return p.Name; });
+    }
+
+    function listLine(label, names, max) {
+        if (!names || !names.length) return '';
+        var shown = names.slice(0, max || names.length);
+        return '<div class="nfx-m-line"><span class="nfx-m-label">' + esc(label) + ':</span> ' +
+            shown.map(function (n) { return '<span>' + esc(n) + '</span>'; }).join(', ') +
+            (max && names.length > max ? ', <i>more</i>' : '') + '</div>';
+    }
+
+    function seasonsText(it) {
+        var n = it.ChildCount;
+        return n ? n + (n === 1 ? ' Season' : ' Seasons') : '';
+    }
+
+    function modalMeta(it) {
+        return '<span class="nfx-match">' + esc(match(it.CommunityRating)) + '</span>' +
+            '<span>' + esc(it.ProductionYear || '') + '</span>' +
+            (it.OfficialRating ? '<span class="nfx-maturity">' + esc(it.OfficialRating) + '</span>' : '') +
+            '<span>' + esc(it.Type === 'Series' ? seasonsText(it) : runtime(it.RunTimeTicks)) + '</span>' +
+            '<span class="nfx-hd">HD</span>';
+    }
+
+    function epHtml(ep) {
+        var ud = ep.UserData || {};
+        var pct = ud.PlaybackPositionTicks && ep.RunTimeTicks ? Math.round(ud.PlaybackPositionTicks / ep.RunTimeTicks * 100) : 0;
+        var src = ep.ImageTags && ep.ImageTags.Primary ? img(ep.Id, 'Primary', ep.ImageTags.Primary, 400) : '';
+        return '<button type="button" class="nfx-ep" data-play="' + esc(ep.Id) + '" data-pos="' + (ud.PlaybackPositionTicks || 0) + '">' +
+            '<span class="nfx-ep__num">' + esc(ep.IndexNumber != null ? ep.IndexNumber : '') + '</span>' +
+            '<span class="nfx-ep__img">' + (src ? '<img loading="lazy" alt="" src="' + esc(src) + '">' : '') +
+            '<span class="nfx-ep__play">' + icon('play_arrow') + '</span>' +
+            (pct ? '<span class="nfx-ep__bar"><i style="width:' + pct + '%"></i></span>' : '') + '</span>' +
+            '<span class="nfx-ep__body"><span class="nfx-ep__head"><span class="nfx-ep__title">' + esc(ep.Name) + '</span>' +
+            '<span class="nfx-ep__rt">' + esc(runtime(ep.RunTimeTicks)) + '</span></span>' +
+            '<span class="nfx-ep__ov">' + esc(ep.Overview || '') + '</span></span></button>';
+    }
+
+    function simHtml(it) {
+        var m = card(it);
+        var src = m.thumb || m.backdrop || m.poster;
+        var fav = it.UserData && it.UserData.IsFavorite;
+        return '<div class="nfx-sim" data-open="' + esc(it.Id) + '" tabindex="0" role="button">' +
+            '<div class="nfx-sim__img">' + (src ? '<img loading="lazy" alt="" src="' + esc(src) + '">' : '') +
+            (m.thumb ? '' : (m.logo ? '<img class="nfx-sim__logo" alt="" src="' + esc(m.logo) + '">' : '<span class="nfx-sim__name">' + esc(it.Name) + '</span>')) +
+            '<span class="nfx-sim__rt">' + esc(it.Type === 'Series' ? seasonsText(it) : runtime(it.RunTimeTicks)) + '</span></div>' +
+            '<div class="nfx-sim__body"><div class="nfx-sim__meta"><div><span class="nfx-match">' + esc(match(it.CommunityRating)) + '</span>' +
+            '<div class="nfx-sim__sub">' + (it.OfficialRating ? '<span class="nfx-maturity">' + esc(it.OfficialRating) + '</span>' : '') +
+            '<span>' + esc(it.ProductionYear || '') + '</span></div></div>' +
+            '<button type="button" class="nfx-circle" data-fav="' + esc(it.Id) + '" aria-label="My List">' + icon(fav ? 'check' : 'add') + '</button></div>' +
+            '<p class="nfx-sim__ov">' + esc(it.Overview || '') + '</p></div></div>';
+    }
+
+    function loadEpisodes(box, seriesId, seasonId) {
+        var list = box.querySelector('.nfx-eps__list');
+        list.innerHTML = '<div class="nfx-m-loading"></div>';
+        getJSON('Shows/' + seriesId + '/Episodes', { userId: userId(), seasonId: seasonId, Fields: 'Overview', EnableImageTypes: 'Primary', ImageTypeLimit: 1 })
+            .then(safe('episodes', function (r) {
+                list.innerHTML = ((r && r.Items) || []).map(epHtml).join('') || '<p class="nfx-m-empty">No episodes.</p>';
+            }), function (e) { warn('episodes', e); });
+    }
+
+    function closeModal() {
+        var m = doc.getElementById('nfx-modal');
+        if (!m) return;
+        root.classList.remove('nfx-modal-open');
+        m.classList.add('is-leaving');
+        setTimeout(function () { m.remove(); }, 250);
+        if (state.modalReturn && state.modalReturn.focus) { try { state.modalReturn.focus(); } catch (_) { /* */ } }
+    }
+
+    function openModal(id) {
+        closePreview();
+        var c = api();
+        if (!c || !c.getItem) { goDetails(id); return; }
+        var m = doc.getElementById('nfx-modal');
+        if (!m) {
+            state.modalReturn = doc.activeElement;
+            m = doc.createElement('div');
+            m.id = 'nfx-modal';
+            m.className = 'nfx-modal';
+            m.setAttribute('role', 'dialog');
+            m.setAttribute('aria-modal', 'true');
+            m.innerHTML = '<div class="nfx-modal__box"></div>';
+            m.addEventListener('click', safe('modalClick', onModalClick));
+            doc.body.appendChild(m);
+            requestAnimationFrame(function () { root.classList.add('nfx-modal-open'); });
+        }
+        var box = m.querySelector('.nfx-modal__box');
+        m.scrollTop = 0;
+        box.innerHTML = '<div class="nfx-m-loading nfx-m-loading--big"></div>';
+        m.setAttribute('data-id', id);
+        c.getItem(userId(), id).then(safe('modal', function (it) {
+            if (m.getAttribute('data-id') !== id) return;
+            state.items[it.Id] = it;
+            renderModal(m, box, it);
+        }), function (e) { warn('modal item', e); closeModal(); goDetails(id); });
+    }
+
+    function renderModal(m, box, it) {
+        var isSeries = it.Type === 'Series';
+        var t = it.ImageTags || {};
+        var bd = it.BackdropImageTags && it.BackdropImageTags.length ? img(it.Id, 'Backdrop', it.BackdropImageTags[0], 1280) : (t.Thumb ? img(it.Id, 'Thumb', t.Thumb, 1280) : '');
+        var logo = t.Logo ? img(it.Id, 'Logo', t.Logo, 600) : '';
+        var fav = it.UserData && it.UserData.IsFavorite;
+        var resume = it.UserData && it.UserData.PlaybackPositionTicks > 0;
+        var cast = peopleOf(it, ['Actor', 'GuestStar']);
+        m.setAttribute('aria-label', it.Name);
+        box.innerHTML =
+            '<button type="button" class="nfx-modal__close" aria-label="Close">' + icon('close') + '</button>' +
+            '<div class="nfx-modal__media">' + (bd ? '<img class="nfx-modal__bd" alt="" src="' + esc(bd) + '">' : '') +
+            '<div class="nfx-modal__shade"></div>' +
+            '<div class="nfx-modal__hero">' + kindLabel(it.Type) +
+            (logo ? '<img class="nfx-modal__logo" alt="' + esc(it.Name) + '" src="' + esc(logo) + '">' : '<h2 class="nfx-modal__title">' + esc(it.Name) + '</h2>') +
+            '<div class="nfx-modal__actions">' +
+            '<button type="button" class="nfx-btn nfx-btn--play nfx-m-play">' + icon('play_arrow') + '<span>' + (resume ? 'Resume' : 'Play') + '</span></button>' +
+            '<button type="button" class="nfx-circle nfx-circle--lg" data-fav="' + esc(it.Id) + '" aria-label="My List">' + icon(fav ? 'check' : 'add') + '</button>' +
+            '<button type="button" class="nfx-circle nfx-circle--lg nfx-m-like" aria-label="I like this">' + icon('thumb_up_off_alt') + '</button>' +
+            '</div></div></div>' +
+            '<div class="nfx-modal__body">' +
+            '<div class="nfx-modal__info"><div class="nfx-modal__left">' +
+            '<div class="nfx-modal__meta">' + modalMeta(it) + '</div>' +
+            (it.Taglines && it.Taglines[0] ? '<p class="nfx-modal__tag">' + esc(it.Taglines[0]) + '</p>' : '') +
+            '<p class="nfx-modal__ov">' + esc(it.Overview || '') + '</p></div>' +
+            '<div class="nfx-modal__right">' + listLine('Cast', cast, 3) + listLine('Genres', it.Genres) + '</div></div>' +
+            (isSeries ? '<section class="nfx-eps"><div class="nfx-eps__head"><h3>Episodes</h3><select class="nfx-eps__season" aria-label="Season"></select></div><div class="nfx-eps__list"></div></section>' : '') +
+            '<section class="nfx-more"><h3>More Like This</h3><div class="nfx-more__grid"><div class="nfx-m-loading"></div></div></section>' +
+            '<section class="nfx-about"><h3>About <b>' + esc(it.Name) + '</b></h3>' +
+            listLine('Director', peopleOf(it, ['Director'])) +
+            listLine('Cast', cast, 12) +
+            listLine('Writer', peopleOf(it, ['Writer'])) +
+            listLine('Genres', it.Genres) +
+            (it.OfficialRating ? '<div class="nfx-m-line"><span class="nfx-m-label">Maturity rating:</span> <span class="nfx-maturity">' + esc(it.OfficialRating) + '</span></div>' : '') +
+            '<a class="nfx-about__all" href="' + esc(detailsHash(it.Id)) + '">All details, trailers and audio options</a>' +
+            '</section></div>';
+
+        if (isSeries) {
+            getJSON('Shows/' + it.Id + '/Seasons', { userId: userId() }).then(safe('seasons', function (r) {
+                var seasons = ((r && r.Items) || []).filter(function (s) { return s.IndexNumber !== 0 || (r.Items.length === 1); });
+                var sel = box.querySelector('.nfx-eps__season');
+                if (!sel || !seasons.length) return;
+                sel.innerHTML = seasons.map(function (s) { return '<option value="' + esc(s.Id) + '">' + esc(s.Name) + '</option>'; }).join('');
+                // start on the season you're in
+                var cur = seasons.filter(function (s) { return s.UserData && s.UserData.UnplayedItemCount > 0 && s.UserData.PlayedPercentage > 0; })[0] || seasons[0];
+                sel.value = cur.Id;
+                sel.addEventListener('change', function () { loadEpisodes(box, it.Id, sel.value); });
+                loadEpisodes(box, it.Id, cur.Id);
+            }), function (e) { warn('seasons', e); });
+        }
+        getJSON('Items/' + it.Id + '/Similar', withImg({ Limit: 12 })).then(safe('similar', function (r) {
+            var grid = box.querySelector('.nfx-more__grid');
+            var items = ((r && r.Items) || []).filter(function (x) { return x.Type === 'Movie' || x.Type === 'Series'; });
+            if (!items.length) { box.querySelector('.nfx-more').remove(); return; }
+            grid.innerHTML = items.map(simHtml).join('');
+        }), function () { var s = box.querySelector('.nfx-more'); if (s) s.remove(); });
+        var pb = box.querySelector('.nfx-m-play');
+        if (pb) setTimeout(function () { try { pb.focus({ preventScroll: true }); } catch (_) { /* */ } }, 50);
+    }
+
+    function playFromModal(it) {
+        if (it.Type !== 'Series') { closeModal(); play(it.Id, it.Type, (it.UserData && it.UserData.PlaybackPositionTicks) || 0, it.Id); return; }
+        getJSON('Shows/NextUp', { userId: userId(), SeriesId: it.Id, Limit: 1, EnableResumable: true }).then(function (r) {
+            var ep = r && r.Items && r.Items[0];
+            closeModal();
+            if (ep) play(ep.Id, 'Episode', (ep.UserData && ep.UserData.PlaybackPositionTicks) || 0, it.Id);
+            else play(it.Id, 'Series', 0, it.Id);
+        }, function () { closeModal(); play(it.Id, 'Series', 0, it.Id); });
+    }
+
+    function onModalClick(e) {
+        var m = doc.getElementById('nfx-modal');
+        var t = e.target;
+        var it = state.items[m.getAttribute('data-id')] || {};
+        if (t === m || t.closest('.nfx-modal__close')) { closeModal(); return; }
+        var fav = t.closest('[data-fav]');
+        if (fav) {
+            e.stopPropagation();
+            var fid = fav.getAttribute('data-fav');
+            var c = api();
+            var cur = fav.querySelector('.material-icons');
+            var next = !(cur && cur.classList.contains('check'));
+            c.updateFavoriteStatus(userId(), fid, next).then(function () {
+                fav.innerHTML = icon(next ? 'check' : 'add');
+                if (state.items[fid]) (state.items[fid].UserData = state.items[fid].UserData || {}).IsFavorite = next;
+            }).catch(function (er) { warn('fav', er); });
+            return;
+        }
+        if (t.closest('.nfx-m-like')) { var b = t.closest('.nfx-m-like'); b.innerHTML = icon(b.classList.toggle('is-on') ? 'thumb_up' : 'thumb_up_off_alt'); return; }
+        if (t.closest('.nfx-m-play')) { playFromModal(it); return; }
+        var ep = t.closest('[data-play]');
+        if (ep) { closeModal(); play(ep.getAttribute('data-play'), 'Episode', parseInt(ep.getAttribute('data-pos'), 10) || 0, it.Id); return; }
+        var sim = t.closest('[data-open]');
+        if (sim) { openModal(sim.getAttribute('data-open')); return; }
+        if (t.closest('.nfx-about__all')) { closeModal(); }
+    }
+
+    // ------------------------------------------------------------------ Who's watching?
+    // Netflix-style profile gate on every app open. Profiles = accounts that have signed in on
+    // THIS device (never the server's user list). Each keeps its own token, so switching is
+    // instant: swap the web client's stored credentials and reload.
+
+    var PROFILES_KEY = 'nfx-profiles';
+    var GATE_KEY = 'nfx-gate-passed';
+
+    function lsGet(k, fallback) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch (_) { return fallback; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { /* private mode */ } }
+    function ssGet(k) { try { return sessionStorage.getItem(k); } catch (_) { return null; } }
+    function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (_) { /* */ } }
+
+    function credStore() {
+        // "Remember me" off keeps credentials in sessionStorage
+        var stores = [];
+        try { stores.push(localStorage); } catch (_) { /* */ }
+        try { stores.push(sessionStorage); } catch (_) { /* */ }
+        for (var i = 0; i < stores.length; i++) {
+            try {
+                var raw = stores[i].getItem('jellyfin_credentials');
+                if (raw) return { store: stores[i], creds: JSON.parse(raw) };
+            } catch (_) { /* */ }
+        }
+        return null;
+    }
+
+    function currentServer(cs) {
+        if (!cs || !cs.creds || !cs.creds.Servers) return null;
+        var sid = serverId();
+        var list = cs.creds.Servers;
+        return list.filter(function (s) { return s.Id === sid; })[0] ||
+            list.slice().sort(function (a, b) { return (b.DateLastAccessed || 0) - (a.DateLastAccessed || 0); })[0] || null;
+    }
+
+    function profilesFor(sid) {
+        return lsGet(PROFILES_KEY, []).filter(function (p) { return p.ServerId === sid; });
+    }
+
+    function rememberProfile() {
+        var cs = credStore();
+        var srv = currentServer(cs);
+        var u = state.user;
+        if (!srv || !srv.AccessToken || !u || u.Id !== srv.UserId) return;
+        var all = lsGet(PROFILES_KEY, []);
+        var p = all.filter(function (x) { return x.ServerId === srv.Id && x.UserId === u.Id; })[0];
+        if (!p) { p = { ServerId: srv.Id, UserId: u.Id }; all.push(p); }
+        p.Name = u.Name;
+        p.Token = srv.AccessToken;
+        p.ImageTag = u.PrimaryImageTag || '';
+        p.Last = Date.now();
+        lsSet(PROFILES_KEY, all);
+    }
+
+    function forgetProfile(sid, uid) {
+        lsSet(PROFILES_KEY, lsGet(PROFILES_KEY, []).filter(function (x) { return !(x.ServerId === sid && x.UserId === uid); }));
+    }
+
+    var AVATAR_COLORS = ['#0071eb', '#e50914', '#f5b50a', '#2bb871', '#8c4ad8', '#e87c03'];
+    function avatarHtml(p, i) {
+        if (p.ImageTag) {
+            return '<span class="nfx-prof__img" style="background-image:url(&quot;' +
+                esc(url('Users/' + p.UserId + '/Images/Primary', { tag: p.ImageTag, maxWidth: 320 })) + '&quot;)"></span>';
+        }
+        return '<span class="nfx-prof__img nfx-prof__img--letter" style="background-color:' + AVATAR_COLORS[i % AVATAR_COLORS.length] + '">' +
+            esc((p.Name || '?').charAt(0).toUpperCase()) + '</span>';
+    }
+
+    function switchTo(p) {
+        var cs = credStore();
+        var srv = currentServer(cs);
+        if (!srv) return;
+        // make sure the saved token still works (Session Cleaner or a sign-out can revoke it)
+        fetch(url('Users/Me'), { headers: { Authorization: 'MediaBrowser Token="' + p.Token + '"' } }).then(function (r) {
+            if (r.status === 401 || r.status === 403) {
+                forgetProfile(p.ServerId, p.UserId);
+                srv.AccessToken = null;
+                srv.UserId = null;
+            } else {
+                srv.AccessToken = p.Token;
+                srv.UserId = p.UserId;
+            }
+            cs.store.setItem('jellyfin_credentials', JSON.stringify(cs.creds));
+            ssSet(GATE_KEY, '1');
+            location.hash = '#/home';
+            location.reload();
+        }).catch(function (e) { warn('switch', e); });
+    }
+
+    function addProfile() {
+        // sign-in screen WITHOUT revoking the current token, so this profile stays switchable
+        var cs = credStore();
+        var srv = currentServer(cs);
+        if (!srv) return;
+        srv.AccessToken = null;
+        srv.UserId = null;
+        cs.store.setItem('jellyfin_credentials', JSON.stringify(cs.creds));
+        ssSet(GATE_KEY, '1');
+        location.hash = '#/login';
+        location.reload();
+    }
+
+    function closeGate(gate) {
+        ssSet(GATE_KEY, '1');
+        root.classList.remove('nfx-gate-open');
+        gate.classList.add('is-leaving');
+        setTimeout(function () { gate.remove(); }, 350);
+    }
+
+    function renderGate(gate) {
+        var sid = serverId();
+        var list = profilesFor(sid).sort(function (a, b) { return (a.Name || '').localeCompare(b.Name || ''); });
+        var me = userId();
+        var manage = gate.classList.contains('is-managing');
+        gate.innerHTML =
+            '<div class="nfx-gate__logo">' + BRAND + '</div>' +
+            '<div class="nfx-gate__center">' +
+            '<h1 class="nfx-gate__title">' + (manage ? 'Manage Profiles:' : 'Who\'s watching?') + '</h1>' +
+            '<ul class="nfx-gate__list">' +
+            list.map(function (p, i) {
+                return '<li><button type="button" class="nfx-prof" data-uid="' + esc(p.UserId) + '">' + avatarHtml(p, i) +
+                    (manage && p.UserId !== me ? '<span class="nfx-prof__remove" aria-hidden="true">' + icon('close') + '</span>' : '') +
+                    '<span class="nfx-prof__name">' + esc(p.Name) + '</span></button></li>';
+            }).join('') +
+            (manage ? '' : '<li><button type="button" class="nfx-prof nfx-prof--add"><span class="nfx-prof__img nfx-prof__img--add">' + icon('add_circle') + '</span><span class="nfx-prof__name">Add Profile</span></button></li>') +
+            '</ul>' +
+            '<button type="button" class="nfx-gate__manage">' + (manage ? 'Done' : 'Manage Profiles') + '</button>' +
+            '</div>';
+        var first = gate.querySelector('.nfx-prof[data-uid="' + me + '"]') || gate.querySelector('.nfx-prof');
+        if (first) setTimeout(function () { try { first.focus(); } catch (_) { /* */ } }, 50);
+    }
+
+    function openGate() {
+        if (doc.getElementById('nfx-gate')) return;
+        var gate = doc.createElement('div');
+        gate.id = 'nfx-gate';
+        gate.className = 'nfx-gate';
+        gate.setAttribute('role', 'dialog');
+        gate.setAttribute('aria-modal', 'true');
+        gate.setAttribute('aria-label', 'Who\'s watching?');
+        renderGate(gate);
+        gate.addEventListener('click', safe('gate', function (e) {
+            var t = e.target;
+            if (t.closest('.nfx-gate__manage')) { gate.classList.toggle('is-managing'); renderGate(gate); return; }
+            if (t.closest('.nfx-prof--add')) { addProfile(); return; }
+            var b = t.closest('.nfx-prof[data-uid]');
+            if (!b) return;
+            var uid = b.getAttribute('data-uid');
+            if (gate.classList.contains('is-managing')) {
+                if (uid !== userId()) { forgetProfile(serverId(), uid); renderGate(gate); }
+                return;
+            }
+            if (uid === userId()) { closeGate(gate); return; }
+            var p = profilesFor(serverId()).filter(function (x) { return x.UserId === uid; })[0];
+            if (p) switchTo(p);
+        }));
+        gate.addEventListener('keydown', function (e) {
+            // own arrow-key focus so TV remotes work without Jellyfin's focus manager
+            var items = Array.prototype.slice.call(gate.querySelectorAll('.nfx-prof, .nfx-gate__manage'));
+            var i = items.indexOf(doc.activeElement);
+            var k = e.key;
+            if (k === 'ArrowRight' || k === 'ArrowLeft' || k === 'ArrowDown' || k === 'ArrowUp') {
+                e.preventDefault();
+                e.stopPropagation();
+                var n = k === 'ArrowRight' ? i + 1 : k === 'ArrowLeft' ? i - 1 : k === 'ArrowDown' ? items.length - 1 : 0;
+                n = Math.max(0, Math.min(items.length - 1, n));
+                if (items[n]) items[n].focus();
+            }
+        }, true);
+        doc.body.appendChild(gate);
+        root.classList.add('nfx-gate-open');
+        root.classList.remove('nfx-gate-pending');
+    }
+
+    function ensureGate() {
+        if (!state.user || ssGet(GATE_KEY)) { root.classList.remove('nfx-gate-pending'); return; }
+        rememberProfile();
+        if (onDashboard()) { ssSet(GATE_KEY, '1'); root.classList.remove('nfx-gate-pending'); return; }
+        openGate();
     }
 
     // ------------------------------------------------------------------ own home
@@ -924,9 +1396,18 @@
         };
         sec.querySelector('.nfx-row__arrow--prev').addEventListener('click', function () { step(-1); });
         sec.querySelector('.nfx-row__arrow--next').addEventListener('click', function () { step(1); });
+        var pagesEl = doc.createElement('ul');
+        pagesEl.className = 'nfx-row__pages';
+        pagesEl.setAttribute('aria-hidden', 'true');
+        sec.insertBefore(pagesEl, sec.firstChild);
         var edges = function () {
             sec.classList.toggle('at-start', items.scrollLeft < 8);
             sec.classList.toggle('at-end', items.scrollLeft + items.clientWidth > items.scrollWidth - 8);
+            var n = Math.ceil((items.scrollWidth - 8) / Math.max(1, items.clientWidth));
+            var cur = sec.classList.contains('at-end') ? n - 1 : Math.round(items.scrollLeft / Math.max(1, items.clientWidth));
+            var html = '';
+            for (var i = 0; n > 1 && i < n; i++) html += '<li' + (i === cur ? ' class="is-on"' : '') + '></li>';
+            if (pagesEl.innerHTML !== html) pagesEl.innerHTML = html;
         };
         items.addEventListener('scroll', edges, { passive: true });
         if (items.pause === undefined) { items.pause = function () { }; items.resume = function () { return Promise.resolve(); }; }
@@ -992,6 +1473,13 @@
         });
 
         home.addEventListener('click', safe('homeClick', function (e) {
+            var any = e.target.closest && e.target.closest('a.nfx-card');
+            if (any && !any.hasAttribute('data-nfx-action') && useModal() && !e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                var it0 = state.items[any.getAttribute('data-id')] || {};
+                openModal(it0.Type === 'Episode' && it0.SeriesId ? it0.SeriesId : any.getAttribute('data-id'));
+                return;
+            }
             var a = e.target.closest && e.target.closest('a.nfx-card[data-nfx-action="play"]');
             if (!a) return;
             e.preventDefault();
@@ -1037,7 +1525,8 @@
                 toggleFavorite(id, t.closest('.nfx-btn--list'));
             } else if (t.closest('.nfx-btn--more') || t.closest('.nfx-preview__media')) {
                 closePreview();
-                goDetails(id);
+                var dl = (state.items[id] && state.items[id].Type === 'Episode' && state.items[id].SeriesId) || id;
+                if (useModal()) openModal(dl); else goDetails(dl);
             }
         }));
         doc.body.appendChild(p);
@@ -1077,7 +1566,7 @@
             setListIcon(p.querySelector('.nfx-btn--list'), false);
             return;
         }
-        p.querySelector('.nfx-preview__meta').innerHTML = metaHtml(it);
+        p.querySelector('.nfx-preview__meta').innerHTML = metaHtml(it) + '<span class="nfx-hd">HD</span>';
         p.querySelector('.nfx-preview__genres').innerHTML = genresHtml(it.Genres);
         setListIcon(p.querySelector('.nfx-btn--list'), it.UserData && it.UserData.IsFavorite);
     }
@@ -1288,12 +1777,14 @@
         root.classList.toggle('nfx-modern', !!doc.querySelector('.MuiAppBar-root'));
         root.classList.toggle('nfx-legacy', !doc.querySelector('.MuiAppBar-root'));
         if (onDashboard()) { closePreview(); root.classList.remove('nfx-own-chrome', 'nfx-own-home'); return; }
+        if (/#\/login/.test(location.hash)) { ssSet(GATE_KEY, '1'); root.classList.remove('nfx-gate-pending'); }
         if (!api() || !userId()) return;
         root.classList.add('nfx-own-chrome');
         loadUser();
         loadConfig().then(function () { return loadViews().catch(function () { return []; }); }).then(safe('header', ensureHeader));
         ensureDetailBackdrop();
         tagSearch();
+        hideCollections();
         var tab = activeHomeTab();
         if (!tab) { root.classList.remove('nfx-on-home', 'nfx-own-home'); return; }
         var container = tab.querySelector('.homeSectionsContainer');
@@ -1320,6 +1811,11 @@
 
     function init() {
         root.classList.add('nfx');
+        // hide the app until the profile gate decides, so home never flashes first
+        if (!ssGet(GATE_KEY) && !/#\/login/.test(location.hash)) {
+            root.classList.add('nfx-gate-pending');
+            setTimeout(function () { root.classList.remove('nfx-gate-pending'); }, 4000); // never strand a black screen
+        }
         new MutationObserver(function (muts) {
             if (state.scanQueued || osdOpen()) return; // the OSD clock mutates constantly
             for (var i = 0; i < muts.length; i++) {
@@ -1334,6 +1830,8 @@
         doc.addEventListener('mouseover', safe('over', onOver), { passive: true });
         doc.addEventListener('mouseout', safe('out', onOut), { passive: true });
         window.addEventListener('resize', safe('resize', closePreview), { passive: true });
+        doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && doc.getElementById('nfx-modal')) { e.stopPropagation(); closeModal(); } }, true);
+        window.addEventListener('hashchange', function () { if (doc.getElementById('nfx-modal')) closeModal(); });
         queueScan();
     }
 
