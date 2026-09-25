@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Netflix UI</title>
+</head>
+<body>
+<div id="NetflixUiConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            <form id="NetflixUiConfigForm">
+                <div class="verticalSection">
+                    <h2 class="sectionTitle">Netflix UI</h2>
+                    <p>Changes apply the next time a client loads the home screen. The theme itself comes from the plugin, so there is nothing to paste into Branding.</p>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="EnableHero" name="EnableHero" type="checkbox" is="emby-checkbox" />
+                        <span>Hero banner on home</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Big rotating banner at the top of home.</div>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="EnableHeroTrailer" name="EnableHeroTrailer" type="checkbox" is="emby-checkbox" />
+                        <span>Play local trailers in the hero (muted)</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Desktop only. Needs trailer files next to the movie.</div>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="EnableTop10" name="EnableTop10" type="checkbox" is="emby-checkbox" />
+                        <span>Top 10 rows</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Top 10 movies and shows on this server, last 30 days.</div>
+                </div>
+
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="GenreRowCount" name="GenreRowCount" min="0" max="10" label="Genre rows" />
+                    <div class="fieldDescription">Rows built from the genres each person watches most. 0 turns them off.</div>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="EnableHoverPreview" name="EnableHoverPreview" type="checkbox" is="emby-checkbox" />
+                        <span>Hover preview cards</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Desktop with a mouse only.</div>
+                </div>
+
+                <div class="selectContainer">
+                    <select is="emby-select" id="HomeCardShape" name="HomeCardShape" label="Card shape on home">
+                        <option value="backdrop">Wide (16:9, like Netflix)</option>
+                        <option value="stock">Stock Jellyfin</option>
+                    </select>
+                </div>
+
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="InjectCss" name="InjectCss" type="checkbox" is="emby-checkbox" />
+                        <span>Load the theme css from index.html too</span>
+                    </label>
+                    <div class="fieldDescription checkboxFieldDescription">Keeps the theme on even if Branding custom css is cleared.</div>
+                </div>
+
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                        <span>Save</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        (function () {
+            var pluginId = '6e2f1c0a-9b7d-4c1e-8f3a-5d6b7c8e9f10';
+            var bools = ['EnableHero', 'EnableHeroTrailer', 'EnableTop10', 'EnableHoverPreview', 'InjectCss'];
+            var page = document.querySelector('#NetflixUiConfigPage');
+
+            page.addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    bools.forEach(function (k) { page.querySelector('#' + k).checked = !!config[k]; });
+                    page.querySelector('#GenreRowCount').value = config.GenreRowCount;
+                    page.querySelector('#HomeCardShape').value = config.HomeCardShape || 'backdrop';
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            page.querySelector('#NetflixUiConfigForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    bools.forEach(function (k) { config[k] = page.querySelector('#' + k).checked; });
+                    config.GenreRowCount = parseInt(page.querySelector('#GenreRowCount').value, 10) || 0;
+                    config.HomeCardShape = page.querySelector('#HomeCardShape').value;
+                    ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+                });
+                return false;
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

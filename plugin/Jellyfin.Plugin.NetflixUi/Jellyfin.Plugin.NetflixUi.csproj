@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Jellyfin.Plugin.NetflixUi</RootNamespace>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <!-- theme artifact produced by workstream B; copied in by build.sh -->
+    <NfxCssPath Condition="'$(NfxCssPath)' == ''">$(MSBuildThisFileDirectory)../../theme/dist/netflix.css</NfxCssPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Jellyfin.Controller" Version="12.1.*" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Model" Version="12.1.*" ExcludeAssets="runtime" />
+    <!-- only used to build the File Transformation payload; the server already ships Newtonsoft -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Configuration\configPage.html" />
+    <EmbeddedResource Include="Configuration\configPage.html" />
+    <EmbeddedResource Include="..\web\netflix.js" LogicalName="NetflixUi.netflix.js" />
+    <EmbeddedResource Include="$(NfxCssPath)" LogicalName="NetflixUi.netflix.css" Condition="Exists('$(NfxCssPath)')" />
+  </ItemGroup>
+
+</Project>

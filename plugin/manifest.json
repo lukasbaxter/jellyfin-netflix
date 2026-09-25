@@ -1,0 +1,21 @@
+[
+  {
+    "guid": "6e2f1c0a-9b7d-4c1e-8f3a-5d6b7c8e9f10",
+    "name": "Netflix UI",
+    "description": "Netflix style hero banner, Top 10 rows, genre rows, hover previews and theme for the Jellyfin web client. Needs File Transformation.",
+    "overview": "Netflix style home and theme for the Jellyfin web client",
+    "owner": "lukasbaxter",
+    "category": "General",
+    "imageUrl": "",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "First release.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/lukasbaxter/jellyfin-netflix/releases/download/v1.0.0/netflix-ui_1.0.0.0.zip",
+        "checksum": "033905619d8868e64c2f64c2dd710e59",
+        "timestamp": "2026-09-25T08:28:39Z"
+      }
+    ]
+  }
+]
