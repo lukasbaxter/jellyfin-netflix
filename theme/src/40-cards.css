@@ -221,7 +221,7 @@ body:not(.dashboardDocument) :is(.cardImageContainer .cardText, .cardDefaultText
 /* ---------- hover: grow after a beat (mouse only) ---------- */
 @media (hover: hover) and (pointer: fine) {
     :is(.homeSectionsContainer, .nfx-row, .detailVerticalSection) .scrollSlider > .card > .cardBox {
-        transition: transform .3s var(--nfx-ease), box-shadow .3s var(--nfx-ease);
+        transition: transform .18s var(--nfx-ease), box-shadow .18s var(--nfx-ease);
         transform-origin: center center;
         will-change: transform;
     }
@@ -233,7 +233,6 @@ body:not(.dashboardDocument) :is(.cardImageContainer .cardText, .cardDefaultText
 
     :is(.homeSectionsContainer, .nfx-row) .scrollSlider > .card:hover > .cardBox {
         transform: scale(1.08);
-        transition-delay: .25s;
         box-shadow: 0 10px 24px rgba(0, 0, 0, .75);
         border-radius: var(--nfx-radius);
     }

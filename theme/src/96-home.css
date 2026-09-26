@@ -185,7 +185,7 @@ html.nfx-has-hero #nfx-home { margin-top: calc(-1 * max(90px, 9vw)); }
 
 /* mouse: gentle lift while the preview arms */
 @media (hover: hover) and (pointer: fine) {
-    #nfx-home .nfx-card { transition: transform .25s var(--nfx-ease); }
+    #nfx-home .nfx-card { transition: transform .18s var(--nfx-ease); }
 }
 
 /* TV focus */

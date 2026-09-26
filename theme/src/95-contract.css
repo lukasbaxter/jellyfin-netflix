@@ -91,14 +91,13 @@
 
 @media (hover: hover) and (pointer: fine) {
     .nfx-row .scrollSlider > .nfx-card {
-        transition: transform .3s var(--nfx-ease), box-shadow .3s var(--nfx-ease);
+        transition: transform .18s var(--nfx-ease), box-shadow .18s var(--nfx-ease);
         position: relative;
     }
 
     .nfx-row .scrollSlider > .nfx-card:hover {
         z-index: 5;
         transform: scale(1.08);
-        transition-delay: .25s;
     }
 
     .nfx-row .scrollSlider > .nfx-card:first-child,
@@ -171,7 +170,7 @@ html.layout-tv .nfx-card--top10 .nfx-rank {
     transform-origin: center center;
     pointer-events: none;
     will-change: transform, opacity;
-    transition: opacity .15s var(--nfx-ease), transform .2s var(--nfx-ease);
+    transition: opacity .1s var(--nfx-ease), transform .14s var(--nfx-ease);
 }
 
 .nfx-preview.is-open {

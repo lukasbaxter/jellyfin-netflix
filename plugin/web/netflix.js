@@ -12,7 +12,8 @@
     var root = doc.documentElement;
     var CACHE_MS = 5 * 60 * 1000;
     var HERO_ROTATE_MS = 9000;
-    var PREVIEW_DELAY_MS = 380;
+    var PREVIEW_DELAY_MS = 150;
+    var PREVIEW_WARM_MS = 400;     // a preview closed this recently: the next card opens at once
 
     var state = {
         cfg: null,
@@ -1685,6 +1686,7 @@
         clearTimeout(state.preview.timer);
         state.preview.armed = null;
         var p = state.preview.el;
+        if (state.preview.openFor) state.preview.closedAt = Date.now();
         state.preview.openFor = null;
         state.preview.card = null;
         root.classList.remove('nfx-preview-open');
@@ -1741,7 +1743,7 @@
             var r1 = layoutPos(card);
             if (Math.abs(r1.x - r0.x) > 4 || Math.abs(r1.y - r0.y) > 4) return; // layout shifted
             if (card.matches(':hover')) openPreview(card);
-        }), PREVIEW_DELAY_MS);
+        }), Date.now() - (state.preview.closedAt || 0) < PREVIEW_WARM_MS ? 0 : PREVIEW_DELAY_MS);
     }
 
     function onOut(e) {

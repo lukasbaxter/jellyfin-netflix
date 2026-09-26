@@ -202,9 +202,9 @@ body:not(.dashboardDocument) :is(.cardImageContainer .cardText,.cardDefaultText)
 :is(.homeSectionsContainer,.nfx-row) .innerCardFooter{z-index:3}
 @media (hover:none){:is(.homeSectionsContainer,.nfx-row) .cardOverlayContainer{display:none !important}
 }
-@media (hover:hover) and (pointer:fine){:is(.homeSectionsContainer,.nfx-row,.detailVerticalSection) .scrollSlider>.card>.cardBox{transition:transform .3s var(--nfx-ease),box-shadow .3s var(--nfx-ease);transform-origin:center center;will-change:transform}
+@media (hover:hover) and (pointer:fine){:is(.homeSectionsContainer,.nfx-row,.detailVerticalSection) .scrollSlider>.card>.cardBox{transition:transform .18s var(--nfx-ease),box-shadow .18s var(--nfx-ease);transform-origin:center center;will-change:transform}
 :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:hover{z-index:5;position:relative}
-:is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:hover>.cardBox{transform:scale(1.08);transition-delay:.25s;box-shadow:0 10px 24px rgba(0,0,0,.75);border-radius:var(--nfx-radius)}
+:is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:hover>.cardBox{transform:scale(1.08);box-shadow:0 10px 24px rgba(0,0,0,.75);border-radius:var(--nfx-radius)}
 :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card:first-child>.cardBox,
 :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card.nfx-edge-left>.cardBox{transform-origin:left center}
 :is(.homeSectionsContainer,.nfx-row) .scrollSlider>.card.nfx-edge-right>.cardBox{transform-origin:right center}
@@ -621,8 +621,8 @@ html.layout-tv #itemDetailPage .mainDetailButtons :is(.btnPlay,.btnReplay):focus
 .nfx-card__img>img{width:100%;height:100%;object-fit:cover;display:block}
 .nfx-card__progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:#4d4d4d}
 .nfx-card__progress>i{display:block;height:100%;background:var(--nfx-red)}
-@media (hover:hover) and (pointer:fine){.nfx-row .scrollSlider>.nfx-card{transition:transform .3s var(--nfx-ease),box-shadow .3s var(--nfx-ease);position:relative}
-.nfx-row .scrollSlider>.nfx-card:hover{z-index:5;transform:scale(1.08);transition-delay:.25s}
+@media (hover:hover) and (pointer:fine){.nfx-row .scrollSlider>.nfx-card{transition:transform .18s var(--nfx-ease),box-shadow .18s var(--nfx-ease);position:relative}
+.nfx-row .scrollSlider>.nfx-card:hover{z-index:5;transform:scale(1.08)}
 .nfx-row .scrollSlider>.nfx-card:first-child,
 .nfx-row .scrollSlider>.nfx-card.nfx-edge-left{transform-origin:left center}
 .nfx-row .scrollSlider>.nfx-card.nfx-edge-right{transform-origin:right center}
@@ -638,7 +638,7 @@ html.layout-tv .nfx-row .scrollSlider>.nfx-card--top10{width:calc((100vw - 10vw)
 html.layout-tv .nfx-card--top10 .nfx-rank{font-size:calc((100vw - 10vw) / 6 * .9)}
 #itemDetailPage .itemBackdrop.nfx-detail-backdrop{background-size:cover !important;background-repeat:no-repeat !important;animation:nfx-fade .6s var(--nfx-ease) both}
 .nfx-btn__label{display:none}
-.nfx-preview{position:absolute;z-index:1000;background:var(--nfx-bg-elev);border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.75);overflow:hidden;color:#fff;opacity:0;transform:scale(.66);transform-origin:center center;pointer-events:none;will-change:transform,opacity;transition:opacity .15s var(--nfx-ease),transform .2s var(--nfx-ease)}
+.nfx-preview{position:absolute;z-index:1000;background:var(--nfx-bg-elev);border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.75);overflow:hidden;color:#fff;opacity:0;transform:scale(.66);transform-origin:center center;pointer-events:none;will-change:transform,opacity;transition:opacity .1s var(--nfx-ease),transform .14s var(--nfx-ease)}
 .nfx-preview.is-open{opacity:1;transform:none;pointer-events:auto}
 .nfx-preview__media{position:relative;aspect-ratio:16 / 9;background:#000}
 .nfx-preview__media img{width:100%;height:100%;object-fit:cover;display:block}
@@ -738,7 +738,7 @@ html.nfx-has-hero #nfx-home{margin-top:calc(-1 * max(90px,9vw))}
 }
 @media (hover:none){#nfx-home .nfx-row__arrow{display:none}
 }
-@media (hover:hover) and (pointer:fine){#nfx-home .nfx-card{transition:transform .25s var(--nfx-ease)}
+@media (hover:hover) and (pointer:fine){#nfx-home .nfx-card{transition:transform .18s var(--nfx-ease)}
 }
 html.layout-tv #nfx-home{--gap:.6vw; --per:5}
 html.layout-tv #nfx-home .nfx-row__items{padding-top:1.4vw; padding-bottom:1.4vw; margin:-1.4vw 0; scroll-snap-type:none}
