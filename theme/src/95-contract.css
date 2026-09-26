@@ -166,11 +166,11 @@ html.layout-tv .nfx-card--top10 .nfx-rank {
     overflow: hidden;
     color: #fff;
     opacity: 0;
-    transform: scale(.66);
+    transform: scale(var(--nfx-from, .66));  /* the card's size, set per open in netflix.js */
     transform-origin: center center;
     pointer-events: none;
     will-change: transform, opacity;
-    transition: opacity .1s var(--nfx-ease), transform .14s var(--nfx-ease);
+    transition: opacity .12s ease-out, transform .24s var(--nfx-ease);
 }
 
 .nfx-preview.is-open {
@@ -261,6 +261,16 @@ html.layout-tv .nfx-card--top10 .nfx-rank {
 
 html.nfx-preview-open .homeSectionsContainer .card:hover > .cardBox {
     transform: none;
+}
+
+/* hover preview on: the preview grows out of the card, so the card itself stays put
+   (a lifting card under a growing preview reads as a shrink-then-grow jump) */
+@media (hover: hover) and (pointer: fine) {
+    html.nfx-hp .nfx-row .scrollSlider > .nfx-card:hover,
+    html.nfx-hp .homeSectionsContainer .scrollSlider > .card:hover > .cardBox {
+        transform: none;
+        box-shadow: none;
+    }
 }
 
 /* ---- plugin rows use the stock row styles (30-home-rows) plus this ---- */

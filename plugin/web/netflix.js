@@ -23,7 +23,9 @@
         hero: { list: [], index: 0, timer: 0, paused: false, trailerTimer: 0 },
         scanQueued: false,
         preview: { el: null, card: null, timer: 0, closeTimer: 0, openFor: null, armed: null },
-        lastMove: 0
+        lastMove: 0,
+        pointer: null,      // last mouse position, to find the card under a still cursor after a scroll
+        scrollEnd: 0
     };
 
     function warn(where, e) {
@@ -124,6 +126,8 @@
                         ExcludedLibraryIds: c.ExcludedLibraryIds || [],
                         PerfBeacon: c.PerfBeacon === true
                     };
+                    // the preview grows out of the card, so the card itself must not lift too
+                    root.classList.toggle('nfx-hp', state.cfg.EnableHoverPreview);
                     return state.cfg;
                 });
         }
@@ -1646,6 +1650,9 @@
         p.style.left = Math.round(left + window.scrollX) + 'px';
         p.style.top = Math.round(top + window.scrollY) + 'px';
         p.style.width = w + 'px';
+        // start exactly on top of the card: its scale and its centre inside the preview
+        p.style.setProperty('--nfx-from', (r.width / w).toFixed(3));
+        p.style.transformOrigin = Math.round(r.left + r.width / 2 - left) + 'px ' + Math.round(r.top + r.height / 2 - top) + 'px';
     }
 
     function openPreview(card) {
@@ -1676,6 +1683,7 @@
 
     function onMove(e) {
         state.lastMove = Date.now();
+        state.pointer = { x: e.clientX, y: e.clientY };
         var p = state.preview;
         if (p.armed || !state.cfg || !state.cfg.EnableHoverPreview) return;
         var card = e.target && e.target.closest ? e.target.closest('.card[data-id]') : null;
@@ -1729,20 +1737,24 @@
         var card = homeCardFrom(e.target);
         if (!card) return;
         markEdges(card);
+        // content rendering under a still cursor fires mouseover too; only a moving mouse
+        // counts (onMove arms it on the next real move, a finished scroll arms it in onScroll)
+        if (Date.now() - state.lastMove > 500) return;
+        arm(card);
+    }
+
+    function arm(card) {
         if (!state.cfg || !state.cfg.EnableHoverPreview) return;
         if (state.preview.card === card || state.preview.armed === card) return;
         clearTimeout(state.preview.timer);
-        state.preview.armed = null;
-        // content rendering under a still cursor fires mouseover too; only a moving mouse
-        // counts (onMove arms it on the next real move if this one was stale)
-        if (Date.now() - state.lastMove > 500) return;
         state.preview.armed = card;
         var r0 = layoutPos(card);
         state.preview.timer = setTimeout(safe('preview', function () {
             state.preview.armed = null;
             var r1 = layoutPos(card);
             if (Math.abs(r1.x - r0.x) > 4 || Math.abs(r1.y - r0.y) > 4) return; // layout shifted
-            if (card.matches(':hover')) openPreview(card);
+            var pt = state.pointer, under = pt && doc.elementFromPoint(pt.x, pt.y);
+            if (card.matches(':hover') || (under && card.contains(under))) openPreview(card);
         }), Date.now() - (state.preview.closedAt || 0) < PREVIEW_WARM_MS ? 0 : PREVIEW_DELAY_MS);
     }
 
@@ -1770,7 +1782,16 @@
             var y = window.scrollY || doc.documentElement.scrollTop || 0;
             root.classList.toggle('nfx-scrolled', y > 40);
         });
-        if (state.preview.openFor) closePreview();
+        if (state.preview.openFor || state.preview.armed) closePreview();
+        // page scrolled under a still cursor (trackpad): once it settles, the card now under
+        // the cursor gets its preview, without waiting for the mouse to move
+        clearTimeout(state.scrollEnd);
+        state.scrollEnd = setTimeout(safe('scrollEnd', function () {
+            var pt = state.pointer;
+            if (!pt || isTv() || !finePointer()) return;
+            var card = homeCardFrom(doc.elementFromPoint(pt.x, pt.y));
+            if (card) { markEdges(card); arm(card); }
+        }), 120);
     }
 
     // ------------------------------------------------------------------ detail backdrop
