@@ -278,7 +278,7 @@
             ? '<img class="nfx-hero__logo" alt="' + esc(it.Name) + '" src="' + esc(img(it.Id, 'Logo', it.LogoTag, 800)) + '">'
             : '<h1 class="nfx-hero__title">' + esc(it.Name) + '</h1>';
         var fav = it.UserData && it.UserData.IsFavorite;
-        content.innerHTML = kindLabel(it.Type) + title +
+        content.innerHTML = title +
             '<div class="nfx-hero__meta">' + metaHtml(it) + '</div>' +
             '<p class="nfx-hero__overview">' + esc(it.Overview || '') + '</p>' +
             '<div class="nfx-hero__genres">' + genresHtml(it.Genres) + '</div>' +
@@ -889,11 +889,6 @@
 
     function useModal() { return !isTv() && !isMobile() && window.innerWidth > 800; }
 
-    function kindLabel(type) {
-        var k = type === 'Series' || type === 'Episode' || type === 'Season' ? 'SERIES' : 'FILM';
-        return '<div class="nfx-kind"><span class="nfx-kind__b">' + esc(BRAND.charAt(0)) + '</span><span class="nfx-kind__t">' + k + '</span></div>';
-    }
-
     function peopleOf(it, types) {
         return (it.People || []).filter(function (p) { return types.indexOf(p.Type) > -1; }).map(function (p) { return p.Name; });
     }
@@ -1007,7 +1002,7 @@
             '<button type="button" class="nfx-modal__close" aria-label="Close">' + icon('close') + '</button>' +
             '<div class="nfx-modal__media">' + (bd ? '<img class="nfx-modal__bd" alt="" src="' + esc(bd) + '">' : '') +
             '<div class="nfx-modal__shade"></div>' +
-            '<div class="nfx-modal__hero">' + kindLabel(it.Type) +
+            '<div class="nfx-modal__hero">' +
             (logo ? '<img class="nfx-modal__logo" alt="' + esc(it.Name) + '" src="' + esc(logo) + '">' : '<h2 class="nfx-modal__title">' + esc(it.Name) + '</h2>') +
             '<div class="nfx-modal__actions">' +
             '<button type="button" class="nfx-btn nfx-btn--play nfx-m-play">' + icon('play_arrow') + '<span>' + (resume ? 'Resume' : 'Play') + '</span></button>' +

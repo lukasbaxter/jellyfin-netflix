@@ -9,6 +9,14 @@
     "imageUrl": "",
     "versions": [
       {
+        "version": "2.3.0.0",
+        "changelog": "Removed the J + FILM/SERIES label over the hero and More Info titles.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/lukasbaxter/jellyfin-netflix/releases/download/v2.3.0/netflix-ui_2.3.0.0.zip",
+        "checksum": "293a28de6317865639b77c4b2532a487",
+        "timestamp": "2026-09-27T04:36:37Z"
+      },
+      {
         "version": "2.2.0.0",
         "changelog": "First public release: Netflix style header, home rows, Top 10, My List, hover previews, Who's watching gate, red loading spinner. Jellyfin 12.x, needs File Transformation 3.0.1.0.",
         "targetAbi": "12.0.0.0",

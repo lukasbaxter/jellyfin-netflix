@@ -32,7 +32,7 @@ This is the repo digest from `docker image inspect jellyfin/jellyfin:latest -f '
 ## Things staging found that the notes do not mention
 
 1. **encoding.xml gets wiped.** Prod has `<EncoderPreset xsi:nil="true" />`. 12.1 cannot parse that, logs `Error loading configuration file: /config/config/encoding.xml`, and rewrites the file with defaults. That silently turns off NVENC, tonemapping, HEVC/AV1 encoding and the hw decode codec list. Fix it before first start (step 5). With the fix, staging kept `nvenc` and all 8 decode codecs.
-2. **The migration deletes items whose files are missing.** `MigrateLinkedChildren` checks every item path (182k items). On staging the log has 1817 "Removing item" lines. Most files were really gone (for example The Wire S04), but not all: 127 of the removed paths still exist on disk. 126 are MusicArtist folders that the scan re-created as new items, and 1 is `Battlestar Galactica Miniseries - Part 2.mkv`, dropped as an "orphaned alternate version". Watch history for removed items is kept on a placeholder, but it is detached from the new item (detached UserData rows went from 1707 to 1841). So after the scan, check the watch state of re-added items (step 13). If `/mnt/unas` or `/mnt/wd_nvme1/music` is unmounted or wedged at that moment, it would treat the whole library as missing and wipe watch history. The UNAS guard in step 7 is not optional.
+2. **The migration deletes items whose files are missing.** `MigrateLinkedChildren` checks every item path (182k items). On staging the log has 1817 "Removing item" lines. Most files were really gone (for example The Wire S04), but not all: 127 of the removed paths still exist on disk. 126 are MusicArtist folders that the scan re-created as new items, and 1 is `Battlestar Galactica Miniseries - Part 2.mkv`, dropped as an "orphaned alternate version". Watch history for removed items is kept on a placeholder, but it is detached from the new item (detached UserData rows went from 1707 to 1841). So after the scan, check the watch state of re-added items (step 13). If `/mnt/unas` is unmounted or wedged at that moment, it would treat the whole library as missing and wipe watch history. The UNAS guard in step 7 is not optional.
 3. **Playlists and counts drop until the scan runs.** Right after the migration staging showed 180 playlists (prod 196). The missing ones were music playlists made from `.m3u` files in album folders. The full scan brought them back (196). Movies / Series / Episodes drop for good: 1516 to 1260, 284 to 195, 13436 to 12628. That is exactly the number of prod items whose file still exists on disk (checked one by one), so no real movie or episode is lost. Expect the same on prod.
 4. **The 12.1 web client does NOT need legacy auth.** After login it opens `/socket?ApiKey=<token>` (12.1 moved websockets to SDK subscriptions). The old `api_key=` string is still inside the bundled jellyfin-apiclient, but that code path is not used for the socket. The 3 or so `/socket` 403s on the login page are tries without a token ("Token is required" in the server log), not a legacy auth problem. Proven on staging with legacy auth OFF by `test/socket-check.mjs`: socket on `ApiKey=`, open, no 403 after login, and a remote control message from a second session reached the browser. So browsers, the iPhone app and Jellyfin Media Player are fine with legacy auth off. The only callers that need it are Jellyseerr and the 5 music-requests lines below.
 5. Streaming Collections 1.0.1.0 targets 10.11. It has to be rebuilt for net10/12 (release step 1 in the plan) before it can go back on.
@@ -78,7 +78,7 @@ time smbclient -L //192.168.1.100 -A /root/.smbcredentials-jellyfin > /dev/null
 # /mnt/unas is a systemd automount, so `mountpoint` says yes even when the share is NOT mounted.
 # Touch it first (that triggers the mount), then ask for the real cifs mount.
 timeout 5 ls /mnt/unas/movies | head -1 && findmnt -t cifs /mnt/unas && findmnt -t cifs /mnt/cloud
-ls /mnt/unas | wc -l ; ls /mnt/wd_nvme1/music | wc -l   # both non-zero
+ls /mnt/unas | wc -l   # non-zero
 # rollback image: the 10.11.5 registry digest must still pull, and must match what prod runs
 docker image inspect jellyfin/jellyfin:latest -f '{{.Id}} {{.RepoDigests}}' | tee -a ~/jellyfin-upgrade-$(date +%Y%m%d).log
 docker pull jellyfin/jellyfin@sha256:6d819e9ab067efcf712993b23455cc100ee5585919bb297ea5a109ac00cb626e
@@ -168,16 +168,17 @@ docker compose pull
 ## 7. Migrate, then start
 
 ```bash
-set -o pipefail   # so a failed migration is not hidden by tee
 cd /home/admin/services/jellyfin
-# Hard guard in the SAME command: both media mounts must answer right now, or nothing runs.
-# ls first (it triggers the automount), then check it really is cifs.
-timeout 5 ls /mnt/unas/movies | head -1 | grep -q . \
-  && findmnt -t cifs /mnt/unas >/dev/null \
-  && timeout 5 ls /mnt/wd_nvme1/music | head -1 | grep -q . \
-  && { time docker compose run --rm jellyfin --mode MigrateSystem 2>&1 | tee migrate-12.1-$D.log; } \
-  || echo "GUARD FAILED or migration failed: do NOT continue, read the output above"
-# expect about 4 min. Do not interrupt. If it passes 2 h, stop and report (jellyfin#17840).
+# Hard guard: the UNAS must answer right now, or nothing runs. ls first (it triggers the automount),
+# then check it really is cifs. Capture with $(...) and NO pipefail here: `ls | head -1` on a big
+# directory exits 141 (SIGPIPE) under pipefail, which failed the guard on prod 2026-09-26.
+g=$(timeout 5 ls /mnt/unas/movies | head -1)
+if [ -n "$g" ] && findmnt -t cifs /mnt/unas >/dev/null; then
+  set -o pipefail   # now, so a failed migration is not hidden by tee
+  { time docker compose run --rm jellyfin --mode MigrateSystem 2>&1 | tee migrate-12.1-$D.log; } && echo MIGRATE_OK
+else echo "GUARD FAILED: do NOT continue"; fi
+# staging: about 4 min. Prod 2026-09-26 took ~95 min: every item of the removed Music library
+# (~118k Audio rows) is deleted here at ~1000/min. Do not interrupt. Do not interrupt. If it passes 2 h, stop and report (jellyfin#17840).
 tail -3 migrate-12.1-$D.log      # "jellyfin.db optimized successfully!"
 
 # Legacy auth ON before the first start. The migration writes it as false, and with it off

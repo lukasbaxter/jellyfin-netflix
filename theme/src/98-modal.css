@@ -1,12 +1,6 @@
-/* ---- 98 Netflix 2022 details: More Info modal, SERIES/FILM label, row pagers, badges ---- */
+/* ---- 98 Netflix 2022 details: More Info modal, row pagers, badges ---- */
 [data-nfx-hide] { display: none !important; }
 
-/* SERIES / FILM label over hero and modal titles */
-.nfx-kind { display: flex; align-items: center; gap: .35em; margin: 0 0 .6em; line-height: 1; }
-.nfx-kind__b { font-family: "NfxBrand", "Bebas Neue", Impact, sans-serif; color: var(--nfx-red); font-size: 2.1em; transform: translateY(.04em); }
-.nfx-kind__t { color: #ddd; font-weight: 600; letter-spacing: .32em; font-size: .9em; }
-.nfx-hero .nfx-kind { font-size: clamp(11px, 1vw, 18px); }
-.nfx-hero--card .nfx-kind { justify-content: center; }
 
 /* badges */
 .nfx-hd { border: 1px solid rgba(255, 255, 255, .4); border-radius: 3px; padding: 0 .35em; font-size: .7em; line-height: 1.5; font-weight: 600; }
@@ -48,7 +42,6 @@ html.nfx-modal-open .nfx-modal:not(.is-leaving) .nfx-modal__box { opacity: 1; tr
 .nfx-modal__bd { width: 100%; height: 100%; object-fit: cover; display: block; }
 .nfx-modal__shade { position: absolute; inset: 0; background: linear-gradient(0deg, #181818 0%, rgba(24, 24, 24, 0) 45%); }
 .nfx-modal__hero { position: absolute; left: 3em; right: 3em; bottom: 8%; }
-.nfx-modal__hero .nfx-kind { font-size: 14px; }
 .nfx-modal__logo { display: block; max-width: 40%; max-height: 7em; object-fit: contain; object-position: left bottom; margin-bottom: 1.2em; }
 .nfx-modal__title { font-size: 2.6em; font-weight: 800; margin: 0 0 .5em; text-shadow: 0 2px 6px rgba(0, 0, 0, .6); }
 .nfx-modal__actions { display: flex; align-items: center; gap: .5em; }

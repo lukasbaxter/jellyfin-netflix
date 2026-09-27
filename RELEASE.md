@@ -46,7 +46,7 @@ Prod installs plugins from their manifests, so both releases have to exist first
 4. [ ] **Repo URL typo** in system.xml (step 4)
 5. [ ] **encoding.xml fix** (step 5), or NVENC gets wiped
 6. [ ] **Pin the image** (step 6): `docker tag 58b57fd06c97 jellyfin/jellyfin:10.11.5-rollback`, then compose `image:` to the 12.1 digest, `docker compose pull`
-7. [ ] **Migrate, then start** (step 7): `set -o pipefail`, the UNAS guard and `MigrateSystem` in the same command, legacy auth set to true, `up -d`, version says 12.1.0, no encoding.xml error
+7. [ ] **Migrate, then start** (step 7): the UNAS guard (no pipefail around it) and `MigrateSystem` in the same command, legacy auth set to true, `up -d`, version says 12.1.0, no encoding.xml error
 8. [ ] **Plugins** (step 8): the 5 repos, then install Cover Art Archive, Discogs, Fanart, LrcLib, Open Subtitles, Session Cleaner, Subtitle Extract, Streaming Collections 1.1.0.0, File Transformation 3.0.1.0, Intro Skipper 12.0.4.0 and Netflix UI 1.0.0.0. One `docker compose restart`, then all Active. This is the last restart.
 
 ## D. Theme on
