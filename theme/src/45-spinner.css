@@ -1,0 +1,26 @@
+/* ---------- loading spinner: Netflix red ring with a fading tail ----------
+   Stock loading.js builds .docspinner.mdl-spinner with four material layers; they are
+   hidden and the element itself becomes the ring (page loads and player buffering). */
+.docspinner.mdl-spinner {
+    --nfx-spin-size: clamp(48px, 8vh, 84px);
+    width: var(--nfx-spin-size);
+    height: var(--nfx-spin-size);
+    margin: calc(var(--nfx-spin-size) / -2) 0 0 calc(var(--nfx-spin-size) / -2);
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, rgba(229, 9, 20, 0) 0deg, rgba(229, 9, 20, .15) 90deg, #e50914 340deg, rgba(229, 9, 20, 0) 341deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 11%), #000 calc(100% - 11% + 1px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 11%), #000 calc(100% - 11% + 1px));
+    animation: nfx-spin .9s linear infinite;
+}
+
+.docspinner.mdl-spinner > * {
+    display: none !important;
+}
+
+@keyframes nfx-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .docspinner.mdl-spinner { animation-duration: 2.4s; }
+}

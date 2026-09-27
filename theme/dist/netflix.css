@@ -224,6 +224,12 @@ body:not(.dashboardDocument) .personCard .cardFooter{text-align:center}
 body:not(.dashboardDocument) .card:hover>.cardBox,
 body:not(.dashboardDocument) .card:focus>.cardBox{transform:none !important;transition:none !important}
 }
+.docspinner.mdl-spinner{--nfx-spin-size:clamp(48px,8vh,84px);width:var(--nfx-spin-size);height:var(--nfx-spin-size);margin:calc(var(--nfx-spin-size) / -2) 0 0 calc(var(--nfx-spin-size) / -2);border-radius:50%;background:conic-gradient(from 0deg,rgba(229,9,20,0) 0deg,rgba(229,9,20,.15) 90deg,#e50914 340deg,rgba(229,9,20,0) 341deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 11%),#000 calc(100% - 11% + 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 11%),#000 calc(100% - 11% + 1px));animation:nfx-spin .9s linear infinite}
+.docspinner.mdl-spinner>*{display:none !important}
+@keyframes nfx-spin{to{transform:rotate(360deg)}
+}
+@media (prefers-reduced-motion:reduce){.docspinner.mdl-spinner{animation-duration:2.4s}
+}
 .nfx-hero{position:relative;display:block;width:100%;min-height:min(var(--nfx-hero-h,56.25vw),80vh);margin:calc(-1 * var(--nfx-header-h)) 0 calc(-1 * clamp(40px,7vw,140px)) 0;overflow:hidden;color:#fff;background:#000;z-index:0}
 .nfx-hero__backdrop{position:absolute;inset:0}
 .nfx-hero__img{width:100%;height:100%;object-fit:cover;object-position:center 20%;display:block;animation:nfx-fade .8s var(--nfx-ease) both}
