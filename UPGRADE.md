@@ -177,8 +177,10 @@ if [ -n "$g" ] && findmnt -t cifs /mnt/unas >/dev/null; then
   set -o pipefail   # now, so a failed migration is not hidden by tee
   { time docker compose run --rm jellyfin --mode MigrateSystem 2>&1 | tee migrate-12.1-$D.log; } && echo MIGRATE_OK
 else echo "GUARD FAILED: do NOT continue"; fi
-# staging: about 4 min. Prod 2026-09-26 took ~95 min: every item of the removed Music library
-# (~118k Audio rows) is deleted here at ~1000/min. Do not interrupt. Do not interrupt. If it passes 2 h, stop and report (jellyfin#17840).
+# about 2-4 min. It deletes items of removed libraries one by one at ~1000/min, so first drop
+# them in one statement (every child table cascades, ~35 s). Prod 2026-09-26 (dead Music library):
+#   sudo sqlite3 config/data/jellyfin.db "PRAGMA foreign_keys=ON; DELETE FROM BaseItems WHERE Path LIKE '/music/%';"
+# Mounting the old folder back does NOT help: orphans go for having no library, not a missing file. Do not interrupt. If it passes 2 h, stop and report (jellyfin#17840).
 tail -3 migrate-12.1-$D.log      # "jellyfin.db optimized successfully!"
 
 # Legacy auth ON before the first start. The migration writes it as false, and with it off
